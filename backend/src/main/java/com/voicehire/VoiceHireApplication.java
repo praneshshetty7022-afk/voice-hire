@@ -3,11 +3,8 @@ package com.voicehire;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// Temporarily disable MongoDB for basic connection testing
-@SpringBootApplication(exclude = {
-    org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration.class,
-    org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration.class
-})
+// Disabled to prevent conflicting auto-configuration exclusions with SimpleApplication
+// @SpringBootApplication
 public class VoiceHireApplication {
 
     public static void main(String[] args) {

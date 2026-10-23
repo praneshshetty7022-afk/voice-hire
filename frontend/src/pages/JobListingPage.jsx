@@ -24,8 +24,23 @@ export default function JobListingPage() {
   const [voiceApplyJob, setVoiceApplyJob] = useState(null)
 
   useEffect(() => {
+    const cat = searchParams.get('category') || 'ALL'
+    const city = searchParams.get('location') || 'ALL'
+    const srch = searchParams.get('search') || ''
+    setSelectedCategory(cat)
+    setSelectedCity(city)
+    setSearchQuery(srch)
+  }, [searchParams])
+
+  useEffect(() => {
     fetchJobs()
-  }, [selectedCategory, selectedCity])
+  }, [selectedCategory, selectedCity, searchQuery])
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'voice-apply' && jobs.length > 0 && !voiceApplyJob) {
+      setVoiceApplyJob(jobs[0])
+    }
+  }, [searchParams, jobs])
 
   const fetchJobs = async () => {
     setLoading(true)
@@ -40,37 +55,75 @@ export default function JobListingPage() {
 
       const res = await axios.get(url)
       if (res.data && Array.isArray(res.data)) {
-        setJobs(res.data)
-      } else if (res.data && res.data.jobs) {
-        setJobs(res.data.jobs)
+        let filtered = res.data
+        if (selectedCategory !== 'ALL') {
+          filtered = filtered.filter(j => (j.category || '').toUpperCase() === selectedCategory.toUpperCase())
+        }
+        if (selectedCity !== 'ALL') {
+          filtered = filtered.filter(j => (j.location || '').toLowerCase() === selectedCity.toLowerCase())
+        }
+        if (searchQuery) {
+          const lowerQ = searchQuery.toLowerCase()
+          const terms = lowerQ.split(/\s+/).filter(t => t.length > 1 && !['job', 'jobs', 'in', 'for', 'need', 'show', 'find', 'want', 'काम', 'नौकरी', 'ಕೆಲಸ', 'ಉದ್ಯೋಗ', 'ఉద్యోగం', 'வேலை'].includes(t))
+          if (terms.length > 0) {
+            filtered = filtered.filter(j => 
+              terms.some(t => 
+                (j.title || '').toLowerCase().includes(t) ||
+                (j.category || '').toLowerCase().includes(t) ||
+                (j.location || '').toLowerCase().includes(t)
+              )
+            )
+          }
+        }
+        setJobs(filtered)
       } else {
-        setJobs(getMockSeedJobs(selectedCategory, selectedCity))
+        setJobs(getMockSeedJobs(selectedCategory, selectedCity, searchQuery))
       }
     } catch (e) {
       console.error(e)
-      setJobs(getMockSeedJobs(selectedCategory, selectedCity))
+      setJobs(getMockSeedJobs(selectedCategory, selectedCity, searchQuery))
     } finally {
       setLoading(false)
     }
   }
 
-  const getMockSeedJobs = (cat, city) => {
+  const getMockSeedJobs = (cat, city, srch) => {
     const seed = [
       { id: '1', title: 'Professional Driver (Private Car & Cab)', category: 'DRIVER', location: 'Bengaluru', dailyWage: 1200, workTime: '8 AM – 6 PM', experience: '2+ Years', employerName: 'Nandi Motors' },
       { id: '2', title: 'Commercial Truck & Van Driver', category: 'DRIVER', location: 'Mysuru', dailyWage: 1400, workTime: '9 AM – 7 PM', experience: '3+ Years', employerName: 'Express Logistics' },
       { id: '3', title: 'Furniture Carpenter (Modular Work)', category: 'CARPENTER', location: 'Bengaluru', dailyWage: 1100, workTime: '9 AM – 6 PM', experience: '1+ Years', employerName: 'WoodCraft Interior' },
+      { id: '3b', title: 'Royal Heritage Wood Carpenter', category: 'CARPENTER', location: 'Mysuru', dailyWage: 1250, workTime: '9 AM – 6 PM', experience: '2+ Years', employerName: 'Mysore Woodworks' },
       { id: '4', title: 'Interior House Painter (Wall Texture)', category: 'PAINTER', location: 'Bengaluru', dailyWage: 1000, workTime: '9 AM – 5 PM', experience: '2+ Years', employerName: 'Apex Paints' },
+      { id: '4b', title: 'Residential Wall Painter', category: 'PAINTER', location: 'Mysuru', dailyWage: 1100, workTime: '9 AM – 5 PM', experience: '1+ Years', employerName: 'Heritage Decorators' },
       { id: '5', title: 'Residential Wiring Electrician', category: 'ELECTRICIAN', location: 'Mangaluru', dailyWage: 1300, workTime: '9 AM – 6 PM', experience: '2+ Years', employerName: 'PowerFix Solutions' },
       { id: '6', title: 'Plumber & Sanitary Technician', category: 'PLUMBER', location: 'Bengaluru', dailyWage: 1150, workTime: '9 AM – 6 PM', experience: '1+ Years', employerName: 'AquaCare Services' },
       { id: '7', title: 'Construction Mason (Brick & Concrete)', category: 'MASON', location: 'Hubballi', dailyWage: 1250, workTime: '8 AM – 5 PM', experience: '3+ Years', employerName: 'Shri Builders' },
       { id: '8', title: 'Restaurant South Indian Cook', category: 'COOK', location: 'Bengaluru', dailyWage: 1350, workTime: '7 AM – 3 PM', experience: '2+ Years', employerName: 'Udupi Sagar Hotel' },
+      { id: '8b', title: 'Traditional Household & Hotel Cook', category: 'COOK', location: 'Mysuru', dailyWage: 1300, workTime: '7 AM – 3 PM', experience: '2+ Years', employerName: 'Chamundi Caterers' },
       { id: '9', title: 'Office & Apartment Deep Cleaner', category: 'CLEANER', location: 'Bengaluru', dailyWage: 950, workTime: '9 AM – 5 PM', experience: 'Freshers Allowed', employerName: 'CleanPro Facility' },
     ]
 
     return seed.filter((j) => {
-      const matchCat = cat === 'ALL' || j.category === cat
+      const matchCat = cat === 'ALL' || j.category.toUpperCase() === cat.toUpperCase()
       const matchCity = city === 'ALL' || j.location.toLowerCase() === city.toLowerCase()
-      const matchSearch = !searchQuery || j.title.toLowerCase().includes(searchQuery.toLowerCase()) || j.category.toLowerCase().includes(searchQuery.toLowerCase())
+
+      let matchSearch = true
+      if (srch) {
+        const cleanSearch = srch.toLowerCase()
+        const terms = cleanSearch.split(/\s+/).filter(t => t.length > 1 && !['job', 'jobs', 'in', 'for', 'need', 'show', 'find', 'want', 'काम', 'नौकरी', 'ಕೆಲಸ', 'ಉದ್ಯೋಗ', 'ఉద్యోగం', 'వేట', 'வேலை'].includes(t))
+
+        if (terms.length > 0) {
+          matchSearch = terms.some(term => 
+            j.title.toLowerCase().includes(term) ||
+            j.category.toLowerCase().includes(term) ||
+            j.location.toLowerCase().includes(term) ||
+            j.employerName.toLowerCase().includes(term)
+          )
+        } else {
+          matchSearch = j.title.toLowerCase().includes(cleanSearch) || j.category.toLowerCase().includes(cleanSearch)
+        }
+      }
+
       return matchCat && matchCity && matchSearch
     })
   }

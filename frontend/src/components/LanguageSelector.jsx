@@ -7,6 +7,7 @@ export const LANGUAGES = [
   { code: 'kn-IN', name: 'Kannada', native: 'ಕನ್ನಡ', flag: '🇮🇳' },
   { code: 'hi-IN', name: 'Hindi', native: 'हिन्दी', flag: '🇮🇳' },
   { code: 'ta-IN', name: 'Tamil', native: 'தமிழ்', flag: '🇮🇳' },
+  { code: 'ml-IN', name: 'Malayalam', native: 'മലയാളം', flag: '🇮🇳' },
 ]
 
 export default function LanguageSelector({ selectedLang = 'kn-IN', onSelectLang }) {

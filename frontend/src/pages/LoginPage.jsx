@@ -53,41 +53,67 @@ const LoginPage = () => {
     }
   }
 
-  const startVoiceInput = (field) => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const startVoiceInput = async (field) => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      toast.error('Voice recognition is not supported in this browser.')
+      return
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error('Microphone is not available. Check your device settings.')
+      return
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach(track => track.stop())
+    } catch (err) {
+      toast.error('Microphone permission is required.')
+      return
+    }
+
+    try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
       const recognition = new SpeechRecognition()
       
       recognition.continuous = false
-      recognition.interimResults = false
-      recognition.lang = 'en-US'
+      recognition.interimResults = true
+      recognition.lang = 'en-IN'
 
       recognition.onstart = () => {
         setIsListening(true)
       }
 
       recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript
-        if (field === 'email') {
-          setValue('email', transcript.toLowerCase().replace(/\s+/g, ''))
-        } else if (field === 'all') {
-          // Simple parsing for voice login - in production, use NLP
-          const parts = transcript.toLowerCase().split('password')
-          if (parts.length > 0) {
-            setValue('email', parts[0].trim().replace(/\s+/g, ''))
-          }
-          if (parts.length > 1) {
-            setValue('password', parts[1].trim())
-          }
+        let text = ''
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          text += event.results[i][0].transcript
         }
-        setIsListening(false)
-        toast.success('Voice input captured')
+        const cleanText = text.trim()
+        if (cleanText) {
+          if (field === 'email') {
+            setValue('email', cleanText.toLowerCase().replace(/\s+/g, ''))
+          } else if (field === 'all') {
+            const parts = cleanText.toLowerCase().split('password')
+            if (parts.length > 0) {
+              setValue('email', parts[0].trim().replace(/\s+/g, ''))
+            }
+            if (parts.length > 1) {
+              setValue('password', parts[1].trim())
+            }
+          }
+          toast.success('Voice input captured')
+        }
       }
 
       recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error)
         setIsListening(false)
-        toast.error('Voice recognition failed')
+        if (event.error === 'not-allowed') {
+          toast.error('Microphone permission is required.')
+        } else if (event.error !== 'aborted') {
+          toast.error(`Voice recognition error: ${event.error}`)
+        }
       }
 
       recognition.onend = () => {
@@ -95,8 +121,10 @@ const LoginPage = () => {
       }
 
       recognition.start()
-    } else {
-      toast.error('Voice recognition not supported in this browser')
+    } catch (e) {
+      console.error(e)
+      setIsListening(false)
+      toast.error('Failed to start voice input')
     }
   }
 
@@ -105,8 +133,8 @@ const LoginPage = () => {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">VoiceHire</h1>
-            <p className="text-gray-600">Voice-based Employment Platform</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Udyoga Mitra</h1>
+            <p className="text-gray-600">ಉದ್ಯೋಗ ಮಿತ್ರ • Multi-lingual Employment Platform</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

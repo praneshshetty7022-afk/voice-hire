@@ -19,71 +19,127 @@ export const useVoiceRecognition = (options = {}) => {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState(null)
+  const [micPermission, setMicPermission] = useState('UNKNOWN')
   const recognitionRef = useRef(null)
 
   const {
-    language = 'kn-IN',
+    language = 'en-IN',
     onResult = null,
     onError = null,
   } = options
 
-  const startListening = useCallback(() => {
-    // Clear previous transcript & state before starting new session
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort() } catch (e) {}
+        recognitionRef.current = null
+      }
+    }
+  }, [])
+
+  const checkMicrophoneAccess = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setMicPermission('DENIED')
+      const msg = 'Microphone is not available. Check your device settings.'
+      setError(msg)
+      toast.error(msg)
+      return false
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      setMicPermission('GRANTED')
+      stream.getTracks().forEach(track => track.stop())
+      return true
+    } catch (err) {
+      setMicPermission('DENIED')
+      const msg = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+        ? 'Microphone permission is required.'
+        : 'Microphone is not available. Check your device settings.'
+      setError(msg)
+      toast.error(msg)
+      return false
+    }
+  }
+
+  const startListening = useCallback(async () => {
     setTranscript('')
     setError(null)
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
-      const errorMessage = 'Voice recognition is not supported in this browser. Please use Chrome/Edge or manual search.'
+      const errorMessage = 'SpeechRecognition is not supported in this browser. Please use Google Chrome.'
       setError(errorMessage)
       toast.error(errorMessage)
       return false
     }
 
+    const hasMic = await checkMicrophoneAccess()
+    if (!hasMic) {
+      if (onError) onError('not-allowed')
+      return false
+    }
+
     try {
       if (recognitionRef.current) {
-        recognitionRef.current.abort()
+        try { recognitionRef.current.abort() } catch (e) {}
       }
 
       const recognition = new SpeechRecognition()
       recognitionRef.current = recognition
 
       recognition.continuous = false
-      recognition.interimResults = false
+      recognition.interimResults = true
       recognition.lang = language
+      recognition.maxAlternatives = 1
 
       recognition.onstart = () => {
         setIsListening(true)
-        console.log('[VOICE] SpeechRecognition session started')
+        console.log(`[VOICE] SpeechRecognition session started in language: ${language}`)
       }
 
       recognition.onresult = (event) => {
+        let interimTranscript = ''
         let finalTranscript = ''
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const textChunk = event.results[i][0].transcript
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript
+            finalTranscript += textChunk
+          } else {
+            interimTranscript += textChunk
           }
         }
-        
-        if (!finalTranscript) {
-          finalTranscript = event.results[0][0].transcript
-        }
 
-        const text = finalTranscript.trim()
-        console.log('[VOICE] Final Speech Result Captured:', text)
-        setTranscript(text)
-        if (onResult && text) onResult(text)
+        const recognizedText = (finalTranscript || interimTranscript).trim()
+        if (recognizedText) {
+          console.log('[VOICE] Speech result captured:', recognizedText)
+          setTranscript(recognizedText)
+          if (onResult && finalTranscript.trim()) {
+            onResult(finalTranscript.trim())
+          }
+        }
       }
 
       recognition.onerror = (event) => {
-        console.error('[VOICE] Speech recognition error:', event.error)
-        const errMsg = event.error === 'not-allowed'
-          ? 'Microphone permission denied. Please allow microphone access in browser settings.'
-          : `Voice error: ${event.error}`
-        setError(errMsg)
+        console.error('[VOICE] SpeechRecognition error:', event.error)
+        let errMsg = 'Voice input recognition error. Please try again.'
+        if (event.error === 'not-allowed') {
+          errMsg = 'Microphone permission is required.'
+        } else if (event.error === 'no-speech') {
+          errMsg = "I didn't hear anything. Please try again."
+        } else if (event.error === 'audio-capture') {
+          errMsg = 'Microphone is not available. Check your device settings.'
+        } else if (event.error === 'network' || event.error === 'service-not-allowed') {
+          errMsg = 'Voice recognition network service unavailable.'
+        } else if (event.error === 'aborted') {
+          errMsg = 'Voice session aborted.'
+        }
+
+        setError(event.error || errMsg)
         setIsListening(false)
         if (onError) onError(event.error)
-        else toast.error(errMsg)
+        else if (event.error !== 'aborted') toast.error(errMsg)
       }
 
       recognition.onend = () => {
@@ -94,6 +150,7 @@ export const useVoiceRecognition = (options = {}) => {
       recognition.start()
       return true
     } catch (err) {
+      console.error('[VOICE EXCEPTION]:', err)
       setError(err.message)
       toast.error(`Speech failed: ${err.message}`)
       return false
@@ -102,7 +159,7 @@ export const useVoiceRecognition = (options = {}) => {
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop()
+      try { recognitionRef.current.stop() } catch (e) {}
       recognitionRef.current = null
     }
     setIsListening(false)
@@ -112,8 +169,10 @@ export const useVoiceRecognition = (options = {}) => {
     isListening,
     transcript,
     error,
+    micPermission,
     startListening,
     stopListening,
     isSupported: 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window,
   }
 }
+

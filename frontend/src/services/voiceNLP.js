@@ -1,4 +1,4 @@
-// Production Multilingual Voice NLP Engine for WorkRide
+// Production Multilingual Voice NLP Engine for VoiceHire
 import { SUPPORTED_LANGUAGES } from '../hooks/useVoiceRecognition'
 
 export { SUPPORTED_LANGUAGES }
@@ -150,7 +150,24 @@ export const parseFullVoiceCommand = (rawSpeech, contextMemory = {}) => {
   let intent = 'UNKNOWN'
   let action = 'NAVIGATE'
 
-  if (category) {
+  const statusKeywords = [
+    'status', 'happened', 'interview', 'did i get', 'get the job', 'which jobs', 'my application', 'applied', 'selected', 'hired',
+    'ಸ್ಥಿತಿ', 'ಏನಾಯಿತು', 'ಸಂದರ್ಶನ', 'ಸಿಕ್ಕಿದೆಯೇ', 'ನನ್ನ ಕೆಲಸ', 'ಅರ್ಜಿ',
+    'स्टेटस', 'क्या हुआ', 'इंटरव्यू', 'जॉब मिली', 'आवेदन', 'चयन',
+    'స్టేటస్', 'ఏమైంది', 'ఇంటర్వ్యూ', 'వచ్చిందా', 'అప్లికేషన్',
+    'நிலை', 'என்ன ஆச்சு', 'நேர்காணல்', 'கிடைத்ததா', 'விண்ணப்பம்'
+  ]
+
+  const isStatusTrigger = statusKeywords.some(kw => norm.includes(kw))
+  const isApplyTrigger = norm.includes('apply') || norm.includes('आवेदन') || norm.includes('ಅಪ್ಲೈ') || norm.includes('అప్లై') || norm.includes('விண்ணப்பிக்க')
+
+  if (isStatusTrigger) {
+    intent = 'CHECK_APPLICATION_STATUS'
+    action = 'CHECK_STATUS'
+  } else if (isApplyTrigger) {
+    intent = 'APPLY_JOB'
+    action = 'APPLY'
+  } else if (category) {
     intent = 'SEARCH_CATEGORY'
     action = 'SEARCH'
   } else if (norm.includes('yes') || norm.includes('అవును') || norm.includes('ಹೌದು') || norm.includes('हां')) {
@@ -169,3 +186,5 @@ export const parseFullVoiceCommand = (rawSpeech, contextMemory = {}) => {
     action,
   }
 }
+
+

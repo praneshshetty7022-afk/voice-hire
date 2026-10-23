@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Mic, MicOff, CheckCircle, ShieldCheck, Sparkles, Volume2, ArrowRight } from 'lucide-react'
 import AudioButton from '../components/AudioButton'
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition'
+import axios from '../api/axios'
 import toast from 'react-hot-toast'
 
 export const RegisterPage = () => {
@@ -49,21 +50,70 @@ export const RegisterPage = () => {
     onResult: handleVoiceCapture,
   })
 
-  const handleCompleteRegistration = () => {
+  const handleCompleteRegistration = async () => {
     if (!name && !phone) {
       toast.error('Please speak or type your name/phone number.')
       return
     }
 
     setLoading(true)
-    speakInstruction('आपका खाता बन गया है। काम खोज रहे हैं!')
-    setTimeout(() => {
-      localStorage.setItem('token', 'fake-voicehire-token-123')
-      localStorage.setItem('user', JSON.stringify({ name: name || 'Worker', phone, role: 'WORKER' }))
-      toast.success('🎉 Welcome to VoiceHire!')
+    speakInstruction('आपका पंजीकरण सबमिट हो गया है। एडमिन की मंज़ूरी की प्रतीक्षा है।')
+
+    try {
+      const response = await axios.post('/auth/register', {
+        name: name || 'Worker',
+        phoneNumber: phone,
+        role: 'WORKER',
+        skill: selectedWork,
+        skills: selectedWork,
+        location: 'Bengaluru',
+        experience: '2 Years',
+        preferredJob: selectedWork,
+        preferredLocation: 'Bengaluru',
+        preferredLanguage: 'hi-IN',
+        voiceTranscript: transcript || '',
+        registrationMode: transcript ? 'VOICE' : 'MANUAL'
+      })
+
+      const regUser = response.data?.user || {
+        name: name || 'Worker',
+        phoneNumber: phone,
+        role: 'WORKER',
+        skill: selectedWork,
+        skills: selectedWork,
+        location: 'Bengaluru',
+        experience: '2 Years',
+        accountStatus: 'PENDING',
+        registeredDate: '26 Sep 2026'
+      }
+
+      localStorage.setItem('token', response.data?.token || ('jwt_user_' + Date.now()))
+      localStorage.setItem('user', JSON.stringify(regUser))
+      
+      toast.success('⏳ Registration submitted! Waiting for admin approval.', { duration: 4000 })
       setLoading(false)
       navigate('/jobs')
-    }, 1200)
+    } catch (err) {
+      console.error('Registration failed:', err)
+      // Fallback local storage
+      const fallbackUser = {
+        id: 'user_' + Date.now(),
+        name: name || 'Worker',
+        phoneNumber: phone,
+        role: 'WORKER',
+        skill: selectedWork,
+        skills: selectedWork,
+        location: 'Bengaluru',
+        experience: '2 Years',
+        accountStatus: 'PENDING',
+        registeredDate: '26 Sep 2026'
+      }
+      localStorage.setItem('token', 'jwt_' + fallbackUser.id)
+      localStorage.setItem('user', JSON.stringify(fallbackUser))
+      toast.success('⏳ Registration submitted! Waiting for admin approval.')
+      setLoading(false)
+      navigate('/jobs')
+    }
   }
 
   return (

@@ -3,7 +3,8 @@ import { PROFESSIONS } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 import axios from '../api/axios'
-import { CheckCircle2, Clock, MapPin, IndianRupee, Mic, FileCheck, RefreshCw } from 'lucide-react'
+import ApplicationDetailModal from '../components/ApplicationDetailModal'
+import { CheckCircle2, Clock, MapPin, IndianRupee, Mic, FileCheck, RefreshCw, Calendar, XCircle, Eye, Info } from 'lucide-react'
 
 export default function MyApplicationsPage() {
   const { selectedLang } = useVoice()
@@ -12,6 +13,7 @@ export default function MyApplicationsPage() {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [filterTab, setFilterTab] = useState('ALL') // ALL, VOICE, MANUAL
+  const [selectedAppModal, setSelectedAppModal] = useState(null)
 
   useEffect(() => {
     fetchMyApplications()
@@ -24,7 +26,7 @@ export default function MyApplicationsPage() {
       const user = userStr ? JSON.parse(userStr) : { id: 'worker_1' }
 
       const res = await axios.get(`/applications/worker/${user.id || 'worker_1'}`)
-      if (res.data && Array.isArray(res.data)) {
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
         setApplications(res.data)
       } else {
         setApplications(getMockApplications())
@@ -39,24 +41,36 @@ export default function MyApplicationsPage() {
 
   const getMockApplications = () => [
     {
-      id: 'app_1',
-      jobTitle: 'Professional Driver (Private Car & Cab)',
-      category: 'DRIVER',
-      location: 'Bengaluru',
-      dailyWage: 1200,
-      applicationSource: 'VOICE',
-      appliedAt: '2026-08-23',
-      status: 'UNDER_REVIEW',
-    },
-    {
-      id: 'app_2',
-      jobTitle: 'Furniture Carpenter (Modular Work)',
+      id: 'app_carp_1',
+      jobId: 'job_carp_1',
+      jobTitle: 'Wood Carpenter (ಮರಗೆಲಸ / Carpenter)',
       category: 'CARPENTER',
       location: 'Bengaluru',
-      dailyWage: 1100,
+      dailyWage: 1200,
+      experience: '3 years',
+      applicationSource: 'VOICE',
+      appliedAt: Date.now() - 86400000 * 2,
+      status: 'UNDER_REVIEW',
+      employerName: 'Mysuru Furniture Works',
+    },
+    {
+      id: 'app_drv_1',
+      jobId: 'job_drv_1',
+      jobTitle: 'Personal Car Driver (गाड़ी ड्राइवर)',
+      category: 'DRIVER',
+      location: 'Bengaluru',
+      dailyWage: 18000,
+      salaryType: 'MONTHLY',
+      experience: '5 years',
       applicationSource: 'MANUAL',
-      appliedAt: '2026-08-20',
-      status: 'SHORTLISTED',
+      appliedAt: Date.now() - 86400000 * 5,
+      status: 'INTERVIEW_SCHEDULED',
+      interviewDate: '28 September 2026',
+      interviewTime: '10:30 AM',
+      interviewMode: 'In Person',
+      interviewLocation: 'Koramangala, Bengaluru',
+      employerMessage: 'Please bring your valid Driving License and Aadhaar ID proof.',
+      employerName: 'Sharma Household',
     },
   ]
 
@@ -68,19 +82,27 @@ export default function MyApplicationsPage() {
 
   const getStatusIndex = (status) => {
     switch (status) {
-      case 'APPLIED': return 0
-      case 'UNDER_REVIEW': return 1
-      case 'SHORTLISTED': return 2
-      case 'SELECTED': return 3
-      default: return 1
+      case 'APPLIED':
+      case 'PENDING':
+        return 0
+      case 'UNDER_REVIEW':
+        return 1
+      case 'INTERVIEW_SCHEDULED':
+      case 'SHORTLISTED':
+        return 2
+      case 'HIRED':
+      case 'SELECTED':
+        return 3
+      default:
+        return 0
     }
   }
 
   const timelineSteps = [
-    { id: 0, label: t.statusTimeline.applied },
-    { id: 1, label: t.statusTimeline.underReview },
-    { id: 2, label: t.statusTimeline.shortlisted },
-    { id: 3, label: t.statusTimeline.selected },
+    { id: 0, label: t.statusTimeline?.applied || 'Application Submitted' },
+    { id: 1, label: t.statusTimeline?.underReview || 'Under Review' },
+    { id: 2, label: t.statusTimeline?.interviewScheduled || 'Interview Scheduled' },
+    { id: 3, label: t.statusTimeline?.hired || 'Hired' },
   ]
 
   return (
@@ -90,7 +112,7 @@ export default function MyApplicationsPage() {
         <div>
           <h1 className="text-3xl font-black text-slate-900">{t.myApplications}</h1>
           <p className="text-sm font-semibold text-slate-500 mt-1">
-            Track your job applications and status
+            Track your job applications and complete hiring progress
           </p>
         </div>
         <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
@@ -149,6 +171,7 @@ export default function MyApplicationsPage() {
             const profCategory = (app.category || 'DRIVER').toUpperCase()
             const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
             const currentStepIdx = getStatusIndex(app.status)
+            const isRejected = app.status === 'REJECTED'
 
             return (
               <div
@@ -170,61 +193,117 @@ export default function MyApplicationsPage() {
 
                     <div>
                       <h3 className="text-xl font-black text-slate-900">{app.jobTitle}</h3>
-                      <p className="text-sm font-bold text-slate-500 flex items-center gap-2 mt-0.5">
-                        <MapPin className="w-4 h-4 text-blue-600" /> {app.location}
+                      <p className="text-sm font-bold text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-blue-600" /> {app.jobLocation || app.location || 'Bengaluru'}</span>
                         <span>•</span>
-                        <IndianRupee className="w-4 h-4 text-emerald-600" /> ₹{app.dailyWage}/day
+                        <span className="flex items-center gap-1 text-emerald-700 font-extrabold">
+                          <IndianRupee className="w-4 h-4 text-emerald-600" /> ₹{app.dailyWage || app.minSalary || 1200}/{app.salaryType === 'MONTHLY' ? 'month' : 'day'}
+                        </span>
+                        {app.experience && (
+                          <>
+                            <span>•</span>
+                            <span className="text-purple-700 font-bold">⭐ {app.experience}</span>
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
 
-                  {app.applicationSource === 'VOICE' ? (
-                    <span className="px-3.5 py-1.5 bg-blue-100 text-blue-800 font-extrabold text-xs rounded-full border border-blue-300 flex items-center gap-1 shrink-0">
-                      <Mic className="w-4 h-4 text-blue-600" />
-                      <span>Applied by Voice</span>
-                    </span>
-                  ) : (
-                    <span className="px-3.5 py-1.5 bg-slate-100 text-slate-700 font-extrabold text-xs rounded-full border border-slate-300 shrink-0">
-                      Manual Application
-                    </span>
-                  )}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {app.applicationSource === 'VOICE' || app.applicationMethod === 'VOICE' ? (
+                      <span className="px-3.5 py-1.5 bg-blue-100 text-blue-800 font-extrabold text-xs rounded-full border border-blue-300 flex items-center gap-1">
+                        <Mic className="w-4 h-4 text-blue-600" />
+                        <span>Applied by Voice</span>
+                      </span>
+                    ) : (
+                      <span className="px-3.5 py-1.5 bg-slate-100 text-slate-700 font-extrabold text-xs rounded-full border border-slate-300">
+                        Manual Application
+                      </span>
+                    )}
+
+                    <button
+                      onClick={() => setSelectedAppModal(app)}
+                      className="text-xs font-black text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline pt-1"
+                    >
+                      <Eye className="w-3.5 h-3.5" /> View Details
+                    </button>
+                  </div>
                 </div>
 
-                {/* Status Timeline */}
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Application Status</p>
-                  <div className="flex items-center justify-between relative">
-                    {/* Connecting Progress Line */}
-                    <div className="absolute top-1/2 left-4 right-4 h-1 bg-slate-200 -translate-y-1/2 z-0" />
-                    <div
-                      className="absolute top-1/2 left-4 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500"
-                      style={{
-                        width: `${(currentStepIdx / (timelineSteps.length - 1)) * 90}%`,
-                      }}
-                    />
-
-                    {timelineSteps.map((step) => {
-                      const isCompleted = step.id <= currentStepIdx
-                      const isCurrent = step.id === currentStepIdx
-
-                      return (
-                        <div key={step.id} className="relative z-10 flex flex-col items-center text-center">
-                          <div
-                            className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-sm border-4 transition-all ${
-                              isCompleted
-                                ? 'bg-emerald-500 text-white border-emerald-200 shadow-md'
-                                : 'bg-white text-slate-400 border-slate-300'
-                            } ${isCurrent ? 'ring-4 ring-emerald-200 scale-110' : ''}`}
-                          >
-                            {isCompleted ? '✓' : step.id + 1}
-                          </div>
-                          <span className={`text-xs font-extrabold mt-1.5 ${isCompleted ? 'text-slate-900' : 'text-slate-400'}`}>
-                            {step.label}
-                          </span>
-                        </div>
-                      )
-                    })}
+                {/* Voice Recording Player (if present) */}
+                {app.voiceRecording && (
+                  <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl space-y-2">
+                    <p className="text-xs font-black text-blue-700 uppercase flex items-center gap-1.5">
+                      <Mic className="w-4 h-4 text-blue-600" />
+                      <span>🎤 Voice Recording</span>
+                    </p>
+                    <audio controls src={app.voiceRecording} className="w-full h-10 rounded-xl" />
+                    {app.voiceTranscript && (
+                      <p className="text-xs font-semibold text-slate-700 italic">
+                        "{app.voiceTranscript}"
+                      </p>
+                    )}
                   </div>
+                )}
+
+                {/* Interview Scheduled Highlight Box */}
+                {(app.status === 'INTERVIEW_SCHEDULED' || app.interviewDate) && (
+                  <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl space-y-2">
+                    <div className="flex items-center gap-2 text-amber-900 font-black text-base">
+                      <Calendar className="w-5 h-5 text-amber-600" />
+                      <span>Interview Scheduled Information</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-bold text-slate-800">
+                      {app.interviewDate && <div>📅 <span className="font-black">Date:</span> {app.interviewDate}</div>}
+                      {app.interviewTime && <div>⏰ <span className="font-black">Time:</span> {app.interviewTime}</div>}
+                      {app.interviewMode && <div>📌 <span className="font-black">Mode:</span> {app.interviewMode}</div>}
+                      {app.interviewLocation && <div>📍 <span className="font-black">Location:</span> {app.interviewLocation}</div>}
+                    </div>
+
+                    {app.employerMessage && (
+                      <p className="text-xs font-bold text-slate-700 bg-white/80 p-2.5 rounded-xl border border-amber-200 italic mt-1">
+                        "{app.employerMessage}"
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Status Indicator */}
+                <div className="pt-4 border-t border-slate-100">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Application Status</p>
+
+                  {(app.status === 'ACCEPTED' || app.status === 'APPROVED' || app.status === 'HIRED') ? (
+                    <div className="p-4 bg-emerald-50 border-2 border-emerald-300 rounded-2xl flex items-center gap-3 text-emerald-900">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-600 shrink-0" />
+                      <div>
+                        <h4 className="text-base font-black">🎉 Accepted by Admin (स्वीकृत)</h4>
+                        <p className="text-xs font-semibold text-emerald-800 mt-0.5">
+                          Congratulations! Your application has been reviewed and accepted by Admin based on submitted details.
+                        </p>
+                      </div>
+                    </div>
+                  ) : app.status === 'REJECTED' ? (
+                    <div className="p-4 bg-rose-50 border-2 border-rose-300 rounded-2xl flex items-center gap-3 text-rose-900">
+                      <XCircle className="w-8 h-8 text-rose-600 shrink-0" />
+                      <div>
+                        <h4 className="text-base font-black">Application Not Selected (अस्वीकृत)</h4>
+                        <p className="text-xs font-semibold text-rose-700 mt-0.5">
+                          {app.rejectionReason || 'Application was reviewed by Admin and not selected for this position.'}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl flex items-center gap-3 text-amber-950">
+                      <Clock className="w-8 h-8 text-amber-600 shrink-0 animate-pulse" />
+                      <div>
+                        <h4 className="text-base font-black">Submitted - Pending Admin Review (समीक्षा के अधीन)</h4>
+                        <p className="text-xs font-semibold text-amber-800 mt-0.5">
+                          Your application has been received and is waiting for Admin review & approval.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )
@@ -241,6 +320,15 @@ export default function MyApplicationsPage() {
           </p>
         </div>
       )}
+
+      {/* Application Detail Modal */}
+      {selectedAppModal && (
+        <ApplicationDetailModal
+          application={selectedAppModal}
+          onClose={() => setSelectedAppModal(null)}
+        />
+      )}
     </div>
   )
 }
+

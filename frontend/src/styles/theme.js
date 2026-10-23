@@ -1,4 +1,4 @@
-// WorkRide Design System & Profession Theme Registry
+// VoiceHire Design System & Profession Theme Registry
 
 export const PROFESSIONS = {
   DRIVER: {

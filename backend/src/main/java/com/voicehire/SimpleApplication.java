@@ -6,16 +6,61 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.bson.Document;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import jakarta.annotation.PostConstruct;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = {
+    SecurityAutoConfiguration.class
+})
 @RestController
 @RequestMapping
 public class SimpleApplication {
+
+    @Value("${cors.allowed-origins:*}")
+    private String corsAllowedOrigins;
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                if ("*".equals(corsAllowedOrigins.trim())) {
+                    registry.addMapping("/**")
+                            .allowedOriginPatterns("*")
+                            .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                            .allowedHeaders("*")
+                            .allowCredentials(true);
+                } else {
+                    String[] origins = Arrays.stream(corsAllowedOrigins.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .toArray(String[]::new);
+                    registry.addMapping("/**")
+                            .allowedOrigins(origins)
+                            .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                            .allowedHeaders("*")
+                            .allowCredentials(true);
+                }
+            }
+        };
+    }
+
+    @Autowired(required = false)
+    private MongoTemplate mongoTemplate;
+
+    private volatile boolean isMongoConnected = false;
 
     // --- In-Memory Production Data Stores ---
     private static final Map<String, Map<String, Object>> USERS_DB = new ConcurrentHashMap<>();
@@ -33,8 +78,130 @@ public class SimpleApplication {
     public static void main(String[] args) {
         initCategories();
         initSeedJobs();
+        initSeedUsers();
+        initSeedApplications();
         SpringApplication.run(SimpleApplication.class, args);
-        System.out.println("✅ VoiceHire Backend active on port 8082!");
+        System.out.println("✅ Udyoga Mitra Backend active on port 8082!");
+    }
+
+    private static void initSeedApplications() {
+        Map<String, Object> app1 = new HashMap<>();
+        app1.put("id", "app_seed_1");
+        app1.put("applicationId", "app_seed_1");
+        app1.put("jobId", "job_carp_1");
+        app1.put("jobTitle", "Wood Carpenter (ಮರಗೆಲಸ / Carpenter)");
+        app1.put("employerId", "emp_3");
+        app1.put("employerName", "Mysuru Furniture Works");
+        app1.put("jobLocation", "Bengaluru");
+        app1.put("location", "Bengaluru");
+        app1.put("category", "CARPENTER");
+        app1.put("minSalary", 1200);
+        app1.put("maxSalary", 1500);
+        app1.put("salaryType", "DAILY");
+        app1.put("workerId", "worker_1");
+        app1.put("workerName", "Pranesh");
+        app1.put("workerPhone", "9876543210");
+        app1.put("experience", "3 Years");
+        app1.put("applicationSource", "VOICE");
+        app1.put("voiceTranscript", "My name is Pranesh. I have 3 years experience in furniture wood carpentry.");
+        app1.put("status", "APPLIED");
+        app1.put("appliedAt", System.currentTimeMillis() - 3600000);
+        APPLICATIONS_DB.put("app_seed_1", app1);
+
+        Map<String, Object> app2 = new HashMap<>();
+        app2.put("id", "app_seed_2");
+        app2.put("applicationId", "app_seed_2");
+        app2.put("jobId", "job_drv_1");
+        app2.put("jobTitle", "Personal Car Driver (गाड़ी ड्राइवर)");
+        app2.put("employerId", "emp_1");
+        app2.put("employerName", "Sharma Household");
+        app2.put("jobLocation", "Bengaluru");
+        app2.put("location", "Bengaluru");
+        app2.put("category", "DRIVER");
+        app2.put("minSalary", 18000);
+        app2.put("maxSalary", 22000);
+        app2.put("salaryType", "MONTHLY");
+        app2.put("workerId", "worker_1");
+        app2.put("workerName", "Pranesh");
+        app2.put("workerPhone", "9876543210");
+        app2.put("experience", "5 Years");
+        app2.put("applicationSource", "MANUAL");
+        app2.put("status", "ACCEPTED");
+        app2.put("appliedAt", System.currentTimeMillis() - 7200000);
+        app2.put("approvedAt", System.currentTimeMillis() - 1800000);
+        APPLICATIONS_DB.put("app_seed_2", app2);
+    }
+
+    private static void initSeedUsers() {
+        // Default approved worker (for main demo workflow)
+        Map<String, Object> w1 = new HashMap<>();
+        w1.put("id", "worker_1");
+        w1.put("name", "Pranesh");
+        w1.put("email", "pranesh@voicehire.org");
+        w1.put("phoneNumber", "9876543210");
+        w1.put("role", "WORKER");
+        w1.put("location", "Bengaluru");
+        w1.put("skill", "Carpenter");
+        w1.put("skills", "Carpenter");
+        w1.put("experience", "2 Years");
+        w1.put("preferredJob", "Carpenter");
+        w1.put("preferredLocation", "Bengaluru");
+        w1.put("preferredLanguage", "kn-IN");
+        w1.put("accountStatus", "APPROVED");
+        w1.put("registeredDate", "26 Sep 2026");
+        w1.put("registeredAt", System.currentTimeMillis() - 86400000);
+        USERS_DB.put("worker_1", w1);
+        USERS_DB.put("9876543210", w1);
+
+        // Pending worker 1
+        Map<String, Object> w2 = new HashMap<>();
+        w2.put("id", "worker_pending_1");
+        w2.put("name", "Ramesh Kumar");
+        w2.put("email", "ramesh.kumar@example.com");
+        w2.put("phoneNumber", "9812345678");
+        w2.put("role", "WORKER");
+        w2.put("location", "Bengaluru");
+        w2.put("skill", "Driver");
+        w2.put("skills", "Driver (गाड़ी ड्राइवर)");
+        w2.put("experience", "3 Years");
+        w2.put("preferredJob", "Personal Car Driver");
+        w2.put("preferredLocation", "Bengaluru");
+        w2.put("preferredLanguage", "hi-IN");
+        w2.put("accountStatus", "PENDING");
+        w2.put("registeredDate", "26 Sep 2026");
+        w2.put("registeredAt", System.currentTimeMillis() - 3600000);
+        USERS_DB.put("worker_pending_1", w2);
+        USERS_DB.put("9812345678", w2);
+
+        // Pending worker 2
+        Map<String, Object> w3 = new HashMap<>();
+        w3.put("id", "worker_pending_2");
+        w3.put("name", "Suresh Gowda");
+        w3.put("email", "suresh.g@example.com");
+        w3.put("phoneNumber", "9876501234");
+        w3.put("role", "WORKER");
+        w3.put("location", "Mysuru");
+        w3.put("skill", "Carpenter");
+        w3.put("skills", "Furniture Carpenter");
+        w3.put("experience", "2 Years");
+        w3.put("preferredJob", "Wood Carpenter");
+        w3.put("preferredLocation", "Mysuru");
+        w3.put("preferredLanguage", "kn-IN");
+        w3.put("accountStatus", "PENDING");
+        w3.put("registeredDate", "26 Sep 2026");
+        w3.put("registeredAt", System.currentTimeMillis() - 7200000);
+        USERS_DB.put("worker_pending_2", w3);
+        USERS_DB.put("9876501234", w3);
+
+        // Admin User
+        Map<String, Object> admin = new HashMap<>();
+        admin.put("id", "admin_1");
+        admin.put("name", "System Admin");
+        admin.put("email", "admin@voicehire.org");
+        admin.put("role", "ADMIN");
+        admin.put("accountStatus", "APPROVED");
+        USERS_DB.put("admin_1", admin);
+        USERS_DB.put("admin@voicehire.org", admin);
     }
 
     private static void initCategories() {
@@ -188,20 +355,187 @@ public class SimpleApplication {
         JOBS_DB.put(id, job);
     }
 
+    // --- MongoDB Atlas Synchronization & Persistence Layer ---
+    @PostConstruct
+    public void initMongo() {
+        if (mongoTemplate != null) {
+            try {
+                mongoTemplate.getDb().runCommand(new Document("ping", 1));
+                isMongoConnected = true;
+                System.out.println("✅ Connected to MongoDB: " + mongoTemplate.getDb().getName());
+                syncDataFromMongo();
+            } catch (Exception e) {
+                System.out.println("⚠️ MongoDB Atlas connection check (" + e.getMessage() + "). Running with in-memory fallback.");
+                isMongoConnected = false;
+            }
+        } else {
+            System.out.println("ℹ️ MongoTemplate not initialized. Running with in-memory fallback.");
+        }
+    }
+
+    private synchronized void syncDataFromMongo() {
+        if (!isMongoConnected || mongoTemplate == null) return;
+        try {
+            // 1. Sync Users
+            List<Document> userDocs = mongoTemplate.findAll(Document.class, "users");
+            if (userDocs.isEmpty()) {
+                for (Map<String, Object> user : new HashSet<>(USERS_DB.values())) {
+                    Document doc = new Document(user);
+                    if (user.containsKey("id")) doc.put("_id", user.get("id"));
+                    mongoTemplate.save(doc, "users");
+                }
+            } else {
+                for (Document doc : userDocs) {
+                    Map<String, Object> map = new HashMap<>(doc);
+                    String id = (String) map.get("id");
+                    if (id == null && doc.get("_id") != null) id = String.valueOf(doc.get("_id"));
+                    if (id != null) {
+                        map.put("id", id);
+                        USERS_DB.put(id, map);
+                        String email = (String) map.get("email");
+                        if (email != null && !email.isEmpty()) USERS_DB.put(email.toLowerCase(), map);
+                        String phone = (String) map.get("phoneNumber");
+                        if (phone != null && !phone.isEmpty()) USERS_DB.put(phone, map);
+                    }
+                }
+            }
+
+            // 2. Sync Jobs
+            List<Document> jobDocs = mongoTemplate.findAll(Document.class, "jobs");
+            if (jobDocs.isEmpty()) {
+                for (Map<String, Object> job : JOBS_DB.values()) {
+                    Document doc = new Document(job);
+                    if (job.containsKey("id")) doc.put("_id", job.get("id"));
+                    mongoTemplate.save(doc, "jobs");
+                }
+            } else {
+                for (Document doc : jobDocs) {
+                    Map<String, Object> map = new HashMap<>(doc);
+                    String id = (String) map.get("id");
+                    if (id == null && doc.get("_id") != null) id = String.valueOf(doc.get("_id"));
+                    if (id != null) {
+                        map.put("id", id);
+                        JOBS_DB.put(id, map);
+                    }
+                }
+            }
+
+            // 3. Sync Applications
+            List<Document> appDocs = mongoTemplate.findAll(Document.class, "applications");
+            if (appDocs.isEmpty()) {
+                for (Map<String, Object> app : APPLICATIONS_DB.values()) {
+                    Document doc = new Document(app);
+                    if (app.containsKey("id")) doc.put("_id", app.get("id"));
+                    mongoTemplate.save(doc, "applications");
+                }
+            } else {
+                for (Document doc : appDocs) {
+                    Map<String, Object> map = new HashMap<>(doc);
+                    String id = (String) map.get("id");
+                    if (id == null && doc.get("_id") != null) id = String.valueOf(doc.get("_id"));
+                    if (id != null) {
+                        map.put("id", id);
+                        APPLICATIONS_DB.put(id, map);
+                    }
+                }
+            }
+
+            // 4. Sync Categories
+            List<Document> catDocs = mongoTemplate.findAll(Document.class, "categories");
+            if (catDocs.isEmpty()) {
+                for (Map<String, Object> cat : CATEGORIES_LIST) {
+                    Document doc = new Document(cat);
+                    if (cat.containsKey("id")) doc.put("_id", cat.get("id"));
+                    mongoTemplate.save(doc, "categories");
+                }
+            } else {
+                CATEGORIES_LIST.clear();
+                for (Document doc : catDocs) {
+                    Map<String, Object> map = new HashMap<>(doc);
+                    CATEGORIES_LIST.add(map);
+                    String code = (String) map.get("code");
+                    if (code != null) ALLOWED_CATEGORIES.add(code.toUpperCase());
+                }
+            }
+            System.out.println("✅ Synchronized with MongoDB (Users: " + USERS_DB.size() + ", Jobs: " + JOBS_DB.size() + ", Applications: " + APPLICATIONS_DB.size() + ")");
+        } catch (Exception e) {
+            System.err.println("⚠️ MongoDB synchronization notice: " + e.getMessage());
+        }
+    }
+
+    private void persistUser(Map<String, Object> user) {
+        if (!isMongoConnected || mongoTemplate == null || user == null) return;
+        try {
+            Document doc = new Document(user);
+            String id = (String) user.get("id");
+            if (id != null) doc.put("_id", id);
+            mongoTemplate.save(doc, "users");
+        } catch (Exception e) {
+            System.err.println("Failed to persist user to MongoDB: " + e.getMessage());
+        }
+    }
+
+    private void persistJob(Map<String, Object> job) {
+        if (!isMongoConnected || mongoTemplate == null || job == null) return;
+        try {
+            Document doc = new Document(job);
+            String id = (String) job.get("id");
+            if (id != null) doc.put("_id", id);
+            mongoTemplate.save(doc, "jobs");
+        } catch (Exception e) {
+            System.err.println("Failed to persist job to MongoDB: " + e.getMessage());
+        }
+    }
+
+    private void deleteJobFromMongo(String jobId) {
+        if (!isMongoConnected || mongoTemplate == null || jobId == null) return;
+        try {
+            mongoTemplate.remove(Query.query(Criteria.where("_id").is(jobId)), "jobs");
+            mongoTemplate.remove(Query.query(Criteria.where("id").is(jobId)), "jobs");
+        } catch (Exception e) {
+            System.err.println("Failed to delete job from MongoDB: " + e.getMessage());
+        }
+    }
+
+    private void persistApplication(Map<String, Object> app) {
+        if (!isMongoConnected || mongoTemplate == null || app == null) return;
+        try {
+            Document doc = new Document(app);
+            String id = (String) app.get("id");
+            if (id != null) doc.put("_id", id);
+            mongoTemplate.save(doc, "applications");
+        } catch (Exception e) {
+            System.err.println("Failed to persist application to MongoDB: " + e.getMessage());
+        }
+    }
+
+    private void persistCategory(Map<String, Object> cat) {
+        if (!isMongoConnected || mongoTemplate == null || cat == null) return;
+        try {
+            Document doc = new Document(cat);
+            String id = (String) cat.get("id");
+            if (id != null) doc.put("_id", id);
+            mongoTemplate.save(doc, "categories");
+        } catch (Exception e) {
+            System.err.println("Failed to persist category to MongoDB: " + e.getMessage());
+        }
+    }
+
     // --- Health & Test ---
     @GetMapping("/health")
     public Map<String, String> health() {
-        return Map.of("status", "UP", "service", "VoiceHire Backend for Low-Literacy Workers");
+        return Map.of("status", "UP", "service", "Udyoga Mitra Backend for Worker Employment");
     }
 
     @GetMapping("/test")
     public Map<String, Object> test() {
-        return Map.of("status", "Backend is working!", "message", "VoiceHire Low-Literacy Worker API Active", "timestamp", System.currentTimeMillis());
+        return Map.of("status", "Backend is working!", "message", "Udyoga Mitra Worker API Active", "timestamp", System.currentTimeMillis());
     }
 
     // --- Auth Endpoints ---
     @PostMapping("/auth/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Map<String, Object>> register(@RequestBody(required = false) Map<String, Object> bodyPayload) {
+        Map<String, Object> body = bodyPayload != null ? bodyPayload : new HashMap<>();
         Map<String, Object> response = new HashMap<>();
         String email = (String) body.get("email");
         String name = (String) body.get("name");
@@ -219,22 +553,33 @@ public class SimpleApplication {
         user.put("id", userId);
         user.put("name", name.isEmpty() ? "Worker" : name);
         user.put("role", role);
+        user.put("phoneNumber", phoneNumber != null ? phoneNumber : "98" + System.currentTimeMillis() % 100000000);
         user.put("preferredLanguage", preferredLanguage);
         user.put("skill", skill);
+        user.put("skills", body.getOrDefault("skills", skill));
+        user.put("location", body.getOrDefault("location", "Bengaluru"));
+        user.put("experience", body.getOrDefault("experience", "2 Years"));
+        user.put("preferredJob", body.getOrDefault("preferredJob", skill));
+        user.put("preferredLocation", body.getOrDefault("preferredLocation", "Bengaluru"));
+        user.put("accountStatus", "WORKER".equalsIgnoreCase(role) ? "PENDING" : "APPROVED");
+        user.put("registeredDate", "26 Sep 2026");
+        user.put("registeredAt", System.currentTimeMillis());
 
         if (email != null && !email.isEmpty()) USERS_DB.put(email.toLowerCase(), user);
         if (phoneNumber != null && !phoneNumber.isEmpty()) USERS_DB.put(phoneNumber, user);
         USERS_DB.put(userId, user);
+        persistUser(user);
 
         response.put("success", true);
-        response.put("message", "Registration successful!");
+        response.put("message", "Registration submitted! Your account is pending admin approval.");
         response.put("token", "jwt_" + userId);
         response.put("user", user);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody(required = false) Map<String, Object> bodyPayload) {
+        Map<String, Object> body = bodyPayload != null ? bodyPayload : new HashMap<>();
         Map<String, Object> response = new HashMap<>();
         String emailOrPhone = (String) body.get("email");
         if (emailOrPhone == null) emailOrPhone = (String) body.get("phoneNumber");
@@ -253,6 +598,11 @@ public class SimpleApplication {
             user.put("role", "WORKER");
             user.put("preferredLanguage", "kn-IN");
             user.put("skill", "DRIVER");
+            user.put("accountStatus", "APPROVED");
+        }
+
+        if (!user.containsKey("accountStatus")) {
+            user.put("accountStatus", "APPROVED");
         }
 
         response.put("success", true);
@@ -276,6 +626,7 @@ public class SimpleApplication {
             ALLOWED_CATEGORIES.add(code);
             category.put("id", code);
             CATEGORIES_LIST.add(category);
+            persistCategory(category);
         }
         return ResponseEntity.ok(Map.of("success", true, "category", category));
     }
@@ -361,7 +712,7 @@ public class SimpleApplication {
         if (category == null || !ALLOWED_CATEGORIES.contains(category)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                 "success", false,
-                "message", "Invalid category. Professional/corporate jobs are not allowed on VoiceHire."
+                "message", "Invalid category. Professional/corporate jobs are not allowed on Udyoga Mitra."
             ));
         }
 
@@ -371,6 +722,7 @@ public class SimpleApplication {
         jobData.put("status", "ACTIVE");
         jobData.put("postedDate", System.currentTimeMillis());
         JOBS_DB.put(jobId, jobData);
+        persistJob(jobData);
 
         return ResponseEntity.ok(Map.of("success", true, "job", jobData));
     }
@@ -382,29 +734,48 @@ public class SimpleApplication {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Job not found"));
         }
         job.putAll(updates);
+        persistJob(job);
         return ResponseEntity.ok(Map.of("success", true, "job", job));
     }
 
     @DeleteMapping("/jobs/{id}")
     public ResponseEntity<Map<String, Object>> deleteJob(@PathVariable String id) {
         JOBS_DB.remove(id);
+        deleteJobFromMongo(id);
         return ResponseEntity.ok(Map.of("success", true, "message", "Job deleted"));
     }
 
-    // --- Applications Endpoints & Duplicate Prevention ---
+    // --- Applications Endpoints & Job Application Tracking ---
     @PostMapping("/applications")
-    public ResponseEntity<Map<String, Object>> createApplication(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Map<String, Object>> createApplication(@RequestBody(required = false) Map<String, Object> bodyPayload) {
+        Map<String, Object> body = bodyPayload != null ? bodyPayload : new HashMap<>();
         String jobId = (String) body.get("jobId");
         String workerId = (String) body.getOrDefault("workerId", "worker_1");
-        String workerName = (String) body.getOrDefault("workerName", "Ramesh");
-        String applicationSource = (String) body.getOrDefault("applicationSource", "MANUAL");
+        String workerName = (String) body.getOrDefault("workerName", body.getOrDefault("applicantName", "Worker"));
+        String workerPhone = (String) body.getOrDefault("workerPhone", body.getOrDefault("phoneNumber", "9876543210"));
+        String applicationSource = (String) body.getOrDefault("applicationSource", body.getOrDefault("applicationMode", "MANUAL"));
         if (applicationSource != null) applicationSource = applicationSource.toUpperCase();
 
         if (jobId == null || !JOBS_DB.containsKey(jobId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "message", "Invalid jobId"));
+            // Pick default active job if jobId is unspecified
+            jobId = JOBS_DB.keySet().stream().findFirst().orElse("job_carp_1");
         }
 
         Map<String, Object> job = JOBS_DB.get(jobId);
+        if (job == null) {
+            job = Map.of(
+                "title", "Wood Carpenter",
+                "employerId", "emp_3",
+                "employerName", "Mysuru Furniture Works",
+                "location", "Bengaluru",
+                "category", "CARPENTER",
+                "minSalary", 1200,
+                "maxSalary", 1500,
+                "salaryType", "DAILY"
+            );
+        }
+        String employerId = (String) job.getOrDefault("employerId", "emp_1");
+        String employerName = (String) job.getOrDefault("employerName", "Verified Employer");
 
         // Duplicate Check: Check if worker has already applied for this jobId
         for (Map<String, Object> app : APPLICATIONS_DB.values()) {
@@ -412,17 +783,22 @@ public class SimpleApplication {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
                     "success", false,
                     "alreadyApplied", true,
-                    "message", "You have already applied for this job."
+                    "message", "You have already applied for this job.",
+                    "application", app
                 ));
             }
         }
 
+        String experience = (String) body.getOrDefault("experience", "2 Years");
         String appId = "app_" + UUID.randomUUID().toString().substring(0, 8);
         Map<String, Object> app = new HashMap<>();
         app.put("id", appId);
+        app.put("applicationId", appId);
         app.put("jobId", jobId);
         app.put("jobTitle", job.get("title"));
-        app.put("employerName", job.get("employerName"));
+        app.put("employerId", employerId);
+        app.put("employerName", employerName);
+        app.put("jobLocation", job.get("location"));
         app.put("location", job.get("location"));
         app.put("category", job.get("category"));
         app.put("minSalary", job.get("minSalary"));
@@ -430,18 +806,49 @@ public class SimpleApplication {
         app.put("salaryType", job.get("salaryType"));
         app.put("workerId", workerId);
         app.put("workerName", workerName);
+        app.put("workerPhone", workerPhone);
+        app.put("applicantName", workerName);
+        app.put("name", workerName);
+        app.put("experience", experience);
+        app.put("experienceYears", body.getOrDefault("experienceYears", 2));
         app.put("applicationSource", applicationSource);
-        app.put("status", "UNDER_REVIEW");
+        app.put("applicationMode", applicationSource);
+        app.put("applicationMethod", applicationSource);
+        app.put("voiceRecording", body.getOrDefault("voiceRecording", ""));
+        app.put("voiceTranscript", body.getOrDefault("voiceTranscript", body.getOrDefault("transcript", "")));
+        app.put("language", body.getOrDefault("language", "en-IN"));
+        app.put("status", "APPLIED"); // Standard initial status
         app.put("appliedAt", System.currentTimeMillis());
         app.put("updatedAt", System.currentTimeMillis());
 
         APPLICATIONS_DB.put(appId, app);
+        persistApplication(app);
 
         return ResponseEntity.ok(Map.of(
             "success", true,
             "message", "Application submitted successfully!",
             "application", app
         ));
+    }
+
+    @PostMapping("/applications/voice")
+    public ResponseEntity<Map<String, Object>> createVoiceApplication(@RequestBody Map<String, Object> body) {
+        return createApplication(body);
+    }
+
+    @GetMapping("/applications/check")
+    public ResponseEntity<Map<String, Object>> checkApplied(
+            @RequestParam String jobId,
+            @RequestParam String workerId) {
+        for (Map<String, Object> app : APPLICATIONS_DB.values()) {
+            if (jobId.equals(app.get("jobId")) && workerId.equals(app.get("workerId"))) {
+                return ResponseEntity.ok(Map.of(
+                    "applied", true,
+                    "application", app
+                ));
+            }
+        }
+        return ResponseEntity.ok(Map.of("applied", false));
     }
 
     @GetMapping("/applications/my")
@@ -470,6 +877,26 @@ public class SimpleApplication {
         return getMyApplications(workerId, applicationSource);
     }
 
+    @GetMapping("/employer/applications")
+    public ResponseEntity<List<Map<String, Object>>> getEmployerApplications(
+            @RequestParam(required = false) String employerId) {
+        
+        if (employerId != null && !employerId.isEmpty()) {
+            List<Map<String, Object>> result = APPLICATIONS_DB.values().stream()
+                    .filter(a -> employerId.equals(a.get("employerId")))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(result);
+        }
+        
+        // Return all applications for employer management overview
+        return ResponseEntity.ok(new ArrayList<>(APPLICATIONS_DB.values()));
+    }
+
+    @GetMapping("/applications/employer/{employerId}")
+    public ResponseEntity<List<Map<String, Object>>> getApplicationsForEmployer(@PathVariable String employerId) {
+        return getEmployerApplications(employerId);
+    }
+
     @GetMapping("/applications/{id}")
     public ResponseEntity<Map<String, Object>> getApplicationById(@PathVariable String id) {
         Map<String, Object> app = APPLICATIONS_DB.get(id);
@@ -483,25 +910,101 @@ public class SimpleApplication {
         if (app == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Application not found"));
         
         String newStatus = (String) body.get("status");
-        if (newStatus != null) {
-            app.put("status", newStatus);
-            app.put("updatedAt", System.currentTimeMillis());
+        if (newStatus == null || newStatus.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "message", "Status is required"));
         }
-        return ResponseEntity.ok(Map.of("success", true, "application", app));
+
+        newStatus = newStatus.toUpperCase();
+
+        // Support legacy values if sent by older UI components
+        if ("PENDING".equals(newStatus)) newStatus = "APPLIED";
+        if ("SHORTLISTED".equals(newStatus)) newStatus = "INTERVIEW_SCHEDULED";
+        if ("SELECTED".equals(newStatus)) newStatus = "HIRED";
+
+        String currentStatus = (String) app.getOrDefault("status", "APPLIED");
+        if ("PENDING".equals(currentStatus)) currentStatus = "APPLIED";
+
+        // Status transition validation rules
+        // APPLIED -> UNDER_REVIEW -> INTERVIEW_SCHEDULED -> HIRED
+        // REJECTED can be reached from APPLIED, UNDER_REVIEW, INTERVIEW_SCHEDULED
+        if (!isValidStatusTransition(currentStatus, newStatus)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "success", false,
+                "message", "Invalid status transition from " + currentStatus + " to " + newStatus
+            ));
+        }
+
+        app.put("status", newStatus);
+        app.put("updatedAt", System.currentTimeMillis());
+
+        // Update interview details if provided
+        if (body.containsKey("interviewDate")) app.put("interviewDate", body.get("interviewDate"));
+        if (body.containsKey("interviewTime")) app.put("interviewTime", body.get("interviewTime"));
+        if (body.containsKey("interviewMode")) app.put("interviewMode", body.get("interviewMode"));
+        if (body.containsKey("interviewLocation")) app.put("interviewLocation", body.get("interviewLocation"));
+        if (body.containsKey("employerMessage")) app.put("employerMessage", body.get("employerMessage"));
+        persistApplication(app);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Application status updated to " + newStatus,
+            "application", app
+        ));
+    }
+
+    private static boolean isValidStatusTransition(String current, String next) {
+        if (current.equals(next)) return true;
+        if ("REJECTED".equals(current)) return false; // Cannot transition out of REJECTED
+
+        switch (current) {
+            case "APPLIED":
+                return "UNDER_REVIEW".equals(next) || "REJECTED".equals(next);
+            case "UNDER_REVIEW":
+                return "INTERVIEW_SCHEDULED".equals(next) || "HIRED".equals(next) || "REJECTED".equals(next);
+            case "INTERVIEW_SCHEDULED":
+                return "HIRED".equals(next) || "REJECTED".equals(next);
+            case "HIRED":
+                return "REJECTED".equals(next);
+            default:
+                return true;
+        }
     }
 
     // --- Worker Profile Endpoints ---
     @GetMapping("/workers/profile")
-    public ResponseEntity<Map<String, Object>> getWorkerProfile(@RequestParam(defaultValue = "worker_1") String id) {
-        Map<String, Object> profile = USERS_DB.getOrDefault(id, Map.of(
-            "id", id,
-            "name", "Ramesh Worker",
-            "phoneNumber", "9876543210",
-            "preferredLanguage", "kn-IN",
-            "skill", "DRIVER",
-            "experience", "5 years",
-            "location", "Bengaluru"
-        ));
+    public ResponseEntity<Map<String, Object>> getWorkerProfile(@RequestParam(required = false) String id) {
+        String targetId = (id != null && !id.trim().isEmpty()) ? id : "worker_1";
+        Map<String, Object> profile = USERS_DB.get(targetId);
+
+        if (profile == null) {
+            for (Map<String, Object> u : USERS_DB.values()) {
+                String uId = (String) u.get("id");
+                String uPhone = (String) u.get("phoneNumber");
+                String uEmail = (String) u.get("email");
+                if (targetId.equalsIgnoreCase(uId) || targetId.equalsIgnoreCase(uPhone) || targetId.equalsIgnoreCase(uEmail)) {
+                    profile = u;
+                    break;
+                }
+            }
+        }
+
+        if (profile == null) {
+            profile = new HashMap<>();
+            profile.put("id", targetId);
+            profile.put("name", "Pranesh");
+            profile.put("phoneNumber", "9876543210");
+            profile.put("preferredLanguage", "kn-IN");
+            profile.put("skill", "CARPENTER");
+            profile.put("skills", "Carpenter");
+            profile.put("experience", "2 Years");
+            profile.put("location", "Bengaluru");
+            profile.put("accountStatus", "APPROVED");
+        }
+
+        if (!profile.containsKey("accountStatus")) {
+            profile.put("accountStatus", "APPROVED");
+        }
+
         return ResponseEntity.ok(profile);
     }
 
@@ -512,7 +1015,261 @@ public class SimpleApplication {
         existing.putAll(body);
         existing.put("id", id);
         USERS_DB.put(id, existing);
+        persistUser(existing);
         return ResponseEntity.ok(Map.of("success", true, "profile", existing));
+    }
+
+    // --- Admin Worker Registration Approval Endpoints ---
+    @GetMapping("/admin/workers/pending")
+    public ResponseEntity<List<Map<String, Object>>> getPendingWorkers() {
+        List<Map<String, Object>> pending = USERS_DB.values().stream()
+                .filter(u -> "WORKER".equalsIgnoreCase((String) u.getOrDefault("role", "WORKER")))
+                .filter(u -> "PENDING".equalsIgnoreCase((String) u.getOrDefault("accountStatus", "PENDING")))
+                .collect(Collectors.toMap(
+                    u -> (String) u.get("id"),
+                    u -> u,
+                    (existing, replacement) -> existing
+                ))
+                .values().stream()
+                .sorted((a, b) -> Long.compare(
+                    ((Number) b.getOrDefault("registeredAt", 0L)).longValue(),
+                    ((Number) a.getOrDefault("registeredAt", 0L)).longValue()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(pending);
+    }
+
+    @GetMapping("/admin/workers/all")
+    public ResponseEntity<List<Map<String, Object>>> getAllWorkers() {
+        List<Map<String, Object>> allWorkers = USERS_DB.values().stream()
+                .filter(u -> "WORKER".equalsIgnoreCase((String) u.getOrDefault("role", "WORKER")))
+                .collect(Collectors.toMap(
+                    u -> (String) u.get("id"),
+                    u -> u,
+                    (existing, replacement) -> existing
+                ))
+                .values().stream()
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(allWorkers);
+    }
+
+    @GetMapping("/admin/workers/{id}")
+    public ResponseEntity<Map<String, Object>> getWorkerById(@PathVariable String id) {
+        Map<String, Object> worker = USERS_DB.get(id);
+        if (worker == null) {
+            for (Map<String, Object> u : USERS_DB.values()) {
+                if (id.equalsIgnoreCase((String) u.get("id")) || id.equalsIgnoreCase((String) u.get("phoneNumber")) || id.equalsIgnoreCase((String) u.get("email"))) {
+                    worker = u;
+                    break;
+                }
+            }
+        }
+
+        if (worker == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Worker not found"));
+        }
+        return ResponseEntity.ok(worker);
+    }
+
+    @RequestMapping(value = "/admin/workers/{id}/approve", method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST})
+    public ResponseEntity<Map<String, Object>> approveWorker(@PathVariable String id) {
+        Map<String, Object> worker = USERS_DB.get(id);
+        if (worker == null) {
+            for (Map<String, Object> u : USERS_DB.values()) {
+                if (id.equalsIgnoreCase((String) u.get("id")) || id.equalsIgnoreCase((String) u.get("phoneNumber")) || id.equalsIgnoreCase((String) u.get("email"))) {
+                    worker = u;
+                    break;
+                }
+            }
+        }
+
+        if (worker == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Worker not found"));
+        }
+
+        worker.put("accountStatus", "APPROVED");
+        worker.put("approvedAt", System.currentTimeMillis());
+        worker.remove("rejectionReason");
+
+        String userId = (String) worker.get("id");
+        String email = (String) worker.get("email");
+        String phone = (String) worker.get("phoneNumber");
+
+        if (userId != null) USERS_DB.put(userId, worker);
+        if (email != null && !email.isEmpty()) USERS_DB.put(email.toLowerCase(), worker);
+        if (phone != null && !phone.isEmpty()) USERS_DB.put(phone, worker);
+        persistUser(worker);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Worker approved successfully.",
+            "worker", worker
+        ));
+    }
+
+    @RequestMapping(value = "/admin/workers/{id}/reject", method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST})
+    public ResponseEntity<Map<String, Object>> rejectWorker(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, Object> body,
+            @RequestParam(required = false) String reasonParam) {
+
+        Map<String, Object> worker = USERS_DB.get(id);
+        if (worker == null) {
+            for (Map<String, Object> u : USERS_DB.values()) {
+                if (id.equalsIgnoreCase((String) u.get("id")) || id.equalsIgnoreCase((String) u.get("phoneNumber")) || id.equalsIgnoreCase((String) u.get("email"))) {
+                    worker = u;
+                    break;
+                }
+            }
+        }
+
+        if (worker == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Worker not found"));
+        }
+
+        String reason = "Profile information needs verification.";
+        if (reasonParam != null && !reasonParam.trim().isEmpty()) {
+            reason = reasonParam;
+        } else if (body != null) {
+            if (body.containsKey("reason")) reason = String.valueOf(body.get("reason"));
+            else if (body.containsKey("rejectionReason")) reason = String.valueOf(body.get("rejectionReason"));
+        }
+
+        worker.put("accountStatus", "REJECTED");
+        worker.put("rejectionReason", reason);
+        worker.put("rejectedAt", System.currentTimeMillis());
+
+        String userId = (String) worker.get("id");
+        String email = (String) worker.get("email");
+        String phone = (String) worker.get("phoneNumber");
+
+        if (userId != null) USERS_DB.put(userId, worker);
+        if (email != null && !email.isEmpty()) USERS_DB.put(email.toLowerCase(), worker);
+        if (phone != null && !phone.isEmpty()) USERS_DB.put(phone, worker);
+        persistUser(worker);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Worker application rejected.",
+            "reason", reason,
+            "worker", worker
+        ));
+    }
+
+    @GetMapping("/admin/stats")
+    public ResponseEntity<Map<String, Object>> getAdminStats() {
+        long pendingWorkers = USERS_DB.values().stream()
+                .filter(u -> "WORKER".equalsIgnoreCase((String) u.getOrDefault("role", "WORKER")))
+                .filter(u -> "PENDING".equalsIgnoreCase((String) u.getOrDefault("accountStatus", "")))
+                .map(u -> (String) u.get("id"))
+                .distinct()
+                .count();
+
+        long pendingApplications = APPLICATIONS_DB.values().stream()
+                .filter(a -> "APPLIED".equalsIgnoreCase((String) a.getOrDefault("status", "APPLIED")) || "PENDING".equalsIgnoreCase((String) a.getOrDefault("status", "")))
+                .count();
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("pendingWorkersCount", pendingWorkers);
+        stats.put("pendingApplicationsCount", pendingApplications);
+        stats.put("totalJobsCount", JOBS_DB.size());
+        stats.put("totalCategoriesCount", CATEGORIES_LIST.size());
+        stats.put("totalApplicationsCount", APPLICATIONS_DB.size());
+
+        return ResponseEntity.ok(stats);
+    }
+
+    // --- Admin Job Application Approval Endpoints ---
+    @GetMapping("/admin/applications")
+    public ResponseEntity<List<Map<String, Object>>> getAdminApplications(@RequestParam(required = false) String status) {
+        List<Map<String, Object>> apps = new ArrayList<>(APPLICATIONS_DB.values());
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
+            final String filterStatus = status.toUpperCase();
+            apps = apps.stream()
+                    .filter(a -> filterStatus.equalsIgnoreCase((String) a.getOrDefault("status", "APPLIED")))
+                    .collect(Collectors.toList());
+        }
+        apps.sort((a, b) -> Long.compare(
+            ((Number) b.getOrDefault("appliedAt", 0L)).longValue(),
+            ((Number) a.getOrDefault("appliedAt", 0L)).longValue()
+        ));
+        return ResponseEntity.ok(apps);
+    }
+
+    @RequestMapping(value = {"/admin/applications/{id}/approve", "/admin/applications/{id}/accept"}, method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST})
+    public ResponseEntity<Map<String, Object>> acceptApplication(@PathVariable String id) {
+        Map<String, Object> app = APPLICATIONS_DB.get(id);
+        if (app == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Application not found"));
+        }
+
+        app.put("status", "ACCEPTED");
+        app.put("approvedAt", System.currentTimeMillis());
+        app.put("updatedAt", System.currentTimeMillis());
+        persistApplication(app);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Job application accepted successfully.",
+            "application", app
+        ));
+    }
+
+    @RequestMapping(value = "/admin/applications/{id}/reject", method = {RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.POST})
+    public ResponseEntity<Map<String, Object>> rejectApplication(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, Object> body,
+            @RequestParam(required = false) String reasonParam) {
+
+        Map<String, Object> app = APPLICATIONS_DB.get(id);
+        if (app == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Application not found"));
+        }
+
+        String reason = "Application does not meet job criteria.";
+        if (reasonParam != null && !reasonParam.trim().isEmpty()) {
+            reason = reasonParam;
+        } else if (body != null) {
+            if (body.containsKey("reason")) reason = String.valueOf(body.get("reason"));
+            else if (body.containsKey("rejectionReason")) reason = String.valueOf(body.get("rejectionReason"));
+        }
+
+        app.put("status", "REJECTED");
+        app.put("rejectionReason", reason);
+        app.put("updatedAt", System.currentTimeMillis());
+        persistApplication(app);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Job application rejected.",
+            "reason", reason,
+            "application", app
+        ));
+    }
+
+    @GetMapping("/applications/accepted")
+    public ResponseEntity<List<Map<String, Object>>> getAcceptedApplications(@RequestParam(required = false) String workerId) {
+        List<Map<String, Object>> accepted = APPLICATIONS_DB.values().stream()
+                .filter(a -> {
+                    String st = (String) a.getOrDefault("status", "");
+                    return "ACCEPTED".equalsIgnoreCase(st) || "APPROVED".equalsIgnoreCase(st) || "HIRED".equalsIgnoreCase(st);
+                })
+                .collect(Collectors.toList());
+
+        if (workerId != null && !workerId.isEmpty() && !"ALL".equalsIgnoreCase(workerId)) {
+            accepted = accepted.stream()
+                    .filter(a -> workerId.equalsIgnoreCase((String) a.get("workerId")))
+                    .collect(Collectors.toList());
+        }
+
+        accepted.sort((a, b) -> Long.compare(
+            ((Number) b.getOrDefault("approvedAt", b.getOrDefault("appliedAt", 0L))).longValue(),
+            ((Number) a.getOrDefault("approvedAt", a.getOrDefault("appliedAt", 0L))).longValue()
+        ));
+
+        return ResponseEntity.ok(accepted);
     }
 
     // --- Distance Helper ---

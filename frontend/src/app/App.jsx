@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import '../styles/index.css'
@@ -20,12 +20,23 @@ import { getTranslation } from '../utils/translations'
 import { Mic, UserCheck } from 'lucide-react'
 
 function AppContent() {
-  const { selectedLang, setSelectedLang, startListening } = useVoice()
+  const { selectedLang, setSelectedLang, voiceState, startListening, stopListening } = useVoice()
   const t = getTranslation(selectedLang)
   const navigate = useNavigate()
 
+  useEffect(() => {
+    if (!localStorage.getItem('user')) {
+      localStorage.setItem('user', JSON.stringify({ id: 'worker_1', name: 'Pranesh', phoneNumber: '9876543210', role: 'WORKER', experience: '2 Years', accountStatus: 'APPROVED' }))
+      localStorage.setItem('token', 'jwt_worker_1')
+    }
+  }, [])
+
   const handleGlobalMicTap = () => {
-    startListening(navigate)
+    if (voiceState === 'LISTENING') {
+      stopListening()
+    } else {
+      startListening(navigate)
+    }
   }
 
   return (

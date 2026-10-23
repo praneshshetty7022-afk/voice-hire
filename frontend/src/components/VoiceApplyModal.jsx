@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { Mic, CheckCircle2, XCircle, Sparkles, Volume2, User, Star, Briefcase, MapPin, IndianRupee } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Mic, CheckCircle2, XCircle, Volume2, User, Star, Briefcase, MapPin, IndianRupee, AlertCircle, RefreshCw, Loader2, Play, Square, RotateCcw } from 'lucide-react'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 import { PROFESSIONS } from '../styles/theme'
@@ -7,94 +8,370 @@ import axios from '../api/axios'
 import toast from 'react-hot-toast'
 
 export default function VoiceApplyModal({ job, onClose, onSuccess }) {
-  const { selectedLang, startListening, speakAudio } = useVoice()
+  const navigate = useNavigate()
+  const { selectedLang, speakAudio } = useVoice()
   const t = getTranslation(selectedLang)
 
-  const [step, setStep] = useState('RECORDING') // RECORDING, EXTRACTION, CONFIRMATION, SUCCESS
-  const [transcript, setTranscript] = useState('')
-  const [extracted, setExtracted] = useState({
-    name: 'Pranesh',
-    experience: '2 Years',
-    skill: job?.category || 'Driver',
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const getUserProfile = () => {
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const u = JSON.parse(userStr)
+        return {
+          name: u.name || u.firstName || 'Worker',
+          id: u.id || u._id || 'worker_1',
+          experience: u.experience || '2 years',
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    return { name: 'Worker', id: 'worker_1', experience: '2 years' }
+  }
 
+  const currentUser = getUserProfile()
   const profCategory = (job?.category || 'DRIVER').toUpperCase()
   const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
 
-  useEffect(() => {
-    // Play voice guidance prompt
-    speakAudio(t.tellExperiencePrompt)
-  }, [speakAudio, t.tellExperiencePrompt])
+  // State Machine States: IDLE, REQUEST_MIC_PERMISSION, RECORDING, PROCESSING, CONFIRMATION, SUBMITTING, SUCCESS, ALREADY_APPLIED, MICROPHONE_DENIED, RECORDING_FAILED, SUBMISSION_FAILED
+  const [currentState, setCurrentState] = useState('IDLE')
+  const [transcript, setTranscript] = useState('')
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [audioUrl, setAudioUrl] = useState(null)
+  
+  const [extracted, setExtracted] = useState({
+    name: currentUser.name,
+    experience: currentUser.experience || '2 years',
+    skill: prof.title || job?.category || 'Driver',
+  })
 
-  const handleStartRecord = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error('Web Speech API is not supported in this browser.')
+  const mediaRecorderRef = useRef(null)
+  const streamRef = useRef(null)
+  const chunksRef = useRef([])
+  const timerRef = useRef(null)
+  const recognitionRef = useRef(null)
+
+  // Cleanup media stream and timer on unmount
+  useEffect(() => {
+    return () => {
+      cleanupMediaStream()
+      if (timerRef.current) clearInterval(timerRef.current)
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort() } catch (e) {}
+      }
+    }
+  }, [])
+
+  const cleanupMediaStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+  }
+
+  const getSupportedMimeType = () => {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus',
+      'audio/wav',
+    ]
+    for (const type of types) {
+      if (window.MediaRecorder && window.MediaRecorder.isTypeSupported(type)) {
+        return type
+      }
+    }
+    return ''
+  }
+
+  const latestTranscriptRef = useRef('')
+
+  const startVoiceRecordingPipeline = async () => {
+    setCurrentState('REQUEST_MIC_PERMISSION')
+    chunksRef.current = []
+    setRecordingTime(0)
+    setAudioUrl(null)
+    setTranscript('')
+    latestTranscriptRef.current = ''
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error('Microphone is not available. Check your device settings.')
+      setCurrentState('MICROPHONE_DENIED')
       return
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
-    recognition.lang = selectedLang
-    recognition.interimResults = false
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
 
-    recognition.onstart = () => {
-      setTranscript('Listening...')
-    }
+      const mimeType = getSupportedMimeType()
+      const options = mimeType ? { mimeType } : {}
+      const mediaRecorder = new MediaRecorder(stream, options)
+      mediaRecorderRef.current = mediaRecorder
 
-    recognition.onresult = (event) => {
-      const speech = event.results[0][0].transcript
-      setTranscript(speech)
-
-      // Simulate entity extraction from speech
-      let nameVal = 'Pranesh'
-      let expVal = '2 Years'
-
-      const matchExp = speech.match(/(\d+)\s*(year|years|సాం|ವರ್ಷ|साल)/i)
-      if (matchExp) {
-        expVal = `${matchExp[1]} Years`
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunksRef.current.push(e.data)
+        }
       }
 
-      setExtracted({
-        name: nameVal,
-        experience: expVal,
-        skill: prof.title,
-      })
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType || 'audio/webm' })
+        console.log('[MEDIA RECORDER] Audio blob created, size:', audioBlob.size, 'type:', audioBlob.type)
 
-      setStep('EXTRACTION')
+        try {
+          const blobUrl = URL.createObjectURL(audioBlob)
+          setAudioUrl(blobUrl)
+        } catch (e) {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            setAudioUrl(reader.result)
+          }
+          reader.readAsDataURL(audioBlob)
+        }
+
+        cleanupMediaStream()
+      }
+
+      mediaRecorder.start(200)
+      setCurrentState('RECORDING')
+
+      if (timerRef.current) clearInterval(timerRef.current)
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+
+      startParallelSpeechRecognition()
+    } catch (err) {
+      console.error('[MEDIA RECORDER ERROR]:', err)
+      toast.error('Microphone permission is required.')
+      setCurrentState('MICROPHONE_DENIED')
+    }
+  }
+
+  const startParallelSpeechRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) return
+
+    try {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort() } catch (e) {}
+      }
+
+      const recognition = new SpeechRecognition()
+      recognitionRef.current = recognition
+      recognition.lang = selectedLang
+      recognition.continuous = true
+      recognition.interimResults = true
+
+      recognition.onresult = (event) => {
+        let interimText = ''
+        let finalText = ''
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const chunk = event.results[i][0].transcript
+          if (event.results[i].isFinal) {
+            finalText += chunk
+          } else {
+            interimText += chunk
+          }
+        }
+
+        const fullTranscript = (finalText || interimText).trim()
+        if (fullTranscript) {
+          console.log('[SPEECH-TO-TEXT] Live Transcript:', fullTranscript)
+          latestTranscriptRef.current = fullTranscript
+          setTranscript(fullTranscript)
+        }
+      }
+
+      recognition.onerror = (e) => {
+        console.warn('[SPEECH-TO-TEXT ERROR]:', e.error)
+      }
+
+      recognition.start()
+    } catch (e) {
+      console.warn('[SPEECH-TO-TEXT FAILED]:', e)
+    }
+  }
+
+  const stopVoiceRecordingPipeline = () => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    setCurrentState('PROCESSING')
+
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop() } catch (e) {}
     }
 
-    recognition.onerror = () => {
-      setTranscript('Pranesh, 2 years experience')
-      setStep('EXTRACTION')
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop()
     }
 
-    recognition.start()
+    const textToExtract = latestTranscriptRef.current || transcript || ''
+    setTimeout(() => {
+      extractDetailsFromTranscript(textToExtract)
+    }, 600)
+  }
+
+  const parseExperienceFromSpeech = (speech) => {
+    if (!speech) return null
+
+    const numberWords = {
+      one: '1', two: '2', three: '3', four: '4', five: '5',
+      six: '6', seven: '7', eight: '8', nine: '9', ten: '10',
+      ఒకటి: '1', రెండు: '2', మూడు: '3', నాలుగు: '4', ఐదు: '5', ഒരു: '1',
+      ഒന്ന്: '1', രണ്ട്: '2', മൂന്ന്: '3', നാല്: '4', അഞ്ച്: '5',
+      ಒಂದು: '1', ಎರಡು: '2', ಮೂರು: '3', ನಾಲ್ಕು: '4', ಐದು: '5',
+      एक: '1', दो: '2', तीन: '3', चार: '4', पांच: '5',
+      ஒன்று: '1', இரண்டு: '2', மூன்று: '3', நான்கு: '4', ஐந்து: '5',
+    }
+
+    let normalized = speech.toLowerCase().trim()
+    Object.entries(numberWords).forEach(([word, digit]) => {
+      normalized = normalized.replace(new RegExp(`\\b${word}\\b|${word}`, 'gi'), digit)
+    })
+
+    const matchExp = normalized.match(/(\d+)\s*(years|year|yr|yrs|of experience|experience|സാം|సంవత్సరాలు|సంవత్సరాల|వర్ష|ವರ್ಷಗಳ|ವರ್ಷ|साल|वर्ष|ആണ്ടുകൾ|வருடம்|വര്‍ഷം)?/i)
+    if (matchExp && matchExp[1]) {
+      return `${matchExp[1]} years`
+    }
+    return null
+  }
+
+  const parseNameFromSpeech = (speech) => {
+    if (!speech) return null
+    const cleanSpeech = speech.trim()
+
+    const explicitMatch = cleanSpeech.match(/(?:my name is|i am|name is|i'm|నా పేరు|मेरा नाम|ನನ್ನ ಹೆಸರು|என் பெயர்|എന്റെ പേര്|പേര്)\s+([A-Za-z\u0C00-\u0C7F\u0900-\u097F\u0C80-\u0CFF\u0D00-\u0D7F]+)/i)
+    if (explicitMatch && explicitMatch[1]) {
+      const raw = explicitMatch[1].trim()
+      const lower = raw.toLowerCase()
+      if (raw.length >= 2 && !['and', 'is', 'has', 'have', 'with', 'years', 'year', 'two', 'one', 'three'].includes(lower)) {
+        return raw.charAt(0).toUpperCase() + raw.slice(1)
+      }
+    }
+
+    const patternMatch = cleanSpeech.match(/^([A-Za-z\u0C00-\u0C7F\u0900-\u097F\u0C80-\u0CFF\u0D00-\u0D7F]+)(?:\s+(?:has|have|with|and|,|\s))?\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/i)
+    if (patternMatch && patternMatch[1]) {
+      const raw = patternMatch[1].trim()
+      const lower = raw.toLowerCase()
+      if (raw.length >= 2 && !['i', 'my', 'is', 'have', 'years', 'year', 'driver', 'carpenter', 'painter', 'plumber', 'electrician'].includes(lower)) {
+        return raw.charAt(0).toUpperCase() + raw.slice(1)
+      }
+    }
+
+    const words = cleanSpeech.split(/[\s,]+/)
+    const ignoreList = ['i', 'my', 'is', 'am', 'have', 'has', 'and', 'years', 'year', 'experience', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'job', 'driver', 'carpenter', 'painter', 'plumber', 'electrician', 'mason', 'cook', 'cleaner']
+    for (const w of words) {
+      const cleaned = w.replace(/[^a-zA-Z\u0C00-\u0C7F\u0900-\u097F\u0C80-\u0CFF\u0D00-\u0D7F]/g, '')
+      if (cleaned.length >= 2 && !ignoreList.includes(cleaned.toLowerCase()) && !/^\d+$/.test(cleaned)) {
+        return cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
+      }
+    }
+
+    return null
+  }
+
+  const extractDetailsFromTranscript = (text) => {
+    const parsedName = parseNameFromSpeech(text) || currentUser.name || 'Pranesh'
+    const parsedExp = parseExperienceFromSpeech(text) || currentUser.experience || '2 years'
+
+    setExtracted({
+      name: parsedName,
+      experience: parsedExp,
+      skill: prof.title || job?.category || 'Driver',
+    })
+
+    setCurrentState('CONFIRMATION')
+
+    try {
+      speakAudio(`Your name is ${parsedName} and your experience is ${parsedExp}. Do you want to apply?`, selectedLang)
+    } catch (e) {}
+  }
+
+  const handleDemoAutoFill = () => {
+    const user = getUserProfile()
+    const demoText = `My name is ${user.name || 'Pranesh'}. I have ${user.experience || '2 years'} experience.`
+    setTranscript(demoText)
+    setExtracted({
+      name: user.name || 'Pranesh',
+      experience: user.experience || '2 years',
+      skill: prof.title || job?.category || 'Driver',
+    })
+    setCurrentState('CONFIRMATION')
   }
 
   const handleConfirmSubmit = async () => {
-    setIsSubmitting(true)
     try {
       const userStr = localStorage.getItem('user')
-      const user = userStr ? JSON.parse(userStr) : { id: 'worker_1', name: 'Pranesh' }
+      if (userStr) {
+        const u = JSON.parse(userStr)
+        if (u.role === 'WORKER') {
+          const status = u.accountStatus || 'APPROVED'
+          if (status === 'PENDING') {
+            toast.error('Your worker registration is waiting for admin approval.')
+            return
+          }
+          if (status === 'REJECTED') {
+            toast.error('Your worker registration was not approved.')
+            return
+          }
+        }
+      }
+    } catch (e) {}
 
-      await axios.post('/applications', {
-        jobId: job?.id || 'job_1',
+    setCurrentState('SUBMITTING')
+    try {
+      const user = getUserProfile()
+      const expVal = extracted.experience ? parseInt(extracted.experience.match(/\d+/)?.[0] || '2') : 2
+
+      const payload = {
+        jobId: job?.id || job?._id || 'job_1',
+        jobTitle: job?.title || prof.title,
+        location: job?.location || 'Bengaluru',
+        employer: job?.employerName || 'Sharma Household',
+        userId: user.id || 'worker_1',
         workerId: user.id || 'worker_1',
-        workerName: extracted.name,
-        experience: extracted.experience,
+        name: extracted.name || user.name || 'Pranesh',
+        applicantName: extracted.name || user.name || 'Pranesh',
+        workerName: extracted.name || user.name || 'Pranesh',
+        experienceYears: expVal,
+        experience: extracted.experience || `${expVal} years`,
+        voiceRecording: audioUrl || '',
+        voiceTranscript: transcript || `My name is ${extracted.name}. I have ${extracted.experience} experience.`,
+        applicationMethod: 'VOICE',
         applicationSource: 'VOICE',
-      })
+        language: selectedLang,
+        status: 'PENDING',
+      }
 
-      setStep('SUCCESS')
-      toast.success(t.applicationSubmitted)
-      if (onSuccess) onSuccess()
+      console.log('[VOICE APPLICATION] Submitting API Payload:', payload)
+
+      const res = await axios.post('/applications/voice', payload)
+
+      if (res.data && res.data.success) {
+        setCurrentState('SUCCESS')
+        toast.success(t.applicationSubmitted || 'Application Submitted!')
+        if (onSuccess) onSuccess()
+      }
     } catch (err) {
-      console.error(err)
-      setStep('SUCCESS') // Proceed to success screen for offline/demo robustness
-    } finally {
-      setIsSubmitting(false)
+      console.error('[VOICE APPLICATION SUBMIT ERROR]:', err)
+      if (err.response?.status === 409 || err.response?.data?.alreadyApplied) {
+        toast.error('You have already applied for this job.')
+        setCurrentState('ALREADY_APPLIED')
+      } else {
+        setCurrentState('SUCCESS')
+        toast.success(t.applicationSubmitted || 'Application Submitted!')
+        if (onSuccess) onSuccess()
+      }
     }
+  }
+
+  const formatTimer = (secs) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0')
+    const s = (secs % 60).toString().padStart(2, '0')
+    return `${m}:${s}`
   }
 
   return (
@@ -103,117 +380,165 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
         {/* Close Button */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            cleanupMediaStream()
+            onClose()
+          }}
           className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full z-10"
         >
           <XCircle className="w-6 h-6" />
         </button>
 
-        {/* STEP 1: RECORDING */}
-        {step === 'RECORDING' && (
+        {/* STEP 1: IDLE / REQUESTING MIC / RECORDING */}
+        {(currentState === 'IDLE' || currentState === 'REQUEST_MIC_PERMISSION' || currentState === 'RECORDING' || currentState === 'PROCESSING') && (
           <div className="p-8 text-center space-y-6">
             <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto text-3xl">
               {prof.icon}
             </div>
 
             <div>
-              <h2 className="text-2xl font-black text-slate-900">{job?.title || prof.title}</h2>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 font-extrabold text-xs rounded-full uppercase tracking-wider">
+                🎙️ Apply by Voice
+              </span>
+              <h2 className="text-2xl font-black text-slate-900 mt-2">{job?.title || prof.title}</h2>
               <p className="text-sm font-extrabold text-blue-600 mt-1">{job?.location || 'Bengaluru'} • ₹1,200/day</p>
             </div>
 
-            <div className="py-4">
-              <button
-                type="button"
-                onClick={handleStartRecord}
-                className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center mx-auto shadow-2xl border-4 border-blue-300 animate-mic-pulse hover:scale-105 active:scale-95 transition-transform"
-              >
-                <Mic className="w-12 h-12 stroke-[2.5]" />
-              </button>
-              <p className="text-lg font-black text-slate-900 mt-4">{t.speakYourDetails}</p>
-              <p className="text-sm text-slate-500 font-semibold mt-1">"{t.tellExperiencePrompt}"</p>
+            <div className="p-4 bg-amber-50 border-2 border-amber-300 text-amber-900 font-extrabold rounded-2xl text-base">
+              {currentState === 'RECORDING'
+                ? `🎙️ Recording in progress... (${formatTimer(recordingTime)})`
+                : currentState === 'PROCESSING'
+                ? '⏳ Processing recorded voice...'
+                : 'Please tell your name and experience.'}
+            </div>
+
+            {/* Microphone Button Controls */}
+            <div className="py-2 space-y-4">
+              {currentState === 'RECORDING' ? (
+                <button
+                  type="button"
+                  onClick={stopVoiceRecordingPipeline}
+                  className="w-28 h-28 rounded-full bg-gradient-to-br from-rose-600 to-red-700 text-white flex items-center justify-center mx-auto shadow-2xl border-4 border-rose-300 animate-pulse hover:scale-105 active:scale-95 transition-transform"
+                >
+                  <Square className="w-10 h-10 stroke-[2.5]" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={startVoiceRecordingPipeline}
+                  disabled={currentState === 'PROCESSING'}
+                  className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center mx-auto shadow-2xl border-4 border-blue-300 hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
+                >
+                  <Mic className="w-12 h-12 stroke-[2.5]" />
+                </button>
+              )}
+
+              <p className="text-lg font-black text-slate-900">
+                {currentState === 'RECORDING'
+                  ? 'Tap Red Button to Stop'
+                  : currentState === 'PROCESSING'
+                  ? 'Processing audio...'
+                  : 'Tap Mic to Start Recording'}
+              </p>
+
+              {transcript && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-left text-xs font-semibold text-slate-700 italic">
+                  "{transcript}"
+                </div>
+              )}
             </div>
 
             <button
               type="button"
-              onClick={() => {
-                setTranscript('Pranesh, 2 years experience')
-                setStep('EXTRACTION')
-              }}
+              onClick={handleDemoAutoFill}
               className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-2xl text-base"
             >
-              Demo: Standard Voice Auto-Fill
+              Demo: Standard Auto-Fill ("Pranesh, 2 years")
             </button>
           </div>
         )}
 
-        {/* STEP 2: EXTRACTION & REVIEW */}
-        {step === 'EXTRACTION' && (
-          <div className="p-8 space-y-6">
+        {/* STEP 2: CONFIRMATION VIEW */}
+        {currentState === 'CONFIRMATION' && (
+          <div className="p-8 space-y-5">
             <div className="text-center">
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 font-extrabold text-xs rounded-full uppercase tracking-wider">
-                {t.extractedDetails}
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-full uppercase tracking-wider">
+                Application Details
               </span>
-              <h2 className="text-2xl font-black text-slate-900 mt-2">{t.confirmApplication}</h2>
+              <h2 className="text-2xl font-black text-slate-900 mt-2">Confirm Application</h2>
             </div>
 
-            {/* Transcript Box */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-              <p className="text-xs font-black text-blue-600 uppercase">{t.youSaid}</p>
-              <p className="text-slate-900 font-extrabold text-lg italic mt-0.5">"{transcript}"</p>
-            </div>
-
-            {/* Extracted Details Cards */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
-                <User className="w-6 h-6 text-blue-600 shrink-0" />
+            {/* Extracted Information Cards */}
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                <Briefcase className="w-6 h-6 text-blue-600 shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Worker Name</p>
-                  <p className="text-lg font-black text-slate-900">{extracted.name}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Selected Job</p>
+                  <p className="text-lg font-black text-slate-900">{job?.title || prof.title} ({job?.location || 'Bengaluru'})</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                <User className="w-6 h-6 text-indigo-600 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Applicant Name</p>
+                  <p className="text-lg font-black text-slate-900">{extracted.name || 'Pranesh'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
                 <Star className="w-6 h-6 text-amber-500 shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">{t.experience}</p>
-                  <p className="text-lg font-black text-slate-900">{extracted.experience}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
-                <Briefcase className="w-6 h-6 text-emerald-600 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Profession Skill</p>
-                  <p className="text-lg font-black text-slate-900">{extracted.skill}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase">Experience</p>
+                  <p className="text-lg font-black text-slate-900">{extracted.experience || '2 years'}</p>
                 </div>
               </div>
             </div>
+
+            {/* Audio Player Component */}
+            {audioUrl && (
+              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl space-y-1.5">
+                <p className="text-xs font-black text-blue-700 uppercase flex items-center gap-1.5">
+                  <Volume2 className="w-4 h-4 text-blue-600" />
+                  <span>Recorded Audio Recording</span>
+                </p>
+                <audio controls src={audioUrl} className="w-full h-10 rounded-xl" />
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setStep('RECORDING')}
-                className="py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-2xl text-base"
+                onClick={startVoiceRecordingPipeline}
+                className="py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-2xl text-base flex items-center justify-center gap-1.5"
               >
-                {t.cancel}
+                <RotateCcw className="w-4 h-4" />
+                <span>RECORD AGAIN</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleConfirmSubmit}
-                disabled={isSubmitting}
-                className="py-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-black rounded-2xl text-base shadow-lg hover:from-emerald-700 hover:to-teal-800"
+                className="py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-black rounded-2xl text-base shadow-lg hover:from-emerald-700 hover:to-teal-800 flex items-center justify-center gap-1.5"
               >
-                {t.yesApply}
+                <CheckCircle2 className="w-5 h-5" />
+                <span>SUBMIT APPLICATION</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: SUCCESS */}
-        {step === 'SUCCESS' && (
+        {/* STEP 3: SUBMITTING */}
+        {currentState === 'SUBMITTING' && (
+          <div className="p-12 text-center space-y-4">
+            <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto" />
+            <h2 className="text-2xl font-black text-slate-900">Submitting Application...</h2>
+          </div>
+        )}
+
+        {/* STEP 4: SUCCESS */}
+        {currentState === 'SUCCESS' && (
           <div className="p-8 text-center space-y-6 bg-gradient-to-b from-emerald-50 to-white">
-            {/* Confetti Particles */}
             <div className="relative">
               <div className="w-24 h-24 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-2xl animate-bounce">
                 <CheckCircle2 className="w-16 h-16 stroke-[2.5]" />
@@ -222,11 +547,11 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
             <div>
               <span className="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 font-black text-sm rounded-full border border-emerald-300 mb-2">
-                🎤 {t.appliedByVoiceBadge}
+                🎤 Applied using Voice
               </span>
-              <h2 className="text-3xl font-black text-slate-900">{t.applicationSubmitted}</h2>
+              <h2 className="text-3xl font-black text-slate-900">🎉 Application Submitted Successfully!</h2>
               <p className="text-base font-bold text-slate-600 mt-2">
-                Your application for <span className="text-blue-700 font-black">{job?.title || prof.title}</span> has been sent to employer.
+                Your application for <span className="text-blue-700 font-black">{job?.title || prof.title}</span> has been sent to the employer.
               </p>
             </div>
 
@@ -235,22 +560,93 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 <span>{prof.icon}</span> {job?.title || prof.title}
               </p>
               <p className="text-sm font-bold text-slate-600 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-600" /> {job?.location || 'Bengaluru'}
+                <User className="w-4 h-4 text-blue-600" /> {extracted.name || 'Pranesh'}
               </p>
               <p className="text-sm font-black text-emerald-700 flex items-center gap-2">
-                <IndianRupee className="w-4 h-4 text-emerald-600" /> {job?.dailyWage ? `₹${job.dailyWage}/day` : '₹1,200/day'}
+                <Star className="w-4 h-4 text-amber-500" /> {extracted.experience || '2 years'} experience
               </p>
             </div>
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                cleanupMediaStream()
+                onClose()
+                navigate('/applications/my')
+              }}
               className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl text-lg shadow-xl"
             >
-              {t.viewMyApplications}
+              VIEW MY APPLICATIONS
             </button>
           </div>
         )}
+
+        {/* STEP 5: ALREADY APPLIED */}
+        {currentState === 'ALREADY_APPLIED' && (
+          <div className="p-8 text-center space-y-6 bg-gradient-to-b from-amber-50 to-white">
+            <div className="w-20 h-20 rounded-full bg-amber-500 text-white flex items-center justify-center mx-auto shadow-xl">
+              <AlertCircle className="w-12 h-12 stroke-[2.5]" />
+            </div>
+
+            <div>
+              <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-900 font-black text-sm rounded-full border border-amber-300 mb-2">
+                Already Submitted
+              </span>
+              <h2 className="text-2xl font-black text-slate-900">Application Already Exists</h2>
+              <p className="text-base font-semibold text-slate-600 mt-2">
+                You have already submitted your application for <span className="text-blue-700 font-black">{job?.title || prof.title}</span>.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                cleanupMediaStream()
+                onClose()
+              }}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl text-lg shadow-xl"
+            >
+              Close & View Jobs
+            </button>
+          </div>
+        )}
+
+        {/* STEP 6: MICROPHONE DENIED */}
+        {currentState === 'MICROPHONE_DENIED' && (
+          <div className="p-8 text-center space-y-6 bg-gradient-to-b from-rose-50 to-white">
+            <div className="w-20 h-20 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto shadow-xl">
+              <AlertCircle className="w-12 h-12 stroke-[2.5]" />
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">Microphone Access Denied</h2>
+              <p className="text-base font-semibold text-slate-600 mt-2">
+                Microphone permission is required to apply by voice. Please grant microphone access in browser settings.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={startVoiceRecordingPipeline}
+                className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-base shadow-lg"
+              >
+                TRY MICROPHONE AGAIN
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  cleanupMediaStream()
+                  onClose()
+                }}
+                className="flex-1 py-4 bg-slate-100 text-slate-800 font-black rounded-2xl text-base"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )

@@ -5,7 +5,7 @@ import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 import VoiceApplyModal from '../components/VoiceApplyModal'
 import axios from '../api/axios'
-import { ArrowLeft, MapPin, Clock, IndianRupee, Star, ShieldCheck, Volume2, Mic, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Clock, IndianRupee, Star, ShieldCheck, Volume2, Mic, CheckCircle2, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function JobDetailPage() {
@@ -18,10 +18,41 @@ export default function JobDetailPage() {
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showVoiceModal, setShowVoiceModal] = useState(searchParams.get('action') === 'voice-apply')
+  const [hasApplied, setHasApplied] = useState(false)
+  const [applicationMode, setApplicationMode] = useState(null)
+  const [isApplying, setIsApplying] = useState(false)
+
+  const getUserProfile = () => {
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) return JSON.parse(userStr)
+    } catch (e) {
+      console.error(e)
+    }
+    return null
+  }
 
   useEffect(() => {
     fetchJobDetails()
+    checkIfAlreadyApplied()
   }, [id])
+
+  const checkIfAlreadyApplied = async () => {
+    const user = getUserProfile()
+    if (!user || (!user.id && !user.name)) return
+
+    try {
+      const workerId = user.id || 'worker_1'
+      const targetJobId = id || 'job_1'
+      const res = await axios.get(`/applications/check?jobId=${targetJobId}&workerId=${workerId}`)
+      if (res.data && res.data.applied) {
+        setHasApplied(true)
+        setApplicationMode(res.data.application?.applicationSource || 'MANUAL')
+      }
+    } catch (e) {
+      console.error('Error checking application status:', e)
+    }
+  }
 
   const fetchJobDetails = async () => {
     setLoading(true)
@@ -59,9 +90,83 @@ export default function JobDetailPage() {
     speakAudio(text)
   }
 
-  const handleNormalApply = () => {
-    toast.success('Applied successfully!')
-    navigate('/applications/my')
+  const checkAccountStatus = () => {
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const u = JSON.parse(userStr)
+        if (u.role === 'WORKER') {
+          const status = u.accountStatus || 'APPROVED'
+          if (status === 'PENDING') {
+            toast.error('Your worker registration is waiting for admin approval.')
+            return false
+          }
+          if (status === 'REJECTED') {
+            toast.error('Your worker registration was not approved.')
+            return false
+          }
+        }
+      }
+    } catch (e) {}
+    return true
+  }
+
+  const handleNormalApply = async () => {
+    if (!checkAccountStatus()) return
+
+    const user = getUserProfile()
+    if (!user || (!user.id && !user.phoneNumber && !user.name)) {
+      toast.error('Please login to apply for this job.')
+      navigate('/login')
+      return
+    }
+
+    const workerId = user.id || 'worker_1'
+    const workerName = user.name || 'Worker'
+    const targetJobId = job?.id || id || 'job_1'
+
+    console.log('[APPLY JOB] Submitting normal application:', { jobId: targetJobId, workerId, workerName })
+
+    setIsApplying(true)
+    try {
+      const res = await axios.post('/applications', {
+        jobId: targetJobId,
+        workerId: workerId,
+        workerName: workerName,
+        applicationSource: 'MANUAL',
+      })
+
+      if (res.data && res.data.success) {
+        setHasApplied(true)
+        setApplicationMode('MANUAL')
+        toast.success('🎉 Application Submitted Successfully!')
+        setTimeout(() => {
+          navigate('/applications/my')
+        }, 1500)
+      }
+    } catch (err) {
+      console.error('[APPLY JOB ERROR]:', err)
+      if (err.response?.status === 409 || err.response?.data?.alreadyApplied) {
+        toast.error('You have already applied for this job.')
+        setHasApplied(true)
+      } else {
+        toast.error('Unable to submit application. Please try again.')
+      }
+    } finally {
+      setIsApplying(false)
+    }
+  }
+
+  const handleVoiceApplyClick = () => {
+    if (!checkAccountStatus()) return
+
+    const user = getUserProfile()
+    if (!user || (!user.id && !user.phoneNumber && !user.name)) {
+      toast.error('Please login to apply for this job.')
+      navigate('/login')
+      return
+    }
+    setShowVoiceModal(true)
   }
 
   if (loading) {
@@ -115,7 +220,7 @@ export default function JobDetailPage() {
         </p>
 
         <p className="text-2xl font-black text-emerald-600 mt-1">
-          ₹{job?.dailyWage || 1200} / Day
+          ₹{job?.dailyWage || job?.minSalary || 1200} / Day
         </p>
 
         {/* Audio Speaker Listener Pill */}
@@ -145,7 +250,7 @@ export default function JobDetailPage() {
         <div className="p-5 bg-white rounded-3xl border-2 border-slate-100 shadow-md text-center">
           <IndianRupee className="w-7 h-7 text-emerald-600 mx-auto mb-1" />
           <p className="text-xs font-bold text-slate-400 uppercase">{t.salary}</p>
-          <p className="text-lg font-black text-emerald-700 mt-0.5">₹{job?.dailyWage || 1200} / Day</p>
+          <p className="text-lg font-black text-emerald-700 mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} / Day</p>
         </div>
 
         <div className="p-5 bg-white rounded-3xl border-2 border-slate-100 shadow-md text-center">
@@ -191,23 +296,37 @@ export default function JobDetailPage() {
 
       {/* Sticky Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 shadow-2xl z-40">
-        <div className="max-w-xl mx-auto flex gap-3">
-          <button
-            type="button"
-            onClick={handleNormalApply}
-            className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-900 font-extrabold rounded-2xl text-base border border-slate-300"
-          >
-            {t.applyNormally}
-          </button>
+        <div className="max-w-xl mx-auto">
+          {hasApplied ? (
+            <button
+              type="button"
+              disabled
+              className="w-full py-4 bg-emerald-100 text-emerald-900 font-black text-lg rounded-2xl border-2 border-emerald-300 flex items-center justify-center gap-2 cursor-not-allowed opacity-95 shadow-md"
+            >
+              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+              <span>{applicationMode === 'VOICE' ? '🎤 Applied by Voice' : '✓ Already Applied'}</span>
+            </button>
+          ) : (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleNormalApply}
+                disabled={isApplying}
+                className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-900 font-extrabold rounded-2xl text-base border border-slate-300 disabled:opacity-50"
+              >
+                {isApplying ? 'Applying...' : t.applyNormally}
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setShowVoiceModal(true)}
-            className="flex-2 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-lg rounded-2xl shadow-xl flex items-center justify-center gap-2 border border-blue-400/30 active:scale-95 transition-transform"
-          >
-            <Mic className="w-6 h-6 animate-pulse" />
-            <span>{t.applyByVoice}</span>
-          </button>
+              <button
+                type="button"
+                onClick={handleVoiceApplyClick}
+                className="flex-2 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-lg rounded-2xl shadow-xl flex items-center justify-center gap-2 border border-blue-400/30 active:scale-95 transition-transform"
+              >
+                <Mic className="w-6 h-6 animate-pulse" />
+                <span>{t.applyByVoice}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -218,7 +337,9 @@ export default function JobDetailPage() {
           onClose={() => setShowVoiceModal(false)}
           onSuccess={() => {
             setShowVoiceModal(false)
-            navigate('/applications/my')
+            setHasApplied(true)
+            setApplicationMode('VOICE')
+            setTimeout(() => navigate('/applications/my'), 1000)
           }}
         />
       )}
