@@ -117,27 +117,31 @@ export const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 pb-24">
-      <div className="max-w-xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-emerald-400">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 pb-24 relative overflow-hidden">
+      {/* Ambient Light Field Background Orbs */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-xl w-full bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-glass-edge border border-white/10 text-white relative z-10">
         
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-amber-400 text-slate-950 font-black px-4 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2 shadow">
+          <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-300 font-black px-4 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2 shadow">
             <Sparkles className="w-4 h-4" /> 1-Tap Voice Signup
           </div>
-          <h1 className="text-3xl font-black text-slate-900">
+          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11]">
             Worker Voice Registration (नया खाता)
           </h1>
-          <p className="text-slate-600 font-medium text-base mt-1">
+          <p className="text-slate-400 font-medium text-sm mt-1">
             No long forms. Speak your details & start getting jobs!
           </p>
         </div>
 
         {/* Step 1: Voice Name & Phone */}
-        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-6 mb-6">
+        <div className="bg-[#0c0c0e]/80 border border-white/10 shadow-glass-edge rounded-3xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              <span className="bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">1</span>
+            <h2 className="text-lg font-extrabold text-white flex items-center gap-2.5">
+              <span className="bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] text-slate-950 w-7 h-7 rounded-full flex items-center justify-center text-sm font-black shadow-md">1</span>
               <span>Speak Name & Phone (नाम और फोन बोलें)</span>
             </h2>
             <AudioButton
@@ -147,31 +151,31 @@ export const RegisterPage = () => {
             />
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-3 py-6 bg-white rounded-2xl border-2 border-dashed border-emerald-300">
+          <div className="flex flex-col items-center justify-center gap-3 py-6 bg-white/[0.02] rounded-2xl border border-dashed border-amber-400/30">
             <button
               type="button"
               onClick={isListening ? stopListening : startListening}
               className={`p-6 rounded-full font-black text-white shadow-2xl transition-all active:scale-95 flex flex-col items-center gap-2 ${
                 isListening
-                  ? 'bg-rose-600 animate-pulse-ring'
-                  : 'bg-emerald-600 hover:bg-emerald-700 hover:scale-105'
+                  ? 'bg-rose-600 animate-liquid-pulse shadow-rose-900/50'
+                  : 'bg-gradient-to-br from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-slate-950 shadow-liquid-gold hover:scale-105'
               }`}
             >
               {isListening ? (
                 <>
                   <MicOff className="w-10 h-10 animate-bounce" />
-                  <span className="text-xs uppercase tracking-wider">Listening... Speak Now</span>
+                  <span className="text-xs uppercase tracking-wider font-black">Listening... Speak Now</span>
                 </>
               ) : (
                 <>
-                  <Mic className="w-10 h-10 text-amber-300 animate-pulse" />
-                  <span className="text-xs uppercase tracking-wider">Tap & Speak Name & Phone</span>
+                  <Mic className="w-10 h-10 text-slate-950" />
+                  <span className="text-xs uppercase tracking-wider font-black">Tap & Speak Name & Phone</span>
                 </>
               )}
             </button>
 
             {transcript && (
-              <div className="text-center text-sm font-bold text-emerald-800 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
+              <div className="text-center text-sm font-bold text-amber-300 bg-amber-400/10 px-4 py-2 rounded-xl border border-amber-400/20">
                 Spoken: "{transcript}"
               </div>
             )}
@@ -180,33 +184,33 @@ export const RegisterPage = () => {
           {/* Fallback Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
             <div>
-              <label className="text-xs font-extrabold text-slate-700 uppercase">Your Name (नाम)</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Your Name (नाम)</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex. Ramesh Kumar"
-                className="input-field mt-1 text-base py-2.5"
+                className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
               />
             </div>
             <div>
-              <label className="text-xs font-extrabold text-slate-700 uppercase">Phone Number (मोबाइल)</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Phone Number (मोबाइल)</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="10-digit number"
-                className="input-field mt-1 text-base py-2.5"
+                className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
               />
             </div>
           </div>
         </div>
 
         {/* Step 2: Choose Work Type */}
-        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-6 mb-6">
+        <div className="bg-[#0c0c0e]/80 border border-white/10 shadow-glass-edge rounded-3xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              <span className="bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">2</span>
+            <h2 className="text-lg font-extrabold text-white flex items-center gap-2.5">
+              <span className="bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] text-slate-950 w-7 h-7 rounded-full flex items-center justify-center text-sm font-black shadow-md">2</span>
               <span>Select Work Icon (काम का आइकॉन चुनें)</span>
             </h2>
           </div>
@@ -217,14 +221,14 @@ export const RegisterPage = () => {
                 key={work.id}
                 type="button"
                 onClick={() => setSelectedWork(work.id)}
-                className={`p-3 rounded-2xl border-2 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition-all active:scale-95 ${
                   selectedWork === work.id
-                    ? 'bg-emerald-600 text-white border-slate-900 shadow-lg scale-105 font-black'
-                    : 'bg-white text-slate-800 border-slate-200 font-bold hover:bg-slate-100'
+                    ? 'bg-gradient-to-br from-[#d4af37] to-[#aa7c11] text-slate-950 border-amber-300 font-black shadow-liquid-gold scale-105'
+                    : 'bg-white/[0.03] text-slate-300 border-white/10 font-bold hover:bg-white/[0.07] hover:border-white/20'
                 }`}
               >
                 <span className="text-3xl">{work.emoji}</span>
-                <span className="text-xs text-center">{work.name.split(' ')[0]}</span>
+                <span className="text-xs text-center font-bold">{work.name.split(' ')[0]}</span>
               </button>
             ))}
           </div>
@@ -234,21 +238,21 @@ export const RegisterPage = () => {
         <button
           onClick={handleCompleteRegistration}
           disabled={loading}
-          className="w-full btn-primary py-4 text-xl font-black rounded-3xl shadow-xl flex items-center justify-center gap-3 border-4 border-emerald-400"
+          className="btn-primary w-full py-4 text-base font-black rounded-2xl shadow-liquid-gold flex items-center justify-center gap-3 transition-all"
         >
           {loading ? (
             <span>Creating Account...</span>
           ) : (
             <>
               <span>Start Finding Jobs (खाता बनाएं)</span>
-              <ArrowRight className="w-6 h-6" />
+              <ArrowRight className="w-5 h-5" />
             </>
           )}
         </button>
 
-        <div className="mt-6 text-center text-slate-600 font-bold">
+        <div className="mt-6 text-center text-slate-400 text-xs font-semibold">
           Already registered?{' '}
-          <Link to="/login" className="text-emerald-700 underline font-black">
+          <Link to="/login" className="text-amber-400 hover:text-amber-300 font-bold ml-1 transition-colors">
             Login Here
           </Link>
         </div>

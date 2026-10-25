@@ -17,31 +17,34 @@ export default function DesktopSidebar({ lang = 'en', onMicTap }) {
   ]
 
   return (
-    <aside className="hidden md:flex flex-col w-72 bg-slate-900 text-white min-h-screen p-6 border-r-4 border-blue-600 shrink-0 sticky top-0 h-screen">
+    <aside className="hidden md:flex flex-col w-72 bg-[#0c0c0e]/80 backdrop-blur-2xl text-white min-h-screen p-6 border-r border-white/10 shadow-glass-edge shrink-0 sticky top-0 h-screen z-30">
       {/* Brand Header */}
-      <Link to="/jobs" className="flex items-center gap-3 mb-8 px-2">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg border-2 border-blue-400">
-          <Mic className="w-7 h-7 text-white animate-pulse" />
+      <Link to="/jobs" className="flex items-center gap-3 mb-8 px-2 group">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] flex items-center justify-center shadow-liquid-gold border border-amber-300/40 group-hover:scale-105 transition-transform">
+          <Mic className="w-7 h-7 text-[#050505] animate-pulse stroke-[2.5]" />
         </div>
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-white">{t.brandName}</h1>
-          <p className="text-xs text-blue-400 font-extrabold uppercase tracking-wider">{t.tagline}</p>
+          <h1 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#ffffff]">
+            {t.brandName}
+          </h1>
+          <p className="text-[11px] text-[#d4af37]/80 font-extrabold uppercase tracking-widest">{t.tagline}</p>
         </div>
       </Link>
 
-      {/* Primary Voice Action Button */}
+      {/* Primary Voice Action Button (Liquid Acrylic Gold Capsule) */}
       <button
         type="button"
         onClick={onMicTap}
-        className="w-full mb-8 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-black text-lg rounded-2xl shadow-xl flex items-center justify-center gap-3 border border-blue-400/30 transition-transform active:scale-95 group"
+        className="w-full mb-8 py-3.5 px-5 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black text-base rounded-2xl shadow-liquid-gold flex items-center justify-center gap-3 border border-amber-300/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group relative overflow-hidden"
       >
-        <Mic className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
-        <span>Speak to Find Work</span>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+        <Mic className="w-5 h-5 text-[#050505] group-hover:scale-110 transition-transform stroke-[2.5]" />
+        <span className="tracking-wide">Speak to Find Work</span>
       </button>
 
       {/* Navigation Links */}
       <nav className="flex-1 space-y-2">
-        <p className="px-3 text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Main Menu</p>
+        <p className="px-3 text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">Main Menu</p>
         {(Array.isArray(links) ? links : []).map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
@@ -49,13 +52,13 @@ export default function DesktopSidebar({ lang = 'en', onMicTap }) {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-base transition-all ${
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#d4af37]/20 via-[#f3e5ab]/15 to-[#d4af37]/5 text-[#f3e5ab] border border-amber-400/40 shadow-[0_0_15px_rgba(212,175,55,0.25)]'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.04] border border-transparent'
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className={`w-5 h-5 ${isActive ? 'text-[#f3e5ab]' : 'text-slate-400'}`} />
               <span>{item.label}</span>
             </Link>
           )
@@ -63,11 +66,11 @@ export default function DesktopSidebar({ lang = 'en', onMicTap }) {
       </nav>
 
       {/* Footer Support Info */}
-      <div className="pt-6 border-t border-slate-800 text-xs text-slate-400 px-2 space-y-1">
-        <p className="font-bold flex items-center gap-1.5 text-slate-300">
-          <HelpCircle className="w-4 h-4 text-blue-400" /> Voice-First Engine Active
+      <div className="pt-5 border-t border-white/10 text-xs text-slate-400 px-2 space-y-1 bg-white/[0.02] rounded-2xl p-3">
+        <p className="font-bold flex items-center gap-1.5 text-slate-200">
+          <HelpCircle className="w-4 h-4 text-[#d4af37]" /> Voice-First Engine Active
         </p>
-        <p>Supported in Telugu, Kannada, Hindi, Tamil & English.</p>
+        <p className="text-[11px] text-slate-400">Supported in Telugu, Kannada, Hindi, Tamil & English.</p>
       </div>
     </aside>
   )

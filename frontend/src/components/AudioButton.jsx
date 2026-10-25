@@ -57,21 +57,23 @@ export const AudioButton = ({
     <button
       type="button"
       onClick={handleToggleSpeak}
-      className={`btn-audio flex items-center justify-center transition-all ${
-        isPlaying ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-300' : 'bg-amber-400 hover:bg-amber-500 text-slate-900 shadow-md hover:scale-105'
+      className={`btn-audio flex items-center justify-center transition-all border ${
+        isPlaying
+          ? 'bg-rose-600/80 text-white animate-pulse ring-4 ring-rose-400/20 border-rose-400/40'
+          : 'bg-white/[0.06] hover:bg-white/[0.12] text-[#f3e5ab] border-amber-400/30 shadow-glass-edge hover:scale-105 active:scale-95'
       } ${sizeClasses[size] || sizeClasses.medium} ${className}`}
       title="Tap to listen to audio"
       aria-label="Tap to listen to audio text"
     >
       {isPlaying ? (
         <>
-          <Square className="w-5 h-5 fill-current animate-bounce" />
+          <Square className="w-4 h-4 fill-current animate-bounce" />
           <span>{label ? 'Stopping...' : 'Stop'}</span>
         </>
       ) : (
         <>
-          <Volume2 className="w-6 h-6 animate-pulse text-slate-900" />
-          <span className="font-bold">{label}</span>
+          <Volume2 className="w-5 h-5 text-[#d4af37]" />
+          <span className="font-bold text-slate-200">{label}</span>
         </>
       )}
     </button>

@@ -129,69 +129,80 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ambient Light Field Background Orbs */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-md w-full relative z-10">
+        <div className="bg-white/[0.035] backdrop-blur-2xl border border-white/10 shadow-glass-edge rounded-3xl p-8 sm:p-10 text-white">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Udyoga Mitra</h1>
-            <p className="text-gray-600">ಉದ್ಯೋಗ ಮಿತ್ರ • Multi-lingual Employment Platform</p>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-black tracking-wider uppercase mb-3">
+              ✨ LUXURY EDITION
+            </div>
+            <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] mb-2 tracking-tight">
+              VoiceHire
+            </h1>
+            <p className="text-slate-400 text-xs font-semibold tracking-wide">
+              ಉದ್ಯೋಗ ಮಿತ್ರ • Multi-lingual Employment Platform
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Email Address
               </label>
               <div className="relative">
                 <input
                   {...register('email')}
                   type="email"
-                  className="input-field pr-10"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition-all text-sm pr-11 shadow-inner"
                   placeholder="Enter your email"
                 />
                 <button
                   type="button"
                   onClick={() => startVoiceInput('email')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors p-1"
                 >
-                  {isListening ? <Mic className="w-5 h-5 text-red-500" /> : <Mic className="w-5 h-5" />}
+                  {isListening ? <Mic className="w-5 h-5 text-amber-400 animate-pulse" /> : <Mic className="w-5 h-5" />}
                 </button>
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                <p className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
                 Password
               </label>
               <div className="relative">
                 <input
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
-                  className="input-field pr-10"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/20 transition-all text-sm pr-11 shadow-inner"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition-colors p-1"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                <p className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.password.message}</p>
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+            <div className="flex items-center justify-between text-xs">
+              <label className="flex items-center cursor-pointer">
+                <input type="checkbox" className="rounded border-white/20 bg-white/5 text-amber-400 focus:ring-amber-400/30 w-4 h-4" />
+                <span className="ml-2 text-slate-400 font-medium">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+              <Link to="/forgot-password" className="text-amber-400 hover:text-amber-300 font-bold transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -199,32 +210,32 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full py-3.5 text-base font-black rounded-2xl shadow-liquid-gold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-slate-400 text-xs font-medium">
               Don't have an account?{' '}
-              <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/register" className="text-amber-400 hover:text-amber-300 font-bold ml-1 transition-colors">
                 Sign up
               </Link>
             </p>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-center text-sm text-gray-500 mb-4">
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
               Or continue with voice
             </p>
             <button
               type="button"
               onClick={() => startVoiceInput('all')}
-              className="w-full btn-secondary flex items-center justify-center gap-2"
+              className="w-full btn-secondary py-3.5 rounded-2xl flex items-center justify-center gap-2 border border-white/10 hover:border-amber-400/40 text-slate-200 font-extrabold text-sm transition-all"
             >
-              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              {isListening ? 'Listening...' : 'Voice Login'}
+              {isListening ? <MicOff className="w-5 h-5 text-amber-400 animate-pulse" /> : <Mic className="w-5 h-5 text-amber-400" />}
+              <span>{isListening ? 'Listening...' : 'Voice Login'}</span>
             </button>
           </div>
         </div>

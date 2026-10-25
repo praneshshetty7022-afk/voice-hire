@@ -139,35 +139,36 @@ export default function JobListingPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-lg border-2 border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.035] backdrop-blur-2xl p-6 rounded-3xl shadow-glass-edge border border-white/10 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="text-3xl">{activeProf ? activeProf.icon : '🔎'}</span>
-            <h1 className="text-3xl font-black text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-black text-white">
               {activeProf ? activeProf.title : t.viewAllJobs}
             </h1>
           </div>
-          <p className="text-sm font-semibold text-slate-500 mt-1">
-            {jobs.length} {t.jobsAvailable} • {selectedCity === 'ALL' ? t.allCities : selectedCity}
+          <p className="text-xs font-semibold text-slate-400 mt-1">
+            {jobs.length} {t.jobsAvailable} • <span className="text-[#f3e5ab]">{selectedCity === 'ALL' ? t.allCities : selectedCity}</span>
           </p>
         </div>
 
         {/* Search Field */}
         <div className="relative min-w-[280px]">
-          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search work..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl outline-none focus:border-blue-600 font-bold text-base"
+            className="w-full pl-11 pr-9 py-3 bg-white/[0.04] border border-white/15 rounded-2xl outline-none focus:border-amber-400/50 font-bold text-sm text-white placeholder-slate-500 shadow-glass-edge transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -175,17 +176,17 @@ export default function JobListingPage() {
 
       {/* City Chips Filter */}
       <div className="space-y-2">
-        <p className="text-xs font-black text-slate-500 uppercase tracking-wider px-1 flex items-center gap-1">
-          <MapPin className="w-4 h-4 text-blue-600" /> Select City / స్థలం
+        <p className="text-[11px] font-black text-[#d4af37] uppercase tracking-widest px-1 flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-[#d4af37]" /> Select City / స్థలం
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             type="button"
             onClick={() => setSelectedCity('ALL')}
-            className={`px-4 py-2 rounded-2xl font-extrabold text-sm border-2 shrink-0 transition-all ${
+            className={`px-4 py-2 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
               selectedCity === 'ALL'
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                ? 'bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black border-amber-300/60 shadow-liquid-gold'
+                : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
             }`}
           >
             All Cities
@@ -195,10 +196,10 @@ export default function JobListingPage() {
               key={city.id}
               type="button"
               onClick={() => setSelectedCity(city.name)}
-              className={`px-4 py-2 rounded-2xl font-extrabold text-sm border-2 shrink-0 transition-all ${
+              className={`px-4 py-2 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
                 selectedCity === city.name
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black border-amber-300/60 shadow-liquid-gold'
+                  : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               {city.name} ({city.native[selectedLang.split('-')[0]] || city.name})
@@ -209,8 +210,8 @@ export default function JobListingPage() {
 
       {/* Category Filter Chips */}
       <div className="space-y-2">
-        <p className="text-xs font-black text-slate-500 uppercase tracking-wider px-1 flex items-center gap-1">
-          <Filter className="w-4 h-4 text-blue-600" /> Profession Category
+        <p className="text-[11px] font-black text-[#d4af37] uppercase tracking-widest px-1 flex items-center gap-1.5">
+          <Filter className="w-3.5 h-3.5 text-[#d4af37]" /> Profession Category
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -219,10 +220,10 @@ export default function JobListingPage() {
               setSelectedCategory('ALL')
               setSearchParams({})
             }}
-            className={`px-4 py-2.5 rounded-2xl font-extrabold text-sm border-2 shrink-0 transition-all ${
+            className={`px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
               selectedCategory === 'ALL'
-                ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                ? 'bg-gradient-to-r from-[#d4af37]/20 via-[#f3e5ab]/15 to-[#d4af37]/10 text-[#f3e5ab] border-amber-400/40 shadow-liquid-gold'
+                : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
             }`}
           >
             All Professions
@@ -235,10 +236,10 @@ export default function JobListingPage() {
                 setSelectedCategory(key)
                 setSearchParams({ category: key })
               }}
-              className={`px-4 py-2.5 rounded-2xl font-extrabold text-sm border-2 shrink-0 flex items-center gap-2 transition-all ${
+              className={`px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 flex items-center gap-2 transition-all ${
                 selectedCategory === key
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-gradient-to-r from-[#d4af37]/20 via-[#f3e5ab]/15 to-[#d4af37]/10 text-[#f3e5ab] border-amber-400/40 shadow-liquid-gold'
+                  : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               <span>{prof.icon}</span>
@@ -250,9 +251,9 @@ export default function JobListingPage() {
 
       {/* Jobs Grid */}
       {loading ? (
-        <div className="p-12 text-center bg-white rounded-3xl border-2 border-slate-100 shadow-sm space-y-3">
-          <RefreshCw className="w-10 h-10 animate-spin text-blue-600 mx-auto" />
-          <p className="text-lg font-black text-slate-800">Loading Available Jobs...</p>
+        <div className="p-12 text-center bg-white/[0.035] backdrop-blur-2xl rounded-3xl border border-white/10 shadow-glass-edge space-y-3">
+          <RefreshCw className="w-9 h-9 animate-spin text-[#d4af37] mx-auto" />
+          <p className="text-base font-black text-white">Loading Available Jobs...</p>
         </div>
       ) : safeJobs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -266,24 +267,24 @@ export default function JobListingPage() {
         </div>
       ) : (
         /* EMPTY STATE */
-        <div className="p-12 text-center bg-white rounded-3xl border-2 border-slate-200 shadow-lg space-y-4">
-          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto text-4xl">
+        <div className="p-12 text-center bg-white/[0.035] backdrop-blur-2xl rounded-3xl border border-white/10 shadow-glass-edge space-y-4 text-white">
+          <div className="w-16 h-16 bg-white/[0.05] text-[#d4af37] border border-amber-400/30 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-glass-edge">
             🚗
           </div>
-          <h3 className="text-2xl font-black text-slate-900">No jobs available here right now</h3>
-          <p className="text-base text-slate-500 font-semibold max-w-md mx-auto">
+          <h3 className="text-2xl font-black text-white">No jobs available here right now</h3>
+          <p className="text-sm text-slate-400 font-semibold max-w-md mx-auto">
             Try searching nearby cities or select another profession category.
           </p>
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
               onClick={() => setSelectedCity('ALL')}
-              className="px-6 py-3 bg-blue-600 text-white font-extrabold rounded-2xl shadow-md"
+              className="px-6 py-3 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black rounded-2xl shadow-liquid-gold hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
             >
               Search Nearby
             </button>
             <button
               onClick={() => setSelectedCategory('ALL')}
-              className="px-6 py-3 bg-slate-100 text-slate-800 font-extrabold rounded-2xl"
+              className="px-6 py-3 bg-white/[0.06] text-slate-300 font-extrabold rounded-2xl border border-white/10 hover:bg-white/[0.1] transition-all text-sm"
             >
               Choose Another Work
             </button>

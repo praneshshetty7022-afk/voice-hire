@@ -29,19 +29,18 @@ export default function JobCard({ job, onApplyVoice }) {
   return (
     <div
       onClick={() => navigate(`/jobs/${job.id || job._id || 1}`)}
-      className="card-premium group cursor-pointer border-2 hover:border-blue-500 transition-all duration-200"
-      style={{
-        background: `linear-gradient(180deg, #ffffff 70%, ${prof.color}08 100%)`,
-      }}
+      className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 border border-white/10 hover:border-amber-400/40 shadow-glass-edge hover:shadow-[0_0_20px_rgba(212,175,55,0.18)] transition-all duration-300 group cursor-pointer relative overflow-hidden"
     >
+      {/* 3D Glass Light Highlight Bar */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+
       {/* Top Banner with Profession Illustrated Identity */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-md border-2 shrink-0 group-hover:scale-110 transition-transform"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-glass-edge border border-white/15 shrink-0 group-hover:scale-105 transition-transform bg-white/[0.05] backdrop-blur-xl"
             style={{
-              background: `linear-gradient(135deg, ${prof.color}20, ${prof.color}40)`,
-              borderColor: prof.color,
+              borderColor: `${prof.color}60`,
             }}
           >
             <span>{prof.icon}</span>
@@ -49,12 +48,12 @@ export default function JobCard({ job, onApplyVoice }) {
 
           <div>
             <span
-              className="inline-block px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider mb-1"
-              style={{ backgroundColor: `${prof.color}20`, color: prof.color }}
+              className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider mb-1 border border-white/10"
+              style={{ backgroundColor: `${prof.color}25`, color: prof.color }}
             >
               {prof.title}
             </span>
-            <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+            <h3 className="text-lg font-black text-white group-hover:text-[#f3e5ab] transition-colors line-clamp-1">
               {title}
             </h3>
           </div>
@@ -64,54 +63,54 @@ export default function JobCard({ job, onApplyVoice }) {
         <button
           type="button"
           onClick={handleListenClick}
-          className="p-2.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-2xl transition-all shadow-sm active:scale-95 border border-amber-300 shrink-0"
+          className="p-2.5 bg-white/[0.05] hover:bg-amber-400/20 text-[#f3e5ab] rounded-2xl transition-all shadow-glass-edge active:scale-95 border border-white/10 shrink-0"
           title="Listen to Job Details"
         >
-          <Volume2 className="w-5 h-5 text-amber-700" />
+          <Volume2 className="w-5 h-5 text-[#f3e5ab]" />
         </button>
       </div>
 
       {/* Primary Key Attributes Grid */}
-      <div className="grid grid-cols-2 gap-3 my-4 py-3 px-4 bg-slate-50 rounded-2xl border border-slate-100">
+      <div className="grid grid-cols-2 gap-3 my-4 py-3 px-4 bg-white/[0.025] rounded-2xl border border-white/5">
         <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-600 shrink-0" />
-          <span className="text-base font-extrabold text-slate-800 truncate">{location}</span>
+          <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+          <span className="text-sm font-extrabold text-slate-200 truncate">{location}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <IndianRupee className="w-5 h-5 text-emerald-600 shrink-0" />
-          <span className="text-base font-black text-emerald-700 truncate">{salary}</span>
+          <IndianRupee className="w-4 h-4 text-[#d4af37] shrink-0" />
+          <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] truncate">{salary}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-amber-600 shrink-0" />
-          <span className="text-sm font-bold text-slate-700 truncate">{workTime}</span>
+          <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+          <span className="text-xs font-bold text-slate-300 truncate">{workTime}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Star className="w-5 h-5 text-purple-600 shrink-0" />
-          <span className="text-sm font-bold text-slate-700 truncate">{experience}</span>
+          <Star className="w-4 h-4 text-[#d4af37] shrink-0" />
+          <span className="text-xs font-bold text-slate-300 truncate">{experience}</span>
         </div>
       </div>
 
       {/* Employer Info */}
-      <div className="flex items-center justify-between text-xs font-extrabold text-slate-500 mb-4 px-1">
-        <span className="flex items-center gap-1">
-          <Briefcase className="w-4 h-4 text-slate-400" />
+      <div className="flex items-center justify-between text-xs font-extrabold text-slate-400 mb-4 px-1">
+        <span className="flex items-center gap-1.5">
+          <Briefcase className="w-3.5 h-3.5 text-slate-500" />
           {employerName}
         </span>
-        <span className="text-emerald-600 font-black">✓ Verified</span>
+        <span className="text-emerald-400 font-black flex items-center gap-1">✓ Verified</span>
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+      <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-white/10">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation()
             navigate(`/jobs/${job.id || job._id || 1}`)
           }}
-          className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 font-extrabold rounded-2xl text-sm transition-all border border-slate-300"
+          className="w-full py-3 bg-white/[0.05] hover:bg-white/[0.1] text-white font-extrabold rounded-2xl text-xs sm:text-sm transition-all border border-white/10"
         >
           {t.viewJob}
         </button>
@@ -123,7 +122,7 @@ export default function JobCard({ job, onApplyVoice }) {
             if (onApplyVoice) onApplyVoice(job)
             else navigate(`/jobs/${job.id || job._id || 1}?action=voice-apply`)
           }}
-          className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black rounded-2xl text-sm transition-all shadow-md flex items-center justify-center gap-1.5"
+          className="w-full py-3 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] hover:scale-[1.02] active:scale-[0.98] text-[#050505] font-black rounded-2xl text-xs sm:text-sm transition-all shadow-liquid-gold flex items-center justify-center gap-1.5 border border-amber-300/40"
         >
           <span>🎤</span>
           <span>{t.applyByVoice}</span>

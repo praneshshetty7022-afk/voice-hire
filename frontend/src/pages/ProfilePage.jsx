@@ -43,62 +43,65 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 pb-12 max-w-3xl mx-auto">
       {/* Profile Header Hero Card */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-8 shadow-2xl border-4 border-blue-500 text-center relative overflow-hidden">
+      <div className="bg-white/[0.035] backdrop-blur-2xl text-white rounded-3xl p-8 shadow-glass-edge border border-white/10 text-center relative overflow-hidden">
+        {/* Ambient Top Glow */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-32 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+
         {/* Large Avatar Badge */}
         <div className="relative inline-block mb-4">
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 border-4 border-white flex items-center justify-center text-6xl shadow-2xl mx-auto">
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-amber-400/20 via-white/[0.05] to-amber-600/20 border-2 border-amber-400/40 shadow-liquid-gold flex items-center justify-center text-6xl mx-auto backdrop-blur-xl">
             {prof?.icon || '👤'}
           </div>
           {displayName && (
-            <span className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-xs font-black text-white">
+            <span className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-amber-300 to-amber-500 border-2 border-[#0c0c0e] rounded-full flex items-center justify-center text-xs font-black text-slate-950 shadow-md">
               ✓
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl font-black">
+        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11]">
           {displayName || 'Guest User'}
         </h1>
         
         {/* Profession Badge Pill or Guest Tag */}
         {displayName ? (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 font-extrabold text-base mt-2">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/30 font-extrabold text-base mt-2 shadow-sm">
             <span>{prof.icon}</span>
             <span>{user?.skill || prof.title}</span>
           </div>
         ) : (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 font-extrabold text-sm mt-2">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 text-slate-300 border border-white/10 font-extrabold text-sm mt-2">
             <span>👋 Browsing as Guest</span>
           </div>
         )}
 
         {/* Profile Completion or Guest Prompt */}
         {displayName ? (
-          <div className="mt-6 max-w-sm mx-auto bg-blue-950/60 p-4 rounded-2xl border border-blue-400/20">
+          <div className="mt-6 max-w-sm mx-auto bg-[#0c0c0e]/80 p-4 rounded-2xl border border-white/10 shadow-glass-edge">
             <div className="flex items-center justify-between text-xs font-black mb-1.5">
-              <span className="text-blue-300 uppercase tracking-wider">{t.profileCompletion}</span>
+              <span className="text-slate-400 uppercase tracking-wider">{t.profileCompletion}</span>
               <span className="text-amber-400 font-extrabold text-sm">{user?.profileCompletion || '85%'}</span>
             </div>
-            <div className="w-full h-3 bg-blue-900 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full w-[85%]" />
+            <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+              <div className="h-full bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] rounded-full w-[85%] shadow-liquid-gold" />
             </div>
           </div>
         ) : (
-          <div className="mt-6 max-w-md mx-auto bg-blue-950/70 p-4 rounded-2xl border border-blue-400/30">
-            <p className="text-sm text-blue-200 font-semibold mb-3">
+          <div className="mt-6 max-w-md mx-auto bg-[#0c0c0e]/80 p-5 rounded-2xl border border-amber-400/20 shadow-glass-edge">
+            <p className="text-sm text-slate-300 font-medium mb-4 leading-relaxed">
               You are currently using VoiceHire without a registered session. Create a profile to save applications and get contacted by employers.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link
                 to="/register"
-                className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm rounded-xl shadow-md transition-all active:scale-95 inline-flex items-center gap-1.5"
+                className="btn-primary px-5 py-2.5 rounded-xl text-slate-950 font-black text-sm shadow-liquid-gold inline-flex items-center gap-1.5"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Register Now</span>
               </Link>
               <Link
                 to="/login"
-                className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-extrabold text-sm rounded-xl border border-white/20 transition-all inline-flex items-center gap-1.5"
+                className="btn-secondary px-5 py-2.5 rounded-xl text-slate-200 font-extrabold text-sm inline-flex items-center gap-1.5"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Log In</span>
@@ -110,62 +113,74 @@ export default function ProfilePage() {
 
       {/* Profile Information List (If logged in) */}
       {displayName && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-100 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="text-xl font-black text-slate-900">{t.profileTitle}</h3>
-            <span className="text-xs font-black bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full uppercase">
+        <div className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-glass-edge space-y-5">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <h3 className="text-xl font-black text-white">{t.profileTitle}</h3>
+            <span className="text-xs font-black bg-amber-400/10 text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full uppercase tracking-wider">
               {user?.accountStatus || 'ACTIVE'}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <User className="w-6 h-6 text-blue-600 shrink-0" />
+            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
+                <User className="w-5 h-5" />
+              </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">Full Name</p>
-                <p className="text-lg font-black text-slate-900">{displayName}</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Full Name</p>
+                <p className="text-base font-black text-white">{displayName}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <span className="text-2xl">{prof.icon}</span>
+            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-xl shrink-0">
+                {prof.icon}
+              </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">Profession</p>
-                <p className="text-lg font-black text-slate-900">{user?.skill || prof.title}</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Profession</p>
+                <p className="text-base font-black text-white">{user?.skill || prof.title}</p>
               </div>
             </div>
 
             {user?.phoneNumber && (
-              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <Phone className="w-6 h-6 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
+                <div className="w-10 h-10 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400 shrink-0">
+                  <Phone className="w-5 h-5" />
+                </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Phone Number</p>
-                  <p className="text-lg font-black text-slate-900">{user.phoneNumber}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Phone Number</p>
+                  <p className="text-base font-black text-white">{user.phoneNumber}</p>
                 </div>
               </div>
             )}
 
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <Star className="w-6 h-6 text-amber-500 shrink-0" />
+            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
+                <Star className="w-5 h-5" />
+              </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">{t.experience}</p>
-                <p className="text-lg font-black text-slate-900">{user?.experience || '1+ Year'}</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.experience}</p>
+                <p className="text-base font-black text-white">{user?.experience || '1+ Year'}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <MapPin className="w-6 h-6 text-emerald-600 shrink-0" />
+            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
+                <MapPin className="w-5 h-5" />
+              </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">{t.location}</p>
-                <p className="text-lg font-black text-slate-900">{user?.location || user?.preferredLocation || 'Bengaluru'}</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.location}</p>
+                <p className="text-base font-black text-white">{user?.location || user?.preferredLocation || 'Bengaluru'}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 col-span-1 sm:col-span-2">
-              <Globe className="w-6 h-6 text-purple-600 shrink-0" />
+            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all col-span-1 sm:col-span-2">
+              <div className="w-10 h-10 rounded-xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center text-purple-400 shrink-0">
+                <Globe className="w-5 h-5" />
+              </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">Preferred Language</p>
-                <p className="text-lg font-black text-slate-900">{user?.preferredLanguage || 'English / Regional'}</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Preferred Language</p>
+                <p className="text-base font-black text-white">{user?.preferredLanguage || 'English / Regional'}</p>
               </div>
             </div>
           </div>
@@ -175,7 +190,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handleUpdateProfileVoice}
-              className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-base rounded-2xl shadow-xl flex items-center justify-center gap-2 border border-blue-400/30 active:scale-95 transition-transform"
+              className="btn-primary flex-1 py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-liquid-gold active:scale-95 transition-all"
             >
               <Mic className="w-5 h-5 animate-pulse" />
               <span>{t.updateProfileVoice}</span>
@@ -184,7 +199,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="px-6 py-4 bg-rose-50 hover:bg-rose-100 text-rose-700 border-2 border-rose-200 font-black text-base rounded-2xl shadow transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="px-6 py-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-black text-base rounded-2xl shadow transition-all active:scale-95 flex items-center justify-center gap-2"
             >
               <LogOut className="w-5 h-5" />
               <span>Log Out</span>

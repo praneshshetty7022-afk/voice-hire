@@ -376,8 +376,8 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl border-4 border-blue-500 w-full max-w-lg overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
+      <div className="bg-[#0c0c0e]/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/15 w-full max-w-lg overflow-hidden relative shadow-glass-edge text-white">
         {/* Close Button */}
         <button
           type="button"
@@ -385,27 +385,27 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
             cleanupMediaStream()
             onClose()
           }}
-          className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full z-10"
+          className="absolute top-4 right-4 p-2 bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white rounded-full z-10 border border-white/10 transition-all"
         >
-          <XCircle className="w-6 h-6" />
+          <XCircle className="w-5 h-5" />
         </button>
 
         {/* STEP 1: IDLE / REQUESTING MIC / RECORDING */}
         {(currentState === 'IDLE' || currentState === 'REQUEST_MIC_PERMISSION' || currentState === 'RECORDING' || currentState === 'PROCESSING') && (
           <div className="p-8 text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto text-3xl">
+            <div className="w-16 h-16 rounded-2xl bg-white/[0.05] border border-white/10 text-white flex items-center justify-center mx-auto text-3xl shadow-glass-edge">
               {prof.icon}
             </div>
 
             <div>
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 font-extrabold text-xs rounded-full uppercase tracking-wider">
+              <span className="px-3.5 py-1 bg-amber-400/10 text-[#f3e5ab] font-extrabold text-[11px] rounded-full uppercase tracking-widest border border-amber-400/30">
                 🎙️ Apply by Voice
               </span>
-              <h2 className="text-2xl font-black text-slate-900 mt-2">{job?.title || prof.title}</h2>
-              <p className="text-sm font-extrabold text-blue-600 mt-1">{job?.location || 'Bengaluru'} • ₹1,200/day</p>
+              <h2 className="text-2xl font-black text-white mt-2">{job?.title || prof.title}</h2>
+              <p className="text-sm font-extrabold text-slate-300 mt-1">{job?.location || 'Bengaluru'} • <span className="text-[#d4af37]">₹1,200/day</span></p>
             </div>
 
-            <div className="p-4 bg-amber-50 border-2 border-amber-300 text-amber-900 font-extrabold rounded-2xl text-base">
+            <div className="p-4 bg-white/[0.04] border border-amber-400/30 text-[#f3e5ab] font-extrabold rounded-2xl text-sm shadow-glass-edge">
               {currentState === 'RECORDING'
                 ? `🎙️ Recording in progress... (${formatTimer(recordingTime)})`
                 : currentState === 'PROCESSING'
@@ -419,22 +419,22 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 <button
                   type="button"
                   onClick={stopVoiceRecordingPipeline}
-                  className="w-28 h-28 rounded-full bg-gradient-to-br from-rose-600 to-red-700 text-white flex items-center justify-center mx-auto shadow-2xl border-4 border-rose-300 animate-pulse hover:scale-105 active:scale-95 transition-transform"
+                  className="w-28 h-28 rounded-full bg-gradient-to-br from-rose-600 to-red-700 text-white flex items-center justify-center mx-auto shadow-2xl border-2 border-rose-300 animate-pulse hover:scale-105 active:scale-95 transition-transform"
                 >
-                  <Square className="w-10 h-10 stroke-[2.5]" />
+                  <Square className="w-9 h-9 stroke-[2.5]" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={startVoiceRecordingPipeline}
                   disabled={currentState === 'PROCESSING'}
-                  className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center mx-auto shadow-2xl border-4 border-blue-300 hover:scale-105 active:scale-95 transition-transform disabled:opacity-50"
+                  className="w-28 h-28 rounded-full bg-gradient-to-br from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] flex items-center justify-center mx-auto shadow-liquid-gold border border-amber-300/60 ring-4 ring-amber-400/20 hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 animate-liquid-pulse"
                 >
                   <Mic className="w-12 h-12 stroke-[2.5]" />
                 </button>
               )}
 
-              <p className="text-lg font-black text-slate-900">
+              <p className="text-base font-black text-white">
                 {currentState === 'RECORDING'
                   ? 'Tap Red Button to Stop'
                   : currentState === 'PROCESSING'
@@ -443,7 +443,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               </p>
 
               {transcript && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-left text-xs font-semibold text-slate-700 italic">
+                <div className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl text-left text-xs font-semibold text-slate-300 italic">
                   "{transcript}"
                 </div>
               )}
@@ -452,7 +452,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
             <button
               type="button"
               onClick={handleDemoAutoFill}
-              className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-2xl text-base"
+              className="w-full py-3.5 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 font-extrabold rounded-2xl text-sm border border-white/10 transition-all"
             >
               Demo: Standard Auto-Fill ({currentUser?.name ? `"${currentUser.name}, 2 years"` : '"Applicant, 2 years"'})
             </button>
@@ -463,44 +463,44 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
         {currentState === 'CONFIRMATION' && (
           <div className="p-8 space-y-5">
             <div className="text-center">
-              <span className="px-3 py-1 bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-full uppercase tracking-wider">
+              <span className="px-3.5 py-1 bg-amber-400/10 text-[#f3e5ab] font-extrabold text-[11px] rounded-full uppercase tracking-widest border border-amber-400/30">
                 Application Details
               </span>
-              <h2 className="text-2xl font-black text-slate-900 mt-2">Confirm Application</h2>
+              <h2 className="text-2xl font-black text-white mt-2">Confirm Application</h2>
             </div>
 
             {/* Extracted Information Cards */}
             <div className="space-y-2.5">
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                <Briefcase className="w-6 h-6 text-blue-600 shrink-0" />
+              <div className="flex items-center gap-3 p-3.5 bg-white/[0.035] rounded-2xl border border-white/10">
+                <Briefcase className="w-5 h-5 text-[#d4af37] shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Selected Job</p>
-                  <p className="text-lg font-black text-slate-900">{job?.title || prof.title} ({job?.location || 'Bengaluru'})</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selected Job</p>
+                  <p className="text-base font-black text-white">{job?.title || prof.title} ({job?.location || 'Bengaluru'})</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                <User className="w-6 h-6 text-indigo-600 shrink-0" />
+              <div className="flex items-center gap-3 p-3.5 bg-white/[0.035] rounded-2xl border border-white/10">
+                <User className="w-5 h-5 text-[#f3e5ab] shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Applicant Name</p>
-                  <p className="text-lg font-black text-slate-900">{extracted.name || currentUser?.name || 'Applicant'}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Applicant Name</p>
+                  <p className="text-base font-black text-white">{extracted.name || currentUser?.name || 'Applicant'}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
-                <Star className="w-6 h-6 text-amber-500 shrink-0" />
+              <div className="flex items-center gap-3 p-3.5 bg-white/[0.035] rounded-2xl border border-white/10">
+                <Star className="w-5 h-5 text-amber-400 shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Experience</p>
-                  <p className="text-lg font-black text-slate-900">{extracted.experience || '2 years'}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Experience</p>
+                  <p className="text-base font-black text-white">{extracted.experience || '2 years'}</p>
                 </div>
               </div>
             </div>
 
             {/* Audio Player Component */}
             {audioUrl && (
-              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl space-y-1.5">
-                <p className="text-xs font-black text-blue-700 uppercase flex items-center gap-1.5">
-                  <Volume2 className="w-4 h-4 text-blue-600" />
+              <div className="p-3.5 bg-white/[0.03] border border-amber-400/20 rounded-2xl space-y-1.5">
+                <p className="text-[11px] font-black text-[#d4af37] uppercase flex items-center gap-1.5">
+                  <Volume2 className="w-4 h-4 text-[#d4af37]" />
                   <span>Recorded Audio Recording</span>
                 </p>
                 <audio controls src={audioUrl} className="w-full h-10 rounded-xl" />
@@ -511,18 +511,18 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               <button
                 type="button"
                 onClick={startVoiceRecordingPipeline}
-                className="py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-2xl text-base flex items-center justify-center gap-1.5"
+                className="py-3.5 bg-white/[0.06] hover:bg-white/[0.12] text-white font-extrabold rounded-2xl text-sm flex items-center justify-center gap-1.5 border border-white/10 transition-all"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4 text-slate-400" />
                 <span>RECORD AGAIN</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleConfirmSubmit}
-                className="py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-black rounded-2xl text-base shadow-lg hover:from-emerald-700 hover:to-teal-800 flex items-center justify-center gap-1.5"
+                className="py-3.5 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black rounded-2xl text-sm shadow-liquid-gold hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all border border-amber-300/50"
               >
-                <CheckCircle2 className="w-5 h-5" />
+                <CheckCircle2 className="w-4 h-4 text-[#050505]" />
                 <span>SUBMIT APPLICATION</span>
               </button>
             </div>
@@ -532,39 +532,39 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
         {/* STEP 3: SUBMITTING */}
         {currentState === 'SUBMITTING' && (
           <div className="p-12 text-center space-y-4">
-            <Loader2 className="w-16 h-16 text-blue-600 animate-spin mx-auto" />
-            <h2 className="text-2xl font-black text-slate-900">Submitting Application...</h2>
+            <Loader2 className="w-14 h-14 text-[#d4af37] animate-spin mx-auto" />
+            <h2 className="text-2xl font-black text-white">Submitting Application...</h2>
           </div>
         )}
 
         {/* STEP 4: SUCCESS */}
         {currentState === 'SUCCESS' && (
-          <div className="p-8 text-center space-y-6 bg-gradient-to-b from-emerald-50 to-white">
+          <div className="p-8 text-center space-y-6 bg-gradient-to-b from-[#d4af37]/10 to-transparent">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-                <CheckCircle2 className="w-16 h-16 stroke-[2.5]" />
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+                <CheckCircle2 className="w-12 h-12 stroke-[2.5]" />
               </div>
             </div>
 
             <div>
-              <span className="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 font-black text-sm rounded-full border border-emerald-300 mb-2">
+              <span className="inline-block px-3.5 py-1 bg-emerald-500/10 text-emerald-300 font-black text-xs rounded-full border border-emerald-400/30 mb-2">
                 🎤 Applied using Voice
               </span>
-              <h2 className="text-3xl font-black text-slate-900">🎉 Application Submitted Successfully!</h2>
-              <p className="text-base font-bold text-slate-600 mt-2">
-                Your application for <span className="text-blue-700 font-black">{job?.title || prof.title}</span> has been sent to the employer.
+              <h2 className="text-2xl sm:text-3xl font-black text-white">🎉 Application Submitted Successfully!</h2>
+              <p className="text-sm font-bold text-slate-300 mt-2">
+                Your application for <span className="text-[#f3e5ab] font-black">{job?.title || prof.title}</span> has been sent to the employer.
               </p>
             </div>
 
-            <div className="p-4 bg-white rounded-2xl border-2 border-emerald-200 shadow-sm space-y-2 text-left">
-              <p className="text-base font-black text-slate-900 flex items-center gap-2">
+            <div className="p-4 bg-white/[0.035] rounded-2xl border border-white/10 shadow-glass-edge space-y-2 text-left">
+              <p className="text-sm font-black text-white flex items-center gap-2">
                 <span>{prof.icon}</span> {job?.title || prof.title}
               </p>
-              <p className="text-sm font-bold text-slate-600 flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-600" /> {extracted.name || currentUser?.name || 'Applicant'}
+              <p className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                <User className="w-3.5 h-3.5 text-[#d4af37]" /> {extracted.name || currentUser?.name || 'Applicant'}
               </p>
-              <p className="text-sm font-black text-emerald-700 flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-500" /> {extracted.experience || '2 years'} experience
+              <p className="text-xs font-black text-[#f3e5ab] flex items-center gap-2">
+                <Star className="w-3.5 h-3.5 text-amber-400" /> {extracted.experience || '2 years'} experience
               </p>
             </div>
 
@@ -575,7 +575,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 onClose()
                 navigate('/applications/my')
               }}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl text-lg shadow-xl"
+              className="w-full py-4 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black rounded-2xl text-base shadow-liquid-gold hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               VIEW MY APPLICATIONS
             </button>
@@ -584,18 +584,18 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
         {/* STEP 5: ALREADY APPLIED */}
         {currentState === 'ALREADY_APPLIED' && (
-          <div className="p-8 text-center space-y-6 bg-gradient-to-b from-amber-50 to-white">
-            <div className="w-20 h-20 rounded-full bg-amber-500 text-white flex items-center justify-center mx-auto shadow-xl">
-              <AlertCircle className="w-12 h-12 stroke-[2.5]" />
+          <div className="p-8 text-center space-y-6">
+            <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center justify-center mx-auto shadow-liquid-gold">
+              <AlertCircle className="w-10 h-10 stroke-[2.5]" />
             </div>
 
             <div>
-              <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-900 font-black text-sm rounded-full border border-amber-300 mb-2">
+              <span className="inline-block px-3.5 py-1 bg-amber-400/10 text-amber-300 font-black text-xs rounded-full border border-amber-400/30 mb-2">
                 Already Submitted
               </span>
-              <h2 className="text-2xl font-black text-slate-900">Application Already Exists</h2>
-              <p className="text-base font-semibold text-slate-600 mt-2">
-                You have already submitted your application for <span className="text-blue-700 font-black">{job?.title || prof.title}</span>.
+              <h2 className="text-2xl font-black text-white">Application Already Exists</h2>
+              <p className="text-sm font-semibold text-slate-300 mt-2">
+                You have already submitted your application for <span className="text-[#f3e5ab] font-black">{job?.title || prof.title}</span>.
               </p>
             </div>
 
@@ -605,7 +605,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 cleanupMediaStream()
                 onClose()
               }}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black rounded-2xl text-lg shadow-xl"
+              className="w-full py-3.5 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black rounded-2xl text-base shadow-liquid-gold"
             >
               Close & View Jobs
             </button>
@@ -614,14 +614,14 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
         {/* STEP 6: MICROPHONE DENIED */}
         {currentState === 'MICROPHONE_DENIED' && (
-          <div className="p-8 text-center space-y-6 bg-gradient-to-b from-rose-50 to-white">
-            <div className="w-20 h-20 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto shadow-xl">
-              <AlertCircle className="w-12 h-12 stroke-[2.5]" />
+          <div className="p-8 text-center space-y-6">
+            <div className="w-16 h-16 rounded-full bg-rose-500/20 text-rose-400 border border-rose-400/30 flex items-center justify-center mx-auto">
+              <AlertCircle className="w-10 h-10 stroke-[2.5]" />
             </div>
 
             <div>
-              <h2 className="text-2xl font-black text-slate-900">Microphone Access Denied</h2>
-              <p className="text-base font-semibold text-slate-600 mt-2">
+              <h2 className="text-2xl font-black text-white">Microphone Access Denied</h2>
+              <p className="text-sm font-semibold text-slate-300 mt-2">
                 Microphone permission is required to apply by voice. Please grant microphone access in browser settings.
               </p>
             </div>
@@ -630,7 +630,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               <button
                 type="button"
                 onClick={startVoiceRecordingPipeline}
-                className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-base shadow-lg"
+                className="flex-1 py-3.5 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black rounded-2xl text-sm shadow-liquid-gold"
               >
                 TRY MICROPHONE AGAIN
               </button>
@@ -640,7 +640,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                   cleanupMediaStream()
                   onClose()
                 }}
-                className="flex-1 py-4 bg-slate-100 text-slate-800 font-black rounded-2xl text-base"
+                className="flex-1 py-3.5 bg-white/[0.06] text-slate-300 font-black rounded-2xl text-sm border border-white/10"
               >
                 Cancel
               </button>

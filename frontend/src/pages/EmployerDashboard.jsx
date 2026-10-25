@@ -178,19 +178,19 @@ export const EmployerDashboard = () => {
     switch (status) {
       case 'APPLIED':
       case 'PENDING':
-        return <span className="bg-blue-100 text-blue-800 font-extrabold text-xs px-3 py-1 rounded-full border border-blue-300">Applied</span>
+        return <span className="bg-sky-400/10 text-sky-300 font-extrabold text-xs px-3 py-1 rounded-full border border-sky-400/30">Applied</span>
       case 'UNDER_REVIEW':
-        return <span className="bg-amber-100 text-amber-800 font-extrabold text-xs px-3 py-1 rounded-full border border-amber-300">Under Review</span>
+        return <span className="bg-amber-400/10 text-amber-300 font-extrabold text-xs px-3 py-1 rounded-full border border-amber-400/30">Under Review</span>
       case 'INTERVIEW_SCHEDULED':
       case 'SHORTLISTED':
-        return <span className="bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full border border-purple-300">Interview Scheduled</span>
+        return <span className="bg-purple-400/10 text-purple-300 font-extrabold text-xs px-3 py-1 rounded-full border border-purple-400/30">Interview Scheduled</span>
       case 'HIRED':
       case 'SELECTED':
-        return <span className="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-1 rounded-full border border-emerald-300">Hired</span>
+        return <span className="bg-emerald-400/10 text-emerald-300 font-extrabold text-xs px-3 py-1 rounded-full border border-emerald-400/30">Hired</span>
       case 'REJECTED':
-        return <span className="bg-rose-100 text-rose-800 font-extrabold text-xs px-3 py-1 rounded-full border border-rose-300">Rejected</span>
+        return <span className="bg-rose-400/10 text-rose-300 font-extrabold text-xs px-3 py-1 rounded-full border border-rose-400/30">Rejected</span>
       default:
-        return <span className="bg-slate-100 text-slate-700 font-extrabold text-xs px-3 py-1 rounded-full">{status}</span>
+        return <span className="bg-white/5 text-slate-300 font-extrabold text-xs px-3 py-1 rounded-full border border-white/10">{status}</span>
     }
   }
 
@@ -200,16 +200,19 @@ export const EmployerDashboard = () => {
   return (
     <div className="min-h-screen pb-24">
       {/* Dashboard Title */}
-      <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-2xl mb-8 border-4 border-emerald-500">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white/[0.035] backdrop-blur-2xl text-white rounded-3xl p-6 sm:p-8 shadow-glass-edge mb-8 border border-white/10 relative overflow-hidden">
+        {/* Ambient Top Glow */}
+        <div className="absolute -top-20 left-1/4 w-96 h-32 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-2 bg-emerald-500 text-slate-950 font-black px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-300 font-black px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2">
               <Building2 className="w-4 h-4" /> Employer Portal
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black">
+            <h1 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11]">
               Hire Skilled Local Workers
             </h1>
-            <p className="text-emerald-200 font-medium text-base mt-1">
+            <p className="text-slate-400 font-medium text-sm mt-1">
               Post jobs and manage candidate application progress & interview schedules.
             </p>
           </div>
@@ -217,16 +220,20 @@ export const EmployerDashboard = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('POST_JOB')}
-              className={`px-5 py-3 rounded-2xl font-black text-base transition-all ${
-                activeTab === 'POST_JOB' ? 'bg-emerald-500 text-slate-950 shadow-lg' : 'bg-slate-800 text-slate-200'
+              className={`px-5 py-3 rounded-2xl font-black text-sm transition-all ${
+                activeTab === 'POST_JOB'
+                  ? 'btn-primary text-slate-950 shadow-liquid-gold'
+                  : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
               }`}
             >
               Post Job
             </button>
             <button
               onClick={() => setActiveTab('APPLICANTS')}
-              className={`px-5 py-3 rounded-2xl font-black text-base transition-all ${
-                activeTab === 'APPLICANTS' ? 'bg-emerald-500 text-slate-950 shadow-lg' : 'bg-slate-800 text-slate-200'
+              className={`px-5 py-3 rounded-2xl font-black text-sm transition-all ${
+                activeTab === 'APPLICANTS'
+                  ? 'btn-primary text-slate-950 shadow-liquid-gold'
+                  : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
               }`}
             >
               Applicants ({safeApplications.length})
@@ -237,46 +244,46 @@ export const EmployerDashboard = () => {
 
       {/* Tab 1: Post Job */}
       {activeTab === 'POST_JOB' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-slate-200">
-          <h2 className="text-2xl font-black text-slate-900 mb-4 flex items-center gap-2">
-            <PlusCircle className="w-7 h-7 text-emerald-600" />
+        <div className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-glass-edge border border-white/10 text-white">
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-2.5">
+            <PlusCircle className="w-6 h-6 text-amber-400" />
             <span>Create Worker Job Listing</span>
           </h2>
 
-          <form onSubmit={handlePostJob} className="space-y-4">
+          <form onSubmit={handlePostJob} className="space-y-5">
             <div>
-              <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Job Title</label>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Job Title</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex. Household Driver Required"
-                className="input-field"
+                className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 required
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Work Category</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Work Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="input-field font-semibold"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 >
                   {safeCategories.map((c) => (
-                    <option key={c.code} value={c.code}>{c.name}</option>
+                    <option key={c.code} value={c.code} className="bg-[#0c0c0e] text-white">{c.name}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Location / City</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Location / City</label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="input-field"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                   required
                 />
               </div>
@@ -284,49 +291,49 @@ export const EmployerDashboard = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Min Wage (₹)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Min Wage (₹)</label>
                 <input
                   type="number"
                   value={minSalary}
                   onChange={(e) => setMinSalary(e.target.value)}
-                  className="input-field"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Max Wage (₹)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Max Wage (₹)</label>
                 <input
                   type="number"
                   value={maxSalary}
                   onChange={(e) => setMaxSalary(e.target.value)}
-                  className="input-field"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Salary Type</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Salary Type</label>
                 <select
                   value={salaryType}
                   onChange={(e) => setSalaryType(e.target.value)}
-                  className="input-field font-semibold"
+                  className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 >
-                  <option value="MONTHLY">Monthly</option>
-                  <option value="DAILY">Daily</option>
+                  <option value="MONTHLY" className="bg-[#0c0c0e] text-white">Monthly</option>
+                  <option value="DAILY" className="bg-[#0c0c0e] text-white">Daily</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-extrabold text-slate-800 uppercase mb-1">Job Description</label>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Job Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Specify duties, working hours, food/room availability..."
                 rows={4}
-                className="input-field text-base"
+                className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 required
               />
             </div>
 
-            <button type="submit" className="w-full btn-primary py-4 text-xl font-black">
+            <button type="submit" className="btn-primary w-full py-4 text-base font-black rounded-2xl shadow-liquid-gold transition-all">
               Publish Job Listing
             </button>
           </form>
@@ -335,20 +342,20 @@ export const EmployerDashboard = () => {
 
       {/* Tab 2: Applicants Management */}
       {activeTab === 'APPLICANTS' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-slate-200 space-y-6">
-          <div className="flex items-center justify-between flex-wrap gap-4 border-b-2 border-slate-100 pb-4">
+        <div className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-glass-edge border border-white/10 space-y-6 text-white">
+          <div className="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-4">
             <div>
-              <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-                <Users className="w-7 h-7 text-emerald-600" />
+              <h2 className="text-2xl font-black text-white flex items-center gap-2.5">
+                <Users className="w-6 h-6 text-amber-400" />
                 <span>Manage Worker Applications</span>
               </h2>
-              <p className="text-sm font-semibold text-slate-500 mt-0.5">
+              <p className="text-xs font-semibold text-slate-400 mt-1">
                 Control candidate status from Applied → Review → Interview → Hired / Rejected
               </p>
             </div>
             <button
               onClick={fetchEmployerData}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-xl text-sm transition-all"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 font-extrabold rounded-xl text-xs transition-all flex items-center gap-1.5"
             >
               🔄 Refresh List
             </button>
@@ -359,53 +366,53 @@ export const EmployerDashboard = () => {
               safeApplications.map((app) => (
                 <div
                   key={app.id}
-                  className="bg-slate-50 rounded-3xl p-6 border-2 border-slate-200 shadow-md flex flex-col space-y-4 transition-all hover:border-slate-300"
+                  className="bg-[#0c0c0e]/80 rounded-3xl p-6 border border-white/10 shadow-glass-edge flex flex-col space-y-4 transition-all hover:border-amber-400/30"
                 >
                   {/* Card Main Header */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className="text-2xl font-black text-slate-900">{app.workerName || 'Worker Applicant'}</h3>
+                      <div className="flex items-center gap-2.5 flex-wrap mb-1">
+                        <h3 className="text-xl font-black text-white">{app.workerName || 'Worker Applicant'}</h3>
                         {getStatusBadge(app.status)}
 
                         {app.applicationSource === 'VOICE' ? (
-                          <span className="bg-blue-100 text-blue-800 font-bold text-xs px-2.5 py-0.5 rounded-full border border-blue-300">
+                          <span className="bg-amber-400/10 text-amber-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-amber-400/30 flex items-center gap-1">
                             🎤 Voice App
                           </span>
                         ) : (
-                          <span className="bg-slate-200 text-slate-700 font-bold text-xs px-2.5 py-0.5 rounded-full">
+                          <span className="bg-white/5 text-slate-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-white/10">
                             🖱️ Manual App
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm font-extrabold text-slate-700 mt-1">
-                        Job: <span className="text-emerald-700">{app.jobTitle}</span>
-                        {app.experience && <span className="text-slate-500 font-semibold ml-2">• Experience: {app.experience}</span>}
+                      <p className="text-sm font-semibold text-slate-300 mt-1">
+                        Job: <span className="text-amber-300 font-bold">{app.jobTitle}</span>
+                        {app.experience && <span className="text-slate-400 font-medium ml-2">• Experience: {app.experience}</span>}
                       </p>
                     </div>
 
                     <button
                       onClick={() => setSelectedAppModal(app)}
-                      className="px-4 py-2 bg-white border-2 border-slate-300 hover:bg-slate-100 text-slate-900 font-black rounded-xl text-sm flex items-center gap-1.5 shadow-sm shrink-0"
+                      className="px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-slate-200 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-sm shrink-0 transition-all"
                     >
-                      <Eye className="w-4 h-4 text-blue-600" /> View Application
+                      <Eye className="w-4 h-4 text-amber-400" /> View Application
                     </button>
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs font-black text-slate-400 uppercase">Change Status:</span>
+                  <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Change Status:</span>
 
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                       {/* Move to Review */}
                       <button
                         onClick={() => handleUpdateStatus(app.id, 'UNDER_REVIEW')}
                         disabled={app.status === 'REJECTED' || app.status === 'HIRED'}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
                           app.status === 'UNDER_REVIEW'
-                            ? 'bg-amber-600 text-white shadow'
-                            : 'bg-amber-100 text-amber-900 hover:bg-amber-200 disabled:opacity-40'
+                            ? 'bg-amber-400/30 text-amber-300 border border-amber-400/50 shadow'
+                            : 'bg-white/5 text-slate-300 hover:bg-amber-400/10 hover:text-amber-300 border border-white/10 disabled:opacity-40'
                         }`}
                       >
                         <Clock className="w-3.5 h-3.5" /> Move to Review
@@ -415,10 +422,10 @@ export const EmployerDashboard = () => {
                       <button
                         onClick={() => setScheduleInterviewApp(app)}
                         disabled={app.status === 'REJECTED' || app.status === 'HIRED'}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
                           app.status === 'INTERVIEW_SCHEDULED'
-                            ? 'bg-purple-600 text-white shadow'
-                            : 'bg-purple-100 text-purple-900 hover:bg-purple-200 disabled:opacity-40'
+                            ? 'bg-purple-400/30 text-purple-300 border border-purple-400/50 shadow'
+                            : 'bg-white/5 text-slate-300 hover:bg-purple-400/10 hover:text-purple-300 border border-white/10 disabled:opacity-40'
                         }`}
                       >
                         <Calendar className="w-3.5 h-3.5" /> Schedule Interview
@@ -428,10 +435,10 @@ export const EmployerDashboard = () => {
                       <button
                         onClick={() => handleUpdateStatus(app.id, 'HIRED')}
                         disabled={app.status === 'REJECTED'}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
                           app.status === 'HIRED'
-                            ? 'bg-emerald-600 text-white shadow'
-                            : 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200 disabled:opacity-40'
+                            ? 'bg-emerald-400/30 text-emerald-300 border border-emerald-400/50 shadow'
+                            : 'bg-white/5 text-slate-300 hover:bg-emerald-400/10 hover:text-emerald-300 border border-white/10 disabled:opacity-40'
                         }`}
                       >
                         <CheckCircle className="w-3.5 h-3.5" /> Hire Candidate
@@ -441,10 +448,10 @@ export const EmployerDashboard = () => {
                       <button
                         onClick={() => handleUpdateStatus(app.id, 'REJECTED')}
                         disabled={app.status === 'REJECTED'}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
                           app.status === 'REJECTED'
-                            ? 'bg-rose-600 text-white shadow'
-                            : 'bg-rose-100 text-rose-900 hover:bg-rose-200 disabled:opacity-40'
+                            ? 'bg-rose-400/30 text-rose-300 border border-rose-400/50 shadow'
+                            : 'bg-white/5 text-slate-300 hover:bg-rose-400/10 hover:text-rose-300 border border-white/10 disabled:opacity-40'
                         }`}
                       >
                         <XCircle className="w-3.5 h-3.5" /> Reject
@@ -454,10 +461,10 @@ export const EmployerDashboard = () => {
                 </div>
               ))
             ) : (
-              <div className="p-12 text-center bg-slate-50 rounded-3xl border-2 border-slate-200 space-y-2">
-                <Users className="w-12 h-12 text-slate-400 mx-auto" />
-                <h3 className="text-xl font-black text-slate-800">No applications received yet</h3>
-                <p className="text-sm font-semibold text-slate-500">
+              <div className="p-12 text-center bg-white/[0.02] rounded-3xl border border-white/10 space-y-2">
+                <Users className="w-12 h-12 text-slate-500 mx-auto" />
+                <h3 className="text-lg font-black text-white">No applications received yet</h3>
+                <p className="text-xs font-semibold text-slate-400">
                   Applications submitted by workers will appear here for review.
                 </p>
               </div>
@@ -468,85 +475,85 @@ export const EmployerDashboard = () => {
 
       {/* Schedule Interview Modal */}
       {scheduleInterviewApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-purple-300 p-6 sm:p-8 space-y-6 my-8 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b-2 border-slate-100 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 overflow-y-auto">
+          <div className="bg-[#0c0c0e] w-full max-w-lg rounded-3xl shadow-glass-edge border border-white/10 p-6 sm:p-8 space-y-5 my-8 text-white relative">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <Calendar className="w-6 h-6 text-purple-600" /> Schedule Candidate Interview
+                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-amber-400" /> Schedule Candidate Interview
                 </h3>
-                <p className="text-xs font-bold text-slate-500 mt-0.5">
-                  Applicant: <span className="text-purple-700">{scheduleInterviewApp.workerName}</span> ({scheduleInterviewApp.jobTitle})
+                <p className="text-xs font-semibold text-slate-400 mt-1">
+                  Applicant: <span className="text-amber-300 font-bold">{scheduleInterviewApp.workerName}</span> ({scheduleInterviewApp.jobTitle})
                 </p>
               </div>
               <button
                 onClick={() => setScheduleInterviewApp(null)}
-                className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 flex items-center justify-center font-bold border border-white/10"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleScheduleInterviewSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-black text-slate-800 uppercase mb-1">Interview Date</label>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Interview Date</label>
                   <input
                     type="text"
                     value={interviewDate}
                     onChange={(e) => setInterviewDate(e.target.value)}
                     placeholder="Ex. 28 September 2026"
-                    className="input-field text-sm font-bold"
+                    className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 font-medium"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-slate-800 uppercase mb-1">Interview Time</label>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Interview Time</label>
                   <input
                     type="text"
                     value={interviewTime}
                     onChange={(e) => setInterviewTime(e.target.value)}
                     placeholder="Ex. 10:30 AM"
-                    className="input-field text-sm font-bold"
+                    className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 font-medium"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-800 uppercase mb-1">Interview Mode</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Interview Mode</label>
                 <select
                   value={interviewMode}
                   onChange={(e) => setInterviewMode(e.target.value)}
-                  className="input-field text-sm font-bold"
+                  className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 font-medium"
                 >
-                  <option value="In Person">In Person (Face to Face)</option>
-                  <option value="Phone Call">Phone Call</option>
-                  <option value="Video Call">Video Call</option>
+                  <option value="In Person" className="bg-[#0c0c0e] text-white">In Person (Face to Face)</option>
+                  <option value="Phone Call" className="bg-[#0c0c0e] text-white">Phone Call</option>
+                  <option value="Video Call" className="bg-[#0c0c0e] text-white">Video Call</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-800 uppercase mb-1">Interview Location / Link</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Interview Location / Link</label>
                 <input
                   type="text"
                   value={interviewLocation}
                   onChange={(e) => setInterviewLocation(e.target.value)}
                   placeholder="Address or Google Meet Link"
-                  className="input-field text-sm font-bold"
+                  className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-800 uppercase mb-1">Instructions / Note for Worker</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Instructions / Note for Worker</label>
                 <textarea
                   value={employerMessage}
                   onChange={(e) => setEmployerMessage(e.target.value)}
                   placeholder="Ex. Please bring your driving license or ID proof."
                   rows={3}
-                  className="input-field text-sm font-medium"
+                  className="w-full bg-white/[0.035] border border-white/10 focus:border-amber-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 font-medium"
                 />
               </div>
 
@@ -554,13 +561,13 @@ export const EmployerDashboard = () => {
                 <button
                   type="button"
                   onClick={() => setScheduleInterviewApp(null)}
-                  className="flex-1 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold rounded-2xl text-base"
+                  className="btn-secondary flex-1 py-3 rounded-xl text-sm font-extrabold text-slate-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl text-base shadow-lg"
+                  className="btn-primary flex-1 py-3 rounded-xl text-sm font-black text-slate-950 shadow-liquid-gold"
                 >
                   Confirm & Send Interview
                 </button>

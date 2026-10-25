@@ -178,115 +178,111 @@ export default function JobDetailPage() {
   }
 
   return (
-    <div className="space-y-6 pb-24 max-w-4xl mx-auto">
+    <div className="space-y-6 pb-28 max-w-4xl mx-auto">
       {/* Back Button Header */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 font-extrabold text-blue-600 hover:text-blue-800 text-base"
+        className="flex items-center gap-2 font-extrabold text-slate-400 hover:text-white text-sm transition-colors"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeft className="w-4 h-4" />
         <span>Back to Jobs</span>
       </button>
 
       {/* Top Hero Banner */}
-      <div
-        className="card-premium p-8 text-center border-4 border-blue-500 overflow-hidden relative"
-        style={{
-          background: `linear-gradient(135deg, #ffffff 60%, ${prof.color}15 100%)`,
-        }}
-      >
+      <div className="bg-white/[0.035] backdrop-blur-2xl p-8 text-center border border-white/10 hover:border-amber-400/30 shadow-glass-edge rounded-3xl overflow-hidden relative text-white">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+
         {/* Profession Icon Banner */}
         <div
-          className="w-24 h-24 rounded-3xl flex items-center justify-center text-5xl shadow-xl border-4 mx-auto mb-4"
+          className="w-24 h-24 rounded-3xl flex items-center justify-center text-5xl shadow-glass-edge border border-white/20 mx-auto mb-4 bg-white/[0.05] backdrop-blur-xl"
           style={{
-            background: `linear-gradient(135deg, ${prof.color}25, ${prof.color}50)`,
-            borderColor: prof.color,
+            borderColor: `${prof.color}80`,
           }}
         >
           <span>{prof.icon}</span>
         </div>
 
         <span
-          className="inline-block px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider mb-2"
-          style={{ backgroundColor: `${prof.color}20`, color: prof.color }}
+          className="inline-block px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest mb-2 border border-white/10"
+          style={{ backgroundColor: `${prof.color}25`, color: prof.color }}
         >
           {prof.title}
         </span>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-900">{job?.title}</h1>
+        <h1 className="text-3xl sm:text-4xl font-black text-white">{job?.title}</h1>
         
-        <p className="text-xl font-extrabold text-blue-600 mt-2 flex items-center justify-center gap-1">
-          <MapPin className="w-5 h-5" /> {job?.location}
+        <p className="text-lg font-extrabold text-slate-300 mt-2 flex items-center justify-center gap-1.5">
+          <MapPin className="w-4 h-4 text-slate-400" /> {job?.location}
         </p>
 
-        <p className="text-2xl font-black text-emerald-600 mt-1">
+        <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] mt-1">
           ₹{job?.dailyWage || job?.minSalary || 1200} / Day
         </p>
 
         {/* Audio Speaker Listener Pill */}
         <button
           onClick={handleListenJob}
-          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold rounded-full text-base border border-amber-300 shadow-sm transition-transform active:scale-95"
+          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white/[0.06] hover:bg-white/[0.12] text-[#f3e5ab] font-extrabold rounded-full text-sm border border-amber-400/30 shadow-glass-edge transition-all active:scale-95"
         >
-          <Volume2 className="w-5 h-5 text-amber-700" />
+          <Volume2 className="w-4 h-4 text-[#d4af37]" />
           <span>{t.listenToJob}</span>
         </button>
       </div>
 
       {/* Information Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 bg-white rounded-3xl border-2 border-slate-100 shadow-md text-center">
-          <MapPin className="w-7 h-7 text-blue-600 mx-auto mb-1" />
-          <p className="text-xs font-bold text-slate-400 uppercase">{t.location}</p>
-          <p className="text-lg font-black text-slate-900 mt-0.5">{job?.location}</p>
+        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
+          <MapPin className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.location}</p>
+          <p className="text-base font-black text-white mt-0.5">{job?.location}</p>
         </div>
 
-        <div className="p-5 bg-white rounded-3xl border-2 border-slate-100 shadow-md text-center">
-          <Clock className="w-7 h-7 text-amber-600 mx-auto mb-1" />
-          <p className="text-xs font-bold text-slate-400 uppercase">{t.workTime}</p>
-          <p className="text-lg font-black text-slate-900 mt-0.5">{job?.workTime || '9 AM – 6 PM'}</p>
+        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
+          <Clock className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.workTime}</p>
+          <p className="text-base font-black text-white mt-0.5">{job?.workTime || '9 AM – 6 PM'}</p>
         </div>
 
-        <div className="p-5 bg-white rounded-3xl border-2 border-slate-100 shadow-md text-center">
-          <IndianRupee className="w-7 h-7 text-emerald-600 mx-auto mb-1" />
-          <p className="text-xs font-bold text-slate-400 uppercase">{t.salary}</p>
-          <p className="text-lg font-black text-emerald-700 mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} / Day</p>
+        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
+          <IndianRupee className="w-6 h-6 text-[#d4af37] mx-auto mb-1.5" />
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.salary}</p>
+          <p className="text-base font-black text-[#f3e5ab] mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} / Day</p>
         </div>
 
-        <div className="p-5 bg-white rounded-3xl border-2 border-slate-100 shadow-md text-center">
-          <Star className="w-7 h-7 text-purple-600 mx-auto mb-1" />
-          <p className="text-xs font-bold text-slate-400 uppercase">{t.experience}</p>
-          <p className="text-lg font-black text-slate-900 mt-0.5">{job?.experience || '2+ Years'}</p>
+        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
+          <Star className="w-6 h-6 text-[#d4af37] mx-auto mb-1.5" />
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.experience}</p>
+          <p className="text-base font-black text-white mt-0.5">{job?.experience || '2+ Years'}</p>
         </div>
       </div>
 
       {/* Employer & Description Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-100 shadow-md space-y-4">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-glass-edge space-y-4 text-white">
+        <div className="flex items-center justify-between pb-4 border-b border-white/10">
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">{t.employer}</p>
-            <p className="text-xl font-black text-slate-900">{job?.employerName}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.employer}</p>
+            <p className="text-xl font-black text-white">{job?.employerName}</p>
           </div>
-          <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 font-extrabold text-sm rounded-full border border-emerald-300">
-            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+          <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-300 font-extrabold text-xs rounded-full border border-emerald-400/30">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>{t.verifiedEmployer}</span>
           </span>
         </div>
 
         <div>
-          <h3 className="text-lg font-black text-slate-900 mb-2">Job Description</h3>
-          <p className="text-base text-slate-700 leading-relaxed font-medium">
+          <h3 className="text-base font-black text-white mb-2">Job Description</h3>
+          <p className="text-sm text-slate-300 leading-relaxed font-normal">
             {job?.description}
           </p>
         </div>
 
         {/* Requirements Bullet Points */}
         <div className="pt-2">
-          <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-2">Key Requirements:</h4>
+          <h4 className="text-xs font-black text-[#d4af37] uppercase tracking-widest mb-2">Key Requirements:</h4>
           <ul className="space-y-2">
             {(prof?.props || []).map((prop, idx) => (
-              <li key={idx} className="flex items-center gap-2 text-base font-bold text-slate-800">
-                <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
+              <li key={idx} className="flex items-center gap-2 text-sm font-bold text-slate-200">
+                <CheckCircle2 className="w-4 h-4 text-[#d4af37] shrink-0" />
                 <span>{prop}</span>
               </li>
             ))}
@@ -295,15 +291,15 @@ export default function JobDetailPage() {
       </div>
 
       {/* Sticky Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 shadow-2xl z-40">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0c0c0e]/85 backdrop-blur-2xl border-t border-white/10 shadow-glass-edge z-40">
         <div className="max-w-xl mx-auto">
           {hasApplied ? (
             <button
               type="button"
               disabled
-              className="w-full py-4 bg-emerald-100 text-emerald-900 font-black text-lg rounded-2xl border-2 border-emerald-300 flex items-center justify-center gap-2 cursor-not-allowed opacity-95 shadow-md"
+              className="w-full py-4 bg-emerald-500/15 text-emerald-300 font-black text-base rounded-2xl border border-emerald-400/30 flex items-center justify-center gap-2 cursor-not-allowed opacity-95 shadow-glass-edge"
             >
-              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
               <span>{applicationMode === 'VOICE' ? '🎤 Applied by Voice' : '✓ Already Applied'}</span>
             </button>
           ) : (
@@ -312,7 +308,7 @@ export default function JobDetailPage() {
                 type="button"
                 onClick={handleNormalApply}
                 disabled={isApplying}
-                className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-900 font-extrabold rounded-2xl text-base border border-slate-300 disabled:opacity-50"
+                className="flex-1 py-3.5 bg-white/[0.06] hover:bg-white/[0.12] text-white font-extrabold rounded-2xl text-sm border border-white/10 disabled:opacity-50 transition-all"
               >
                 {isApplying ? 'Applying...' : t.applyNormally}
               </button>
@@ -320,9 +316,9 @@ export default function JobDetailPage() {
               <button
                 type="button"
                 onClick={handleVoiceApplyClick}
-                className="flex-2 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-lg rounded-2xl shadow-xl flex items-center justify-center gap-2 border border-blue-400/30 active:scale-95 transition-transform"
+                className="flex-2 py-3.5 px-6 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] hover:scale-[1.02] active:scale-[0.98] text-[#050505] font-black text-base rounded-2xl shadow-liquid-gold flex items-center justify-center gap-2 border border-amber-300/40 transition-transform"
               >
-                <Mic className="w-6 h-6 animate-pulse" />
+                <Mic className="w-5 h-5 stroke-[2.5]" />
                 <span>{t.applyByVoice}</span>
               </button>
             </div>

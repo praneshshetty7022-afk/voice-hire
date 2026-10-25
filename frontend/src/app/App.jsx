@@ -49,38 +49,50 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-900">
-      {/* Desktop Sidebar Layout */}
+    <div className="min-h-screen bg-[#050505] text-slate-100 flex flex-col md:flex-row font-sans relative overflow-x-hidden selection:bg-gold-400/30 selection:text-gold-200">
+      {/* Dynamic Ambient Light Field Gradients */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-gold-400/10 via-amber-500/5 to-transparent rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -right-24 w-[500px] h-[500px] bg-gradient-to-bl from-silver-400/10 via-slate-500/5 to-transparent rounded-full blur-[130px]" />
+        <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-gradient-to-tr from-gold-400/5 to-transparent rounded-full blur-[120px]" />
+      </div>
+
+      {/* Desktop Floating Liquid Glass Sidebar */}
       <DesktopSidebar lang={selectedLang} onMicTap={handleGlobalMicTap} />
 
-      {/* Main Right Content Panel */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header Bar */}
-        <header className="bg-slate-900 text-white p-4 shadow-xl sticky top-0 z-40 border-b-4 border-blue-600">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+        {/* Floating Liquid Glass Header */}
+        <header className="bg-obsidian-surface/60 backdrop-blur-2xl text-white px-4 sm:px-6 py-3.5 shadow-liquid-glass sticky top-0 z-40 border-b border-white/10">
           <div className="container mx-auto max-w-5xl flex items-center justify-between gap-3">
-            {/* Logo Brand (Mobile & Desktop Header) */}
-            <Link to="/jobs" className="flex items-center gap-2.5">
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-2 rounded-2xl font-black text-xl flex items-center justify-center border border-blue-400">
-                <Mic className="w-6 h-6 animate-pulse" />
+            {/* Logo Brand */}
+            <Link to="/jobs" className="flex items-center gap-3 group">
+              <div className="w-11 h-11 bg-gradient-to-br from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-obsidian rounded-2xl font-black text-xl flex items-center justify-center shadow-liquid-gold border border-white/40 group-hover:scale-105 transition-transform duration-300">
+                <Mic className="w-5 h-5 text-[#0c0c0e] stroke-[2.5]" />
               </div>
               <div>
-                <span className="text-2xl font-black tracking-tight text-white">{t.brandName}</span>
-                <span className="text-xs text-blue-400 font-extrabold block -mt-1 uppercase tracking-wider hidden sm:block">
+                <span className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
+                  <span>{t.brandName}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest bg-gold-400/15 text-gold-300 border border-gold-400/30 px-2 py-0.5 rounded-full hidden sm:inline-block">
+                    LUXURY EDITION
+                  </span>
+                </span>
+                <span className="text-xs text-silver-400 font-extrabold block -mt-0.5 uppercase tracking-wider hidden sm:block">
                   {t.tagline}
                 </span>
               </div>
             </Link>
 
-            {/* Language Selector & Signup */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Language Selector & Register Capsule */}
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
               <LanguageSelector selectedLang={selectedLang} onSelectLang={setSelectedLang} />
 
               <Link
                 to="/register"
-                className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-extrabold px-3 py-2 sm:px-4 sm:py-2 rounded-2xl text-xs sm:text-base shadow-lg flex items-center gap-1.5 border border-blue-400/30 active:scale-95"
+                className="bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#0c0c0e] font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm shadow-liquid-gold hover:shadow-gold-glow flex items-center gap-1.5 border border-white/40 active:scale-95 hover:scale-[1.02] transition-all duration-300"
               >
-                <UserCheck className="w-4 h-4" />
-                <span className="hidden sm:inline">Signup</span>
+                <UserCheck className="w-4 h-4 stroke-[2.5]" />
+                <span className="hidden sm:inline">Register</span>
               </Link>
             </div>
           </div>
@@ -90,7 +102,7 @@ function AppContent() {
         <VoiceDebugPanel />
 
         {/* Main Route Content */}
-        <main className="container-custom py-6 flex-1">
+        <main className="container-custom py-6 flex-1 relative z-10">
           <Routes>
             <Route path="/" element={<Navigate to="/jobs" replace />} />
             <Route path="/jobs" element={<WorkerDashboardPage />} />
@@ -109,7 +121,7 @@ function AppContent() {
         </main>
       </div>
 
-      {/* Mobile Bottom Navbar */}
+      {/* Mobile Floating Bottom Dock */}
       <MobileNavbar lang={selectedLang} onMicTap={handleGlobalMicTap} />
 
       <Toaster
@@ -117,12 +129,13 @@ function AppContent() {
         toastOptions={{
           duration: 3500,
           style: {
-            background: '#0f172a',
-            color: '#38bdf8',
-            fontWeight: 'bold',
-            borderRadius: '1rem',
-            border: '2px solid #2563eb',
-            fontSize: '1.1rem',
+            background: 'rgba(18, 18, 22, 0.9)',
+            backdropFilter: 'blur(20px)',
+            color: '#f8fafc',
+            border: '1px solid rgba(212, 175, 55, 0.35)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+            borderRadius: '16px',
+            fontWeight: 700,
           },
         }}
       />
