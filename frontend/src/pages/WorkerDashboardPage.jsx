@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 import HeroVoiceMic from '../components/HeroVoiceMic'
@@ -15,10 +15,10 @@ export default function WorkerDashboardPage() {
   const t = getTranslation(selectedLang)
   const [userState, setUserState] = useState(() => {
     try {
-      const u = localStorage.getItem('user')
-      return u ? JSON.parse(u) : {}
+      const u = localStorage.getItem('user') || sessionStorage.getItem('user')
+      return u ? JSON.parse(u) : null
     } catch (e) {
-      return {}
+      return null
     }
   })
 
@@ -31,8 +31,16 @@ export default function WorkerDashboardPage() {
 
   const fetchAcceptedApps = async () => {
     try {
-      const localU = JSON.parse(localStorage.getItem('user') || '{}')
-      const workerId = localU.id || localU.phoneNumber || 'worker_1'
+      const localU = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null')
+      if (!localU) {
+        setAcceptedApps([])
+        return
+      }
+      const workerId = localU.id || localU.phoneNumber
+      if (!workerId) {
+        setAcceptedApps([])
+        return
+      }
       const res = await axios.get(`/applications/accepted?workerId=${workerId}`)
       const list = Array.isArray(res?.data)
         ? res.data
@@ -46,8 +54,10 @@ export default function WorkerDashboardPage() {
 
   const syncWorkerProfile = async () => {
     try {
-      const localU = JSON.parse(localStorage.getItem('user') || '{}')
-      const targetId = localU.id || localU.phoneNumber || localU.email || 'worker_1'
+      const localU = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null')
+      if (!localU) return
+      const targetId = localU.id || localU.phoneNumber || localU.email
+      if (!targetId) return
       const res = await axios.get(`/workers/profile?id=${targetId}`)
       if (res.data) {
         const updated = { ...localU, ...res.data }
@@ -67,7 +77,8 @@ export default function WorkerDashboardPage() {
   }
 
   const currentUser = userState
-  const accountStatus = currentUser.role === 'WORKER' ? (currentUser.accountStatus || 'APPROVED') : 'APPROVED'
+  const displayName = currentUser?.name ? currentUser.name.trim() : null
+  const accountStatus = currentUser?.role === 'WORKER' ? (currentUser.accountStatus || 'APPROVED') : 'APPROVED'
 
   const handleProfessionSelect = (profKey) => {
     navigate(`/jobs-list?category=${profKey}`)
@@ -139,8 +150,35 @@ export default function WorkerDashboardPage() {
             <span>Voice-First Employment Platform</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-            {t.greetingMorning} <span className="text-amber-400">{currentUser.name || 'Worker'} 👋</span>
+            {displayName ? (
+              <>
+                {t.greetingMorning} <span className="text-amber-400">{displayName} 👋</span>
+              </>
+            ) : (
+              <>
+                {t.greetingGeneric || 'Welcome,'} <span className="text-amber-400">Guest 👋</span>
+              </>
+            )}
           </h1>
+          {!displayName && (
+            <div className="mt-3 flex items-center gap-2 flex-wrap animate-fade-in">
+              <span className="text-xs font-bold text-blue-200">Looking for employment?</span>
+              <Link
+                to="/register"
+                className="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow transition-all active:scale-95 inline-flex items-center gap-1.5"
+              >
+                <span>Register Profile</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <span className="text-xs text-blue-300 font-bold">or</span>
+              <Link
+                to="/login"
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs rounded-xl border border-white/20 transition-all"
+              >
+                Log In
+              </Link>
+            </div>
+          )}
           <p className="text-lg sm:text-xl font-bold text-blue-100 mt-2">
             {t.heroQuestion}
           </p>

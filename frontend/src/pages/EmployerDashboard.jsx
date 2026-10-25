@@ -82,7 +82,7 @@ export const EmployerDashboard = () => {
       jobId: 'job_carp_1',
       jobTitle: 'Wood Carpenter (ಮರಗೆಲಸ / Carpenter)',
       workerId: 'worker_1',
-      workerName: 'Pranesh Shetty',
+      workerName: 'Rajesh Kumar',
       workerPhone: '9876543210',
       category: 'CARPENTER',
       jobLocation: 'Bengaluru',

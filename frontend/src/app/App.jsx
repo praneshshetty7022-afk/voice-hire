@@ -25,9 +25,18 @@ function AppContent() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!localStorage.getItem('user')) {
-      localStorage.setItem('user', JSON.stringify({ id: 'worker_1', name: 'Pranesh', phoneNumber: '9876543210', role: 'WORKER', experience: '2 Years', accountStatus: 'APPROVED' }))
-      localStorage.setItem('token', 'jwt_worker_1')
+    // If the legacy mock dummy user was previously seeded, clear it so genuine guest/registered user state is respected
+    try {
+      const stored = localStorage.getItem('user')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed?.id === 'worker_1' && parsed?.name === 'Pranesh' && !localStorage.getItem('user_explicit_login')) {
+          localStorage.removeItem('user')
+          localStorage.removeItem('token')
+        }
+      }
+    } catch (e) {
+      // ignore parse errors
     }
   }, [])
 

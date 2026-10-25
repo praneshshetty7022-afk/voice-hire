@@ -274,8 +274,8 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
   }
 
   const extractDetailsFromTranscript = (text) => {
-    const parsedName = parseNameFromSpeech(text) || currentUser.name || 'Pranesh'
-    const parsedExp = parseExperienceFromSpeech(text) || currentUser.experience || '2 years'
+    const parsedName = parseNameFromSpeech(text) || currentUser?.name || 'Applicant'
+    const parsedExp = parseExperienceFromSpeech(text) || currentUser?.experience || '2 years'
 
     setExtracted({
       name: parsedName,
@@ -292,11 +292,12 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
   const handleDemoAutoFill = () => {
     const user = getUserProfile()
-    const demoText = `My name is ${user.name || 'Pranesh'}. I have ${user.experience || '2 years'} experience.`
+    const fallbackName = user?.name || 'Applicant'
+    const demoText = `My name is ${fallbackName}. I have ${user?.experience || '2 years'} experience.`
     setTranscript(demoText)
     setExtracted({
-      name: user.name || 'Pranesh',
-      experience: user.experience || '2 years',
+      name: fallbackName,
+      experience: user?.experience || '2 years',
       skill: prof.title || job?.category || 'Driver',
     })
     setCurrentState('CONFIRMATION')
@@ -331,11 +332,11 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
         jobTitle: job?.title || prof.title,
         location: job?.location || 'Bengaluru',
         employer: job?.employerName || 'Sharma Household',
-        userId: user.id || 'worker_1',
-        workerId: user.id || 'worker_1',
-        name: extracted.name || user.name || 'Pranesh',
-        applicantName: extracted.name || user.name || 'Pranesh',
-        workerName: extracted.name || user.name || 'Pranesh',
+        userId: user?.id || user?.phoneNumber || 'guest_worker',
+        workerId: user?.id || user?.phoneNumber || 'guest_worker',
+        name: extracted.name || user?.name || 'Applicant',
+        applicantName: extracted.name || user?.name || 'Applicant',
+        workerName: extracted.name || user?.name || 'Applicant',
         experienceYears: expVal,
         experience: extracted.experience || `${expVal} years`,
         voiceRecording: audioUrl || '',
@@ -453,7 +454,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               onClick={handleDemoAutoFill}
               className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold rounded-2xl text-base"
             >
-              Demo: Standard Auto-Fill ("Pranesh, 2 years")
+              Demo: Standard Auto-Fill ({currentUser?.name ? `"${currentUser.name}, 2 years"` : '"Applicant, 2 years"'})
             </button>
           </div>
         )}
@@ -482,7 +483,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 <User className="w-6 h-6 text-indigo-600 shrink-0" />
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase">Applicant Name</p>
-                  <p className="text-lg font-black text-slate-900">{extracted.name || 'Pranesh'}</p>
+                  <p className="text-lg font-black text-slate-900">{extracted.name || currentUser?.name || 'Applicant'}</p>
                 </div>
               </div>
 
@@ -560,7 +561,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 <span>{prof.icon}</span> {job?.title || prof.title}
               </p>
               <p className="text-sm font-bold text-slate-600 flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-600" /> {extracted.name || 'Pranesh'}
+                <User className="w-4 h-4 text-blue-600" /> {extracted.name || currentUser?.name || 'Applicant'}
               </p>
               <p className="text-sm font-black text-emerald-700 flex items-center gap-2">
                 <Star className="w-4 h-4 text-amber-500" /> {extracted.experience || '2 years'} experience

@@ -86,13 +86,13 @@ export const VoiceProvider = ({ children }) => {
         
         if (action.type === 'APPLY_JOB') {
           try {
-            const userStr = localStorage.getItem('user')
-            const user = userStr ? JSON.parse(userStr) : { id: 'worker_1', name: 'Pranesh' }
+            const userStr = localStorage.getItem('user') || sessionStorage.getItem('user')
+            const user = userStr ? JSON.parse(userStr) : null
             
             const res = await axios.post('/applications', {
               jobId: action.job.id,
-              workerId: user.id || 'worker_1',
-              workerName: user.name || 'Pranesh',
+              workerId: user?.id || user?.phoneNumber || 'guest_applicant',
+              workerName: user?.name || 'Applicant',
               applicationSource: 'VOICE',
             })
 
