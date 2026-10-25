@@ -18,7 +18,7 @@ export default function MobileNavbar({ lang = 'en', onMicTap }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 shadow-2xl sm:hidden">
       <div className="flex items-center justify-around h-20 px-2 relative">
-        {navItems.map((item, idx) => {
+        {(Array.isArray(navItems) ? navItems : []).map((item, idx) => {
           if (item.isMic) {
             return (
               <div key="mic-btn" className="relative -top-6 flex justify-center">

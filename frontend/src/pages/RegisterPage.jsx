@@ -212,7 +212,7 @@ export const RegisterPage = () => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {workTypes.map((work) => (
+            {(Array.isArray(workTypes) ? workTypes : []).map((work) => (
               <button
                 key={work.id}
                 type="button"

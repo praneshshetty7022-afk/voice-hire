@@ -38,7 +38,7 @@ export default function LanguageSelector({ selectedLang = 'kn-IN', onSelectLang 
             </div>
 
             <div className="py-1 space-y-1">
-              {LANGUAGES.map((lang) => {
+              {(Array.isArray(LANGUAGES) ? LANGUAGES : []).map((lang) => {
                 const isSelected = lang.code === selectedLang
                 return (
                   <button

@@ -37,8 +37,9 @@ export default function JobListingPage() {
   }, [selectedCategory, selectedCity, searchQuery])
 
   useEffect(() => {
-    if (searchParams.get('action') === 'voice-apply' && jobs.length > 0 && !voiceApplyJob) {
-      setVoiceApplyJob(jobs[0])
+    const safeJobs = Array.isArray(jobs) ? jobs : []
+    if (searchParams.get('action') === 'voice-apply' && safeJobs.length > 0 && !voiceApplyJob) {
+      setVoiceApplyJob(safeJobs[0])
     }
   }, [searchParams, jobs])
 
@@ -54,8 +55,12 @@ export default function JobListingPage() {
       if (queryStr) url += `?${queryStr}`
 
       const res = await axios.get(url)
-      if (res.data && Array.isArray(res.data)) {
-        let filtered = res.data
+      const rawList = Array.isArray(res?.data)
+        ? res.data
+        : (Array.isArray(res?.data?.jobs) ? res.data.jobs : (Array.isArray(res?.data?.data) ? res.data.data : null))
+
+      if (rawList) {
+        let filtered = rawList
         if (selectedCategory !== 'ALL') {
           filtered = filtered.filter(j => (j.category || '').toUpperCase() === selectedCategory.toUpperCase())
         }
@@ -129,6 +134,7 @@ export default function JobListingPage() {
   }
 
   const activeProf = PROFESSIONS[selectedCategory]
+  const safeJobs = Array.isArray(jobs) ? jobs : []
 
   return (
     <div className="space-y-6 pb-12">
@@ -184,7 +190,7 @@ export default function JobListingPage() {
           >
             All Cities
           </button>
-          {CITIES.map((city) => (
+          {(Array.isArray(CITIES) ? CITIES : []).map((city) => (
             <button
               key={city.id}
               type="button"
@@ -221,7 +227,7 @@ export default function JobListingPage() {
           >
             All Professions
           </button>
-          {Object.entries(PROFESSIONS).map(([key, prof]) => (
+          {Object.entries(PROFESSIONS || {}).map(([key, prof]) => (
             <button
               key={key}
               type="button"
@@ -248,9 +254,9 @@ export default function JobListingPage() {
           <RefreshCw className="w-10 h-10 animate-spin text-blue-600 mx-auto" />
           <p className="text-lg font-black text-slate-800">Loading Available Jobs...</p>
         </div>
-      ) : jobs.length > 0 ? (
+      ) : safeJobs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {jobs.map((job) => (
+          {safeJobs.map((job) => (
             <JobCard
               key={job.id || job._id}
               job={job}

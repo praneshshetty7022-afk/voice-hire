@@ -34,11 +34,13 @@ export default function WorkerDashboardPage() {
       const localU = JSON.parse(localStorage.getItem('user') || '{}')
       const workerId = localU.id || localU.phoneNumber || 'worker_1'
       const res = await axios.get(`/applications/accepted?workerId=${workerId}`)
-      if (res.data) {
-        setAcceptedApps(res.data)
-      }
+      const list = Array.isArray(res?.data)
+        ? res.data
+        : (Array.isArray(res?.data?.applications) ? res.data.applications : (Array.isArray(res?.data?.data) ? res.data.data : []))
+      setAcceptedApps(list)
     } catch (e) {
       console.error('Failed to fetch accepted applications:', e)
+      setAcceptedApps([])
     }
   }
 
@@ -175,7 +177,7 @@ export default function WorkerDashboardPage() {
       </div>
 
       {/* Accepted Job Applications Banner on Home Page */}
-      {acceptedApps.length > 0 && (
+      {Array.isArray(acceptedApps) && acceptedApps.length > 0 && (
         <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-2xl border-4 border-emerald-500 animate-fade-in space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -193,12 +195,12 @@ export default function WorkerDashboardPage() {
               </div>
             </div>
             <span className="bg-emerald-500 text-slate-950 font-black px-3.5 py-1 rounded-full text-xs">
-              {acceptedApps.length} Accepted
+              {(Array.isArray(acceptedApps) ? acceptedApps.length : 0)} Accepted
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            {acceptedApps.map((app) => (
+            {(Array.isArray(acceptedApps) ? acceptedApps : []).map((app) => (
               <div key={app.id || app.applicationId} className="bg-slate-800/90 p-4 rounded-2xl border-2 border-emerald-400/60 shadow-lg flex flex-col justify-between space-y-3">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
@@ -246,7 +248,7 @@ export default function WorkerDashboardPage() {
             <span>{t.trySaying}</span>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {t.voiceCommands.map((cmd, idx) => (
+            {(Array.isArray(t?.voiceCommands) ? t.voiceCommands : []).map((cmd, idx) => (
               <button
                 key={idx}
                 type="button"
@@ -280,7 +282,7 @@ export default function WorkerDashboardPage() {
 
         {/* 2-Column Mobile / 4-Column Desktop Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {professionKeys.map((profKey) => (
+          {(Array.isArray(professionKeys) ? professionKeys : []).map((profKey) => (
             <ProfessionCard
               key={profKey}
               professionKey={profKey}

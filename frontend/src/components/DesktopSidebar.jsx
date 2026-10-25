@@ -42,7 +42,7 @@ export default function DesktopSidebar({ lang = 'en', onMicTap }) {
       {/* Navigation Links */}
       <nav className="flex-1 space-y-2">
         <p className="px-3 text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Main Menu</p>
-        {links.map((item) => {
+        {(Array.isArray(links) ? links : []).map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
           return (

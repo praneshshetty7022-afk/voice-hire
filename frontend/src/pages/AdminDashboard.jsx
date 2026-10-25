@@ -43,12 +43,28 @@ export const AdminDashboard = () => {
         axios.get('/admin/workers/pending').catch(() => ({ data: [] })),
         axios.get('/admin/applications').catch(() => ({ data: [] }))
       ])
-      setCategories(cRes.data || [])
-      setJobs(jRes.data || [])
-      setPendingWorkers(pRes.data || [])
-      setApplications(aRes.data || [])
+
+      const toArray = (res) => {
+        if (!res || !res.data) return []
+        if (Array.isArray(res.data)) return res.data
+        if (Array.isArray(res.data.data)) return res.data.data
+        if (Array.isArray(res.data.categories)) return res.data.categories
+        if (Array.isArray(res.data.jobs)) return res.data.jobs
+        if (Array.isArray(res.data.workers)) return res.data.workers
+        if (Array.isArray(res.data.applications)) return res.data.applications
+        return []
+      }
+
+      setCategories(toArray(cRes))
+      setJobs(toArray(jRes))
+      setPendingWorkers(toArray(pRes))
+      setApplications(toArray(aRes))
     } catch (err) {
       console.error('Error fetching admin data:', err)
+      setCategories([])
+      setJobs([])
+      setPendingWorkers([])
+      setApplications([])
     } finally {
       setLoading(false)
     }
@@ -101,7 +117,7 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err)
       toast.success('Worker approved successfully.')
-      setPendingWorkers(prev => prev.filter(w => (w.id || w.phoneNumber) !== workerId))
+      setPendingWorkers(prev => (Array.isArray(prev) ? prev : []).filter(w => (w.id || w.phoneNumber) !== workerId))
       setShowApproveModal(false)
       setShowDetailModal(false)
       setTargetWorker(null)
@@ -127,7 +143,7 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err)
       toast.success('Worker application rejected.')
-      setPendingWorkers(prev => prev.filter(w => (w.id || w.phoneNumber) !== workerId))
+      setPendingWorkers(prev => (Array.isArray(prev) ? prev : []).filter(w => (w.id || w.phoneNumber) !== workerId))
       setShowRejectModal(false)
       setShowDetailModal(false)
       setTargetWorker(null)
@@ -157,7 +173,7 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err)
       toast.success('🎉 Job Application Accepted!')
-      setApplications(prev => prev.map(a => (a.id === appId ? { ...a, status: 'ACCEPTED' } : a)))
+      setApplications(prev => (Array.isArray(prev) ? prev : []).map(a => (a.id === appId ? { ...a, status: 'ACCEPTED' } : a)))
       setShowAcceptAppModal(false)
       setShowAppDetailModal(false)
       setTargetApp(null)
@@ -183,7 +199,7 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err)
       toast.success('Job application rejected.')
-      setApplications(prev => prev.map(a => (a.id === appId ? { ...a, status: 'REJECTED' } : a)))
+      setApplications(prev => (Array.isArray(prev) ? prev : []).map(a => (a.id === appId ? { ...a, status: 'REJECTED' } : a)))
       setShowRejectAppModal(false)
       setShowAppDetailModal(false)
       setTargetApp(null)
@@ -194,6 +210,11 @@ export const AdminDashboard = () => {
     setSelectedApp(app)
     setShowAppDetailModal(true)
   }
+
+  const safeCategories = Array.isArray(categories) ? categories : []
+  const safeJobs = Array.isArray(jobs) ? jobs : []
+  const safePendingWorkers = Array.isArray(pendingWorkers) ? pendingWorkers : []
+  const safeApplications = Array.isArray(applications) ? applications : []
 
   return (
     <div className="min-h-screen pb-24">
@@ -224,7 +245,7 @@ export const AdminDashboard = () => {
               <span className="text-xs font-black uppercase tracking-wider opacity-80">Pending Workers</span>
               <Clock className="w-5 h-5 text-amber-300" />
             </div>
-            <div className="text-3xl font-black mt-2">{pendingWorkers.length}</div>
+            <div className="text-3xl font-black mt-2">{safePendingWorkers.length}</div>
             <div className="text-xs font-bold mt-1 opacity-90">Awaiting Approval</div>
           </button>
 
@@ -241,7 +262,7 @@ export const AdminDashboard = () => {
               <span className="text-xs font-black uppercase tracking-wider opacity-80">Job Applications</span>
               <FileText className="w-5 h-5 text-indigo-300" />
             </div>
-            <div className="text-3xl font-black mt-2">{applications.length}</div>
+            <div className="text-3xl font-black mt-2">{safeApplications.length}</div>
             <div className="text-xs font-bold mt-1 opacity-90">Applied by Workers</div>
           </button>
 
@@ -258,7 +279,7 @@ export const AdminDashboard = () => {
               <span className="text-xs font-black uppercase tracking-wider opacity-80">Categories</span>
               <List className="w-5 h-5 text-blue-300" />
             </div>
-            <div className="text-3xl font-black mt-2">{categories.length}</div>
+            <div className="text-3xl font-black mt-2">{safeCategories.length}</div>
             <div className="text-xs font-bold mt-1 opacity-90">Active Skill Types</div>
           </button>
 
@@ -275,7 +296,7 @@ export const AdminDashboard = () => {
               <span className="text-xs font-black uppercase tracking-wider opacity-80">Active Jobs</span>
               <CheckCircle2 className="w-5 h-5 text-emerald-300" />
             </div>
-            <div className="text-3xl font-black mt-2">{jobs.length}</div>
+            <div className="text-3xl font-black mt-2">{safeJobs.length}</div>
             <div className="text-xs font-bold mt-1 opacity-90">Live Listings</div>
           </button>
         </div>
@@ -292,7 +313,7 @@ export const AdminDashboard = () => {
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>Worker Approvals ({pendingWorkers.length})</span>
+          <span>Worker Approvals ({safePendingWorkers.length})</span>
         </button>
 
         <button
@@ -304,7 +325,7 @@ export const AdminDashboard = () => {
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Job Applications ({applications.length})</span>
+          <span>Job Applications ({safeApplications.length})</span>
         </button>
 
         <button
@@ -316,7 +337,7 @@ export const AdminDashboard = () => {
           }`}
         >
           <List className="w-4 h-4" />
-          <span>Worker Categories ({categories.length})</span>
+          <span>Worker Categories ({safeCategories.length})</span>
         </button>
 
         <button
@@ -328,7 +349,7 @@ export const AdminDashboard = () => {
           }`}
         >
           <CheckCircle2 className="w-4 h-4" />
-          <span>Active Jobs ({jobs.length})</span>
+          <span>Active Jobs ({safeJobs.length})</span>
         </button>
       </div>
 
@@ -341,11 +362,11 @@ export const AdminDashboard = () => {
               <p className="text-slate-600 text-sm font-bold mt-0.5">Review and approve new worker accounts before they can apply for jobs.</p>
             </div>
             <span className="bg-amber-100 text-amber-900 font-extrabold px-3 py-1 rounded-full text-xs border border-amber-300">
-              {pendingWorkers.length} Pending
+              {safePendingWorkers.length} Pending
             </span>
           </div>
 
-          {pendingWorkers.length === 0 ? (
+          {safePendingWorkers.length === 0 ? (
             <div className="p-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
               <h3 className="text-lg font-black text-slate-800">No Pending Worker Approvals</h3>
@@ -353,7 +374,7 @@ export const AdminDashboard = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {pendingWorkers.map((worker) => (
+              {safePendingWorkers.map((worker) => (
                 <div key={worker.id} className="p-5 bg-slate-50 rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -408,11 +429,11 @@ export const AdminDashboard = () => {
               <p className="text-slate-600 text-sm font-bold mt-0.5">Accept or reject worker job applications. Accepted applications appear on the Worker Home page.</p>
             </div>
             <span className="bg-indigo-100 text-indigo-900 font-extrabold px-3 py-1 rounded-full text-xs border border-indigo-300">
-              {applications.length} Applications Total
+              {safeApplications.length} Applications Total
             </span>
           </div>
 
-          {applications.length === 0 ? (
+          {safeApplications.length === 0 ? (
             <div className="p-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
               <FileText className="w-12 h-12 text-indigo-500 mx-auto mb-3" />
               <h3 className="text-lg font-black text-slate-800">No Job Applications Found</h3>
@@ -420,7 +441,7 @@ export const AdminDashboard = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {applications.map((app) => {
+              {safeApplications.map((app) => {
                 const isAccepted = (app.status === 'ACCEPTED' || app.status === 'APPROVED' || app.status === 'HIRED');
                 const isRejected = (app.status === 'REJECTED');
                 return (
@@ -539,7 +560,7 @@ export const AdminDashboard = () => {
           </form>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {categories.map((c) => (
+            {safeCategories.map((c) => (
               <div key={c.id || c.code} className="bg-slate-50 p-3 rounded-2xl border-2 border-slate-200 flex items-center justify-between">
                 <span className="font-extrabold text-sm text-slate-800">{c.icon || '🛠️'} {c.code}</span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -552,9 +573,9 @@ export const AdminDashboard = () => {
       {/* SECTION 3: JOBS MANAGEMENT */}
       {activeTab === 'jobs' && (
         <div className="bg-white rounded-3xl p-6 shadow-xl border-4 border-slate-200">
-          <h2 className="text-2xl font-black text-slate-900 mb-4">Active Platform Jobs ({jobs.length})</h2>
+          <h2 className="text-2xl font-black text-slate-900 mb-4">Active Platform Jobs ({safeJobs.length})</h2>
           <div className="space-y-3">
-            {jobs.map((j) => (
+            {safeJobs.map((j) => (
               <div key={j.id} className="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200 flex items-center justify-between">
                 <div>
                   <div className="font-extrabold text-base text-slate-900">{j.title}</div>

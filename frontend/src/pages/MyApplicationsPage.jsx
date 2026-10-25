@@ -26,8 +26,11 @@ export default function MyApplicationsPage() {
       const user = userStr ? JSON.parse(userStr) : { id: 'worker_1' }
 
       const res = await axios.get(`/applications/worker/${user.id || 'worker_1'}`)
-      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-        setApplications(res.data)
+      const data = Array.isArray(res?.data) 
+        ? res.data 
+        : (Array.isArray(res?.data?.applications) ? res.data.applications : (Array.isArray(res?.data?.data) ? res.data.data : null))
+      if (data && data.length > 0) {
+        setApplications(data)
       } else {
         setApplications(getMockApplications())
       }
@@ -74,7 +77,8 @@ export default function MyApplicationsPage() {
     },
   ]
 
-  const filteredApps = applications.filter((app) => {
+  const safeApplications = Array.isArray(applications) ? applications : []
+  const filteredApps = safeApplications.filter((app) => {
     if (filterTab === 'VOICE') return app.applicationSource === 'VOICE'
     if (filterTab === 'MANUAL') return app.applicationSource !== 'VOICE'
     return true
@@ -165,9 +169,9 @@ export default function MyApplicationsPage() {
           <RefreshCw className="w-10 h-10 animate-spin text-blue-600 mx-auto" />
           <p className="text-lg font-black text-slate-800">Loading Applications...</p>
         </div>
-      ) : filteredApps.length > 0 ? (
+      ) : (Array.isArray(filteredApps) && filteredApps.length > 0) ? (
         <div className="space-y-6">
-          {filteredApps.map((app) => {
+          {(Array.isArray(filteredApps) ? filteredApps : []).map((app) => {
             const profCategory = (app.category || 'DRIVER').toUpperCase()
             const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
             const currentStepIdx = getStatusIndex(app.status)

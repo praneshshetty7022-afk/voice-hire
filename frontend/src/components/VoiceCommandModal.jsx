@@ -80,7 +80,7 @@ export default function VoiceCommandModal({ isOpen, onClose, onSubmitVoice, sele
             <Sparkles className="w-4 h-4 text-amber-500" /> Tap to Speak Command:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-60 overflow-y-auto pr-1">
-            {sampleCommands.map((cmd, idx) => (
+            {(Array.isArray(sampleCommands) ? sampleCommands : []).map((cmd, idx) => (
               <button
                 key={idx}
                 type="button"

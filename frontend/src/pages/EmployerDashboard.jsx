@@ -52,17 +52,24 @@ export const EmployerDashboard = () => {
     setLoading(true)
     try {
       const jRes = await axios.get('/jobs')
-      setJobs(jRes.data || [])
+      const jobsList = Array.isArray(jRes?.data) 
+        ? jRes.data 
+        : (Array.isArray(jRes?.data?.jobs) ? jRes.data.jobs : (Array.isArray(jRes?.data?.data) ? jRes.data.data : []))
+      setJobs(jobsList)
 
       const aRes = await axios.get('/employer/applications')
-      if (aRes.data && Array.isArray(aRes.data) && aRes.data.length > 0) {
-        setApplications(aRes.data)
+      const appsList = Array.isArray(aRes?.data) 
+        ? aRes.data 
+        : (Array.isArray(aRes?.data?.applications) ? aRes.data.applications : (Array.isArray(aRes?.data?.data) ? aRes.data.data : []))
+      if (appsList.length > 0) {
+        setApplications(appsList)
       } else {
         // Fallback mock applications if database has no entries
         setApplications(getMockEmployerApplications())
       }
     } catch (err) {
       console.error(err)
+      setJobs([])
       setApplications(getMockEmployerApplications())
     } finally {
       setLoading(false)
@@ -187,6 +194,9 @@ export const EmployerDashboard = () => {
     }
   }
 
+  const safeApplications = Array.isArray(applications) ? applications : []
+  const safeCategories = Array.isArray(categories) ? categories : []
+
   return (
     <div className="min-h-screen pb-24">
       {/* Dashboard Title */}
@@ -219,7 +229,7 @@ export const EmployerDashboard = () => {
                 activeTab === 'APPLICANTS' ? 'bg-emerald-500 text-slate-950 shadow-lg' : 'bg-slate-800 text-slate-200'
               }`}
             >
-              Applicants ({applications.length})
+              Applicants ({safeApplications.length})
             </button>
           </div>
         </div>
@@ -254,7 +264,7 @@ export const EmployerDashboard = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   className="input-field font-semibold"
                 >
-                  {categories.map((c) => (
+                  {safeCategories.map((c) => (
                     <option key={c.code} value={c.code}>{c.name}</option>
                   ))}
                 </select>
@@ -345,8 +355,8 @@ export const EmployerDashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {applications.length > 0 ? (
-              applications.map((app) => (
+            {safeApplications.length > 0 ? (
+              safeApplications.map((app) => (
                 <div
                   key={app.id}
                   className="bg-slate-50 rounded-3xl p-6 border-2 border-slate-200 shadow-md flex flex-col space-y-4 transition-all hover:border-slate-300"

@@ -284,7 +284,7 @@ export default function JobDetailPage() {
         <div className="pt-2">
           <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-2">Key Requirements:</h4>
           <ul className="space-y-2">
-            {prof.props.map((prop, idx) => (
+            {(prof?.props || []).map((prop, idx) => (
               <li key={idx} className="flex items-center gap-2 text-base font-bold text-slate-800">
                 <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
                 <span>{prop}</span>
