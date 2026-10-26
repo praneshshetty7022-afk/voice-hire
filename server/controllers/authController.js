@@ -44,7 +44,7 @@ export const register = async (req, res) => {
       phoneNumber,
       workType = 'Driver',
       city = 'Bengaluru',
-      preferredLanguage = 'hi-IN',
+      preferredLanguage = 'en-IN',
     } = req.body;
 
     // ONLY Name and Phone Number are required
@@ -52,7 +52,7 @@ export const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         code: 'MISSING_FIELDS',
-        message: 'कृपया अपना नाम और मोबाइल नंबर दर्ज करें (Please provide Name and Phone Number).',
+        message: 'Please enter Name and Phone Number (कृपया अपना नाम और मोबाइल नंबर दर्ज करें).',
       });
     }
 
@@ -61,7 +61,7 @@ export const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         code: 'INVALID_PHONE',
-        message: 'कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit phone number).',
+        message: 'Please enter a valid 10-digit mobile number (कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें).',
       });
     }
 
@@ -69,13 +69,28 @@ export const register = async (req, res) => {
 
     if (isMongoConnected) {
       // Check if phone number already exists
-      const existing = await User.findOne({ phoneNumber: cleanPhone });
-      if (existing) {
-        return res.status(409).json({
-          success: false,
-          code: 'USER_ALREADY_EXISTS',
-          message: 'यह मोबाइल नंबर पहले से पंजीकृत है। कृपया लॉगिन करें (Phone number already registered. Please login).',
-          phoneNumber: cleanPhone,
+      let user = await User.findOne({ phoneNumber: cleanPhone });
+      if (user) {
+        user.lastLogin = new Date();
+        if (fullName) user.fullName = fullName.trim();
+        if (preferredLanguage) user.preferredLanguage = preferredLanguage;
+        await user.save({ validateBeforeSave: false });
+
+        const token = user.generateAuthToken();
+        return res.status(200).json({
+          success: true,
+          message: `Welcome back, ${user.fullName}!`,
+          token,
+          user: {
+            id: user._id,
+            fullName: user.fullName,
+            phoneNumber: user.phoneNumber,
+            workType: user.workType,
+            city: user.city,
+            role: user.role,
+            verificationStatus: user.verificationStatus,
+            trustScore: user.trustScore,
+          },
         });
       }
 
@@ -96,7 +111,7 @@ export const register = async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: `बधाई हो, ${newUser.fullName}! आपका पंजीकरण सफल रहा (Registration completed).`,
+        message: `Welcome, ${newUser.fullName}! Your registration is complete.`,
         token,
         user: {
           id: newUser._id,
@@ -111,13 +126,23 @@ export const register = async (req, res) => {
       });
     } else {
       // In-Memory Resilient Fallback Mode
-      const existing = fallbackUsers.find((u) => u.phoneNumber === cleanPhone);
+      let existing = fallbackUsers.find((u) => u.phoneNumber === cleanPhone);
       if (existing) {
-        return res.status(409).json({
-          success: false,
-          code: 'USER_ALREADY_EXISTS',
-          message: 'यह मोबाइल नंबर पहले से पंजीकृत है। कृपया लॉगिन करें (Already registered. Please login).',
-          phoneNumber: cleanPhone,
+        existing.fullName = fullName.trim();
+        existing.preferredLanguage = preferredLanguage;
+        const token = generateToken({
+          id: existing.id,
+          phoneNumber: existing.phoneNumber,
+          fullName: existing.fullName,
+          workType: existing.workType || 'Driver',
+          role: existing.role || 'WORKER',
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: `Welcome back, ${existing.fullName}!`,
+          token,
+          user: existing,
         });
       }
 
@@ -127,6 +152,7 @@ export const register = async (req, res) => {
         phoneNumber: cleanPhone,
         workType,
         city,
+        preferredLanguage,
         role: 'WORKER',
         verificationStatus: 'verified',
         trustScore: 95,
@@ -144,7 +170,7 @@ export const register = async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: `बधाई हो, ${newWorker.fullName}! आपका पंजीकरण सफल रहा (Registration completed).`,
+        message: `Welcome, ${newWorker.fullName}! Your registration is complete.`,
         token,
         user: newWorker,
       });
@@ -154,7 +180,7 @@ export const register = async (req, res) => {
     return res.status(500).json({
       success: false,
       code: 'REGISTRATION_ERROR',
-      message: error.message || 'पंजीकरण विफल (Registration failed).',
+      message: error.message || 'Registration failed.',
     });
   }
 };
