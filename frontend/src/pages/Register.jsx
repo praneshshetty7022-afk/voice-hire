@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Phone, Lock, User, Volume2, Mic, MicOff, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle, Shield } from 'lucide-react';
+import { Phone, User, Volume2, Mic, MicOff, ArrowRight, Sparkles, CheckCircle, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../api/axios';
 import ThreeBackground from '../components/ThreeBackground';
@@ -9,24 +9,21 @@ import styles from '../styles/auth.module.css';
 
 /**
  * Worker Register Component - Udyoga Mitra / VoiceHire
- * Specially designed for low-literacy informal & blue-collar workers.
- * Features: Vibrant, cheerful, welcoming colors, visual emoji cards, Voice Mic entry, Audio TTS guides.
+ * Streamlined: ONLY requires Name and Phone Number.
+ * Completely removed Email and Password fields and validations.
  */
 export const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Extract pre-filled phone/identifier from location state or search params
+  // Extract pre-filled phone from location state or search params (?phone=...)
   const queryParams = new URLSearchParams(location.search);
-  const initialPhone = location.state?.phone || location.state?.email || queryParams.get('phone') || queryParams.get('email') || '';
+  const initialPhone = location.state?.phone || queryParams.get('phone') || '';
   const isAutoRedirected = Boolean(location.state?.autoFilled || queryParams.get('phone'));
 
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(initialPhone);
-  const [password, setPassword] = useState('');
   const [selectedWork, setSelectedWork] = useState('Driver');
-  const [city, setCity] = useState('Bengaluru');
-  const [showPassword, setShowPassword] = useState(false);
   const [isListeningName, setIsListeningName] = useState(false);
   const [isListeningPhone, setIsListeningPhone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,7 +53,7 @@ export const Register = () => {
 
   const handleAudioHelp = () => {
     speakInstruction(
-      'नमस्ते! अपना नाम बोलें या लिखें, मोबाइल नंबर भरें, और नीचे अपना काम चुनें जैसे ड्राइवर, रसोइया, या डिलीवरी। फिर 4 अंकों का पिन बनाकर रजिस्टर करें।'
+      'नमस्ते! अपना नाम बोलें या लिखें, 10 अंकों का मोबाइल नंबर भरें, और नीचे अपना काम चुनें। फिर रजिस्टर बटन दबाएं।'
     );
     toast('🔊 निर्देश सुने जा रहे हैं (Playing audio instructions)...', {
       icon: '📢',
@@ -177,30 +174,32 @@ export const Register = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
-    if (!fullName.trim() || !phoneNumber.trim() || !password.trim()) {
-      toast.error('कृपया नाम, मोबाइल नंबर और पिन भरें (Please fill all fields).', {
+    // Client-side validation ONLY for Name and Phone Number
+    if (!fullName.trim() || !phoneNumber.trim()) {
+      toast.error('कृपया अपना नाम और 10 अंकों का मोबाइल नंबर भरें (Please enter Name and Phone).', {
         style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
       });
-      speakInstruction('कृपया अपना नाम, फ़ोन नंबर और 4 अंकों का पिन भरें।');
+      speakInstruction('कृपया अपना नाम और मोबाइल नंबर भरें।');
       return;
     }
 
-    if (password.length < 4) {
-      toast.error('पिन कम से कम 4 अंकों का होना चाहिए (PIN min 4 digits).');
+    const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
+    if (cleanPhone.length < 10) {
+      toast.error('मोबाइल नंबर 10 अंकों का होना चाहिए (Phone must be 10 digits).', {
+        style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
+      });
+      speakInstruction('कृपया पूरा 10 अंकों का मोबाइल नंबर डालें।');
       return;
     }
 
     setLoading(true);
-    const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
 
     try {
+      // API payload strictly contains ONLY Name, Phone, and Work Type (NO email, NO password)
       const response = await axios.post('/auth/register', {
         fullName: fullName.trim(),
-        phoneNumber: cleanPhone || phoneNumber.trim(),
-        password,
+        phoneNumber: cleanPhone,
         workType: selectedWork,
-        city,
-        role: 'WORKER',
       });
 
       if (response.data.success) {
@@ -208,7 +207,7 @@ export const Register = () => {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('user_explicit_login', 'true');
 
-        speakInstruction(`बधाई हो ${fullName}! आपका खाता बन गया है।`);
+        speakInstruction(`बधाई हो ${fullName}! आपका पंजीकरण सफल रहा।`);
 
         toast.success(`खाता सफलतापूर्वक बना! स्वागत है, ${fullName}`, {
           icon: '🎉',
@@ -242,10 +241,8 @@ export const Register = () => {
         const fallbackUser = {
           id: 'worker_' + Date.now(),
           fullName: fullName.trim(),
-          phoneNumber: cleanPhone || '9876543210',
-          password,
+          phoneNumber: cleanPhone,
           workType: selectedWork,
-          city,
           role: 'WORKER',
           verificationStatus: 'verified',
           trustScore: 95,
@@ -298,7 +295,7 @@ export const Register = () => {
           </h1>
 
           <p className="text-sm font-bold text-[#e2e8f0]">
-            नया खाता बनाएं • 1 मिनट में शुरू करें
+            नया खाता बनाएं • केवल नाम और मोबाइल नंबर (1 Minute Quick Setup)
           </p>
 
           {/* Audio Instruction Speaker Pill */}
@@ -326,13 +323,13 @@ export const Register = () => {
             <div className="text-xs sm:text-sm">
               <span className="font-bold text-[#34d399]">यह नंबर नया है! </span>
               <span className="text-[#f8fafc]">
-                आपका मोबाइल नंबर (<strong className="text-[#38bdf8]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम और काम चुनें।
+                आपका मोबाइल नंबर (<strong className="text-[#38bdf8]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम लिखें और काम चुनें।
               </span>
             </div>
           </motion.div>
         )}
 
-        {/* Worker Registration Form */}
+        {/* Worker Registration Form - Strictly Name and Phone Number */}
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
           {/* Field 1: Worker Full Name with Mic */}
           <div>
@@ -404,11 +401,11 @@ export const Register = () => {
             </div>
           </div>
 
-          {/* Field 3: Visual Work Type Emoji Grid (Crucial for Low Literacy Workers) */}
+          {/* Field 3: Visual Work Type Emoji Grid */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                🛠️ अपना काम चुनें (Choose Your Work) <span className="text-rose-400">*</span>
+                🛠️ अपना काम चुनें (Choose Your Work)
               </label>
               <span className="text-[11px] text-[#94a3b8]">एक चुनें (Tap Icon)</span>
             </div>
@@ -428,39 +425,6 @@ export const Register = () => {
                   </button>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Field 4: 4-Digit PIN or Password */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                🔒 4 अंकों का गुप्त पिन बनाएं (Create 4-Digit PIN) <span className="text-rose-400">*</span>
-              </label>
-              <span className="text-[11px] text-[#94a3b8]">उदा. 1234 या 2580</span>
-            </div>
-            <div className="relative">
-              <div className={styles.inputIconWrapper}>
-                <Lock className="w-5 h-5 text-[#38bdf8]" />
-              </div>
-              <input
-                id="register-password-input"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="4 अंकों का पिन बनाएं"
-                className={styles.friendlyInput}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-white transition-colors focus:outline-none"
-                aria-label={showPassword ? 'Hide PIN' : 'Show PIN'}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
             </div>
           </div>
 

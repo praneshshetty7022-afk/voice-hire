@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Phone, Lock, Volume2, Mic, MicOff, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, UserCheck, ShieldCheck } from 'lucide-react';
+import { Phone, Volume2, Mic, MicOff, ArrowRight, Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../api/axios';
 import ThreeBackground from '../components/ThreeBackground';
@@ -9,16 +9,14 @@ import styles from '../styles/auth.module.css';
 
 /**
  * Worker Login Component - Udyoga Mitra / VoiceHire
- * Specially designed for low-literacy informal & blue-collar workers.
- * Features: Vibrant, welcoming Royal Blue, Sky Cyan & Emerald theme, Voice Mic, Audio TTS guides.
+ * Streamlined: Log in with just 10-digit Mobile Number.
+ * Completely removed Email and Password.
  */
 export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [phoneOrEmail, setPhoneOrEmail] = useState(location.state?.phone || location.state?.email || '');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(location.state?.phone || '');
   const [isListeningPhone, setIsListeningPhone] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +33,7 @@ export const Login = () => {
 
   const handleAudioHelp = () => {
     speakInstruction(
-      'नमस्ते! उद्योग मित्र में आपका स्वागत है। अपना 10 अंकों का मोबाइल नंबर और 4 अंकों का पिन डालें। यदि खाता नहीं बना है, तो हम आपको तुरंत रजिस्टर कर देंगे।'
+      'नमस्ते! उद्योग मित्र में आपका स्वागत है। केवल अपना 10 अंकों का मोबाइल नंबर डालें या माइक दबाकर बोलें। यदि खाता नहीं बना है, तो हम आपको तुरंत रजिस्टर कर देंगे।'
     );
     toast('🔊 निर्देश सुने जा रहे हैं (Playing audio instructions)...', {
       icon: '📢',
@@ -70,13 +68,13 @@ export const Login = () => {
         const numbers = spoken.replace(/\D/g, '');
         if (numbers.length >= 10) {
           const clean = numbers.slice(-10);
-          setPhoneOrEmail(clean);
+          setPhoneNumber(clean);
           speakInstruction(`नंबर दर्ज हुआ ${clean.split('').join(' ')}`);
           toast.success(`फ़ोन नंबर दर्ज हुआ: ${clean}`, {
             style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
           });
         } else if (numbers.length > 0) {
-          setPhoneOrEmail(numbers);
+          setPhoneNumber(numbers);
           toast.success(`नंबर: ${numbers}`);
         } else {
           toast.error('नंबर समझ नहीं आया, दोबारा बोलें (Could not hear digits)');
@@ -93,9 +91,8 @@ export const Login = () => {
   };
 
   // Quick Demo Seeding for testing
-  const setDemoWorker = (phone, pass) => {
-    setPhoneOrEmail(phone);
-    setPassword(pass);
+  const setDemoWorker = (phone) => {
+    setPhoneNumber(phone);
     toast.success(`डेमो खाता भरा गया: ${phone}`, {
       style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
     });
@@ -122,24 +119,27 @@ export const Login = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    if (!phoneOrEmail.trim() || !password.trim()) {
-      toast.error('कृपया मोबाइल नंबर और पिन दर्ज करें (Please enter phone & PIN).', {
-        style: { background: '#0f172a', color: '#f8fafc', border: '1px solid #38bdf8' },
+    if (!phoneNumber.trim()) {
+      toast.error('कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter phone number).', {
+        style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
       });
-      speakInstruction('कृपया अपना मोबाइल नंबर और पिन भरें।');
+      speakInstruction('कृपया अपना मोबाइल नंबर भरें।');
+      return;
+    }
+
+    const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
+    if (cleanPhone.length < 10) {
+      toast.error('मोबाइल नंबर 10 अंकों का होना चाहिए (Phone must be 10 digits).');
       return;
     }
 
     setLoading(true);
-    const rawInput = phoneOrEmail.trim();
 
     try {
-      // 1. Submit login request to backend
+      // 1. Submit login request with just phone number
       const response = await axios.post('/auth/login', {
-        phoneNumber: rawInput,
-        identifier: rawInput,
-        email: rawInput.includes('@') ? rawInput : undefined,
-        password,
+        phoneNumber: cleanPhone,
+        identifier: cleanPhone,
       });
 
       if (response.data.success) {
@@ -168,6 +168,7 @@ export const Login = () => {
       const responseCode = error.response?.data?.code;
 
       // 2. SMART AUTHENTICATION CHECK & REDIRECTION LOGIC:
+      // If user is NOT found in the database, notify and redirect to Register with pre-filled phone number
       if (status === 404 || responseCode === 'USER_NOT_FOUND') {
         speakInstruction('यह खाता नहीं मिला। आइए आपका नया पंजीकरण करते हैं।');
 
@@ -196,30 +197,19 @@ export const Login = () => {
         setTimeout(() => {
           navigate('/register', {
             state: {
-              phone: rawInput,
+              phone: cleanPhone,
               autoFilled: true,
-              fromNotice: `यह नंबर (${rawInput}) नया है! बस अपना नाम और काम चुनकर 1 मिनट में रजिस्टर करें।`,
+              fromNotice: `यह नंबर (${cleanPhone}) नया है! बस अपना नाम लिखें और 1 मिनट में रजिस्टर करें।`,
             },
           });
         }, 1300);
         return;
       }
 
-      // If credentials invalid
-      if (status === 401 || responseCode === 'INVALID_CREDENTIALS') {
-        speakInstruction('गलत पिन! कृपया सही 4 अंकों का पिन डालें।');
-        toast.error('गलत पिन या पासवर्ड। दोबारा प्रयास करें (Wrong PIN).', {
-          style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
-        });
-        return;
-      }
-
       // 3. Fallback client-side demo check if network is offline
       if (!error.response) {
         const storedUsers = JSON.parse(localStorage.getItem('veriproof_users') || '[]');
-        const matched = storedUsers.find(
-          (u) => u.phoneNumber === rawInput || u.email?.toLowerCase() === rawInput.toLowerCase()
-        );
+        const matched = storedUsers.find((u) => u.phoneNumber === cleanPhone);
 
         if (!matched) {
           speakInstruction('यह खाता नहीं मिला। आइए आपका नया पंजीकरण करते हैं।');
@@ -229,11 +219,8 @@ export const Login = () => {
           });
 
           setTimeout(() => {
-            navigate('/register', { state: { phone: rawInput, autoFilled: true } });
+            navigate('/register', { state: { phone: cleanPhone, autoFilled: true } });
           }, 1200);
-          return;
-        } else if (matched.password !== password) {
-          toast.error('गलत पिन या पासवर्ड (Invalid PIN).');
           return;
         } else {
           localStorage.setItem('token', 'jwt_worker_token_' + Date.now());
@@ -278,7 +265,7 @@ export const Login = () => {
             श्रमिक रोजगार मंच (Worker Employment Platform)
           </p>
           <p className="text-xs text-[#94a3b8] mt-0.5">
-            बोलिए और काम पाइए • Speak. Connect. Get Employed.
+            बोलिए और काम पाइए • केवल मोबाइल नंबर से लॉगिन करें
           </p>
 
           {/* Audio Instruction Speaker Pill */}
@@ -304,22 +291,22 @@ export const Login = () => {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setDemoWorker('9876543210', '1234')}
+              onClick={() => setDemoWorker('9876543210')}
               className="text-xs font-bold bg-blue-500/20 hover:bg-blue-500/35 text-blue-200 border border-blue-400/40 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1"
             >
-              🚗 ड्राइवर रमेश (PIN: 1234)
+              🚗 ड्राइवर रमेश (9876543210)
             </button>
             <button
               type="button"
-              onClick={() => setDemoWorker('9123456780', '1234')}
+              onClick={() => setDemoWorker('9123456780')}
               className="text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/35 text-emerald-200 border border-emerald-400/40 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1"
             >
-              🧑‍🍳 रसोइया सुनीता (PIN: 1234)
+              🧑‍🍳 रसोइया सुनीता (9123456780)
             </button>
           </div>
         </div>
 
-        {/* Worker Login Form */}
+        {/* Worker Login Form - ONLY Mobile Number */}
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           {/* Mobile Number Field with Voice Mic Button */}
           <div>
@@ -337,8 +324,8 @@ export const Login = () => {
                 id="login-email-input"
                 type="tel"
                 required
-                value={phoneOrEmail}
-                onChange={(e) => setPhoneOrEmail(e.target.value)}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="उदा. 9876543210"
                 className={styles.friendlyInput}
                 autoComplete="tel"
@@ -351,39 +338,6 @@ export const Login = () => {
                 title="बोलकर नंबर भरें (Speak Phone Number)"
               >
                 {isListeningPhone ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {/* 4-Digit PIN or Password Field */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                🔒 4 अंकों का गुप्त पिन या पासवर्ड (4-Digit PIN)
-              </label>
-              <span className="text-[11px] text-[#64748b]">उदा. 1234</span>
-            </div>
-            <div className="relative">
-              <div className={styles.inputIconWrapper}>
-                <Lock className="w-5 h-5 text-[#38bdf8]" />
-              </div>
-              <input
-                id="login-password-input"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="पिन डालें (उदा. 1234)"
-                className={styles.friendlyInput}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-white transition-colors focus:outline-none"
-                aria-label={showPassword ? 'Hide PIN' : 'Show PIN'}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
@@ -419,7 +373,7 @@ export const Login = () => {
         <div className="text-center">
           <Link
             to="/register"
-            state={{ phone: phoneOrEmail }}
+            state={{ phone: phoneNumber }}
             className="inline-flex items-center gap-2 font-black text-sm text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/40 px-5 py-3 rounded-2xl shadow-sm transition-all"
           >
             <span>👉 नया खाता बनाएं (Register Here)</span>
@@ -430,7 +384,7 @@ export const Login = () => {
         <div className="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-center gap-5 text-xs text-[#94a3b8]">
           <span className="flex items-center gap-1.5 font-bold text-emerald-400">
             <CheckCircle2 className="w-4 h-4" />
-            श्रमिक सम्मान सुरक्षा
+            पासवर्ड की कोई जरूरत नहीं
           </span>
           <span className="flex items-center gap-1.5 font-bold text-cyan-400">
             <Sparkles className="w-4 h-4" />

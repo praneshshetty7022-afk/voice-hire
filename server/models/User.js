@@ -12,27 +12,25 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
+      required: [true, 'Phone number is required / फ़ोन नंबर आवश्यक है'],
       trim: true,
       index: true,
-      sparse: true,
     },
     email: {
       type: String,
       lowercase: true,
       trim: true,
       sparse: true,
-      index: true,
     },
     password: {
       type: String,
-      required: [true, 'PIN or password is required / पिन या पासवर्ड आवश्यक है'],
-      minlength: [4, 'PIN/Password must be at least 4 digits/characters'],
+      required: false, // Password completely optional / not required
       select: false,
     },
     workType: {
       type: String,
       enum: ['Driver', 'Cook', 'Househelp', 'Delivery', 'Helper', 'Security', 'Electrician', 'Carpenter', 'Worker', 'Other'],
-      default: 'Worker',
+      default: 'Driver',
     },
     city: {
       type: String,
@@ -68,9 +66,9 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash PIN/password before saving
+// Hash password only if one was provided
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
+  if (!this.password || !this.isModified('password')) {
     return next();
   }
   try {
@@ -82,8 +80,10 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// Compare password/PIN instance method
+// Compare password/PIN (if no password set on account, allow phone login)
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return true;
+  if (!candidatePassword) return true;
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -96,7 +96,6 @@ userSchema.methods.generateAuthToken = function () {
     {
       id: this._id,
       phoneNumber: this.phoneNumber,
-      email: this.email,
       fullName: this.fullName,
       workType: this.workType,
       role: this.role,
