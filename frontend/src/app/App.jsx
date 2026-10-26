@@ -18,15 +18,31 @@ import DesktopSidebar from '../components/DesktopSidebar'
 import MobileNavbar from '../components/MobileNavbar'
 import LanguageSelector from '../components/LanguageSelector'
 import ThemeToggle from '../components/ThemeToggle'
+import CinematicIntro from '../components/CinematicIntro'
 import { ThemeProvider, useTheme } from '../context/ThemeContext'
 import { VoiceProvider, useVoice } from '../context/VoiceContext'
-import { Mic, UserCheck, User } from 'lucide-react'
+import { Mic, UserCheck, User, Film } from 'lucide-react'
 
 function AppContent() {
   const { selectedLang, setSelectedLang, voiceState, startListening, stopListening } = useVoice()
   const { isDark } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const [showCinematicIntro, setShowCinematicIntro] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('intro') === 'true'
+    } catch (e) {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    const handleOpen = () => setShowCinematicIntro(true)
+    window.addEventListener('open-cinematic-intro', handleOpen)
+    return () => window.removeEventListener('open-cinematic-intro', handleOpen)
+  }, [])
 
   // Full-bleed Worker Authentication Experience
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
@@ -126,10 +142,27 @@ function AppContent() {
               <a href="#about" className="hover:text-[#2563EB] dark:hover:text-white transition-colors">
                 About
               </a>
+              <button
+                type="button"
+                onClick={() => setShowCinematicIntro(true)}
+                className="flex items-center gap-1.5 text-xs font-black px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                title="Play Cinematic Intro: The Power of Voice"
+              >
+                <span>🎬 Watch Story</span>
+              </button>
             </nav>
 
-            {/* Right: Mobile Header (Compact logo + profile avatar icon + language pill switcher) */}
+            {/* Right: Mobile Header (Compact logo + story button + profile avatar icon + language pill switcher) */}
             <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowCinematicIntro(true)}
+                className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-white/[0.08] text-[#2563EB] dark:text-[#60A5FA] border border-blue-200 dark:border-white/10 flex items-center justify-center active:scale-95 transition-all cursor-pointer text-sm"
+                title="Watch Cinematic Story: The Power of Voice"
+                aria-label="Watch Cinematic Story"
+              >
+                🎬
+              </button>
               <ThemeToggle className="!w-8 !h-8 !rounded-xl" />
               <LanguageSelector selectedLang={selectedLang} onSelectLang={setSelectedLang} />
               <Link
@@ -186,12 +219,19 @@ function AppContent() {
             <Route path="/register" element={<Register />} />
             <Route path="/employer/dashboard" element={<EmployerDashboard />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/intro" element={<CinematicIntro isOpen={true} onClose={() => navigate('/jobs')} />} />
 
             {/* Catch-all */}
             <Route path="*" element={<Navigate to="/jobs" replace />} />
           </Routes>
         </main>
       </div>
+
+      {/* Full-screen Cinematic Story Modal Experience */}
+      <CinematicIntro
+        isOpen={showCinematicIntro}
+        onClose={() => setShowCinematicIntro(false)}
+      />
 
       {/* Mobile Floating Bottom Dock (Page 3 Touch Interface) */}
       <MobileNavbar lang={selectedLang} onMicTap={handleGlobalMicTap} />

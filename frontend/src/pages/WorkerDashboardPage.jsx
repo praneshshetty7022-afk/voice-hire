@@ -213,7 +213,7 @@ export default function WorkerDashboardPage() {
     { label: 'Driver Jobs', icon: '🚚', action: () => handleChipClick('DRIVER') },
     { label: 'Carpenter Jobs', icon: '🔨', action: () => handleChipClick('CARPENTER') },
     { label: 'Construction', icon: '🏗️', action: () => handleChipClick('HELPER') },
-    { label: 'My Profile', icon: '👤', action: () => navigate('/profile') },
+    { label: 'Watch Story 🎬', icon: '🎬', action: () => window.dispatchEvent(new CustomEvent('open-cinematic-intro')) },
   ]
 
   return (
@@ -284,10 +284,21 @@ export default function WorkerDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
           {/* Left Column (Value Proposition & Search Engine) */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Badge: ⚡ Smart Voice Search · Verified Jobs */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 text-xs font-black text-[#2563EB] dark:text-[#60A5FA]">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>⚡ Smart Voice Search · Verified Jobs</span>
+            {/* Badges: ⚡ Smart Voice Search · Verified Jobs & 🎬 Watch Story */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 text-xs font-black text-[#2563EB] dark:text-[#60A5FA]">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>⚡ Smart Voice Search · Verified Jobs</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-cinematic-intro'))}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-md shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                <span>🎬 Watch Story: "The Power of Voice"</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             {/* H1 Title: YOUR VOICE. REAL JOBS. */}
