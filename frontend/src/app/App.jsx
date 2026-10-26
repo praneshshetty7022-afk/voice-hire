@@ -14,6 +14,7 @@ import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import EmployerDashboard from '../pages/EmployerDashboard'
 import AdminDashboard from '../pages/AdminDashboard'
+import AnimatedBackground from '../components/AnimatedBackground'
 import VoiceDebugPanel from '../components/VoiceDebugPanel'
 import DesktopSidebar from '../components/DesktopSidebar'
 import MobileNavbar from '../components/MobileNavbar'
@@ -86,35 +87,31 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b132b] text-slate-100 flex flex-col md:flex-row font-sans relative overflow-x-hidden selection:bg-blue-500/30 selection:text-cyan-200">
-      {/* Dynamic Ambient Light Field Gradients (Same Palette as Registration Page) */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-600/20 via-sky-500/10 to-transparent rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-24 w-[500px] h-[500px] bg-gradient-to-bl from-emerald-500/15 via-teal-500/10 to-transparent rounded-full blur-[130px]" />
-        <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/15 to-transparent rounded-full blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col md:flex-row font-sans relative overflow-x-hidden selection:bg-blue-500/20 selection:text-blue-900">
+      {/* Premium Animated Background (Mesh gradients, flowing curves, floating bubbles & particles) */}
+      <AnimatedBackground />
 
       {/* Desktop Floating Sidebar */}
       <DesktopSidebar lang={selectedLang} onMicTap={handleGlobalMicTap} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        {/* Floating Header */}
-        <header className="bg-slate-900/80 backdrop-blur-2xl text-white px-4 sm:px-6 py-3.5 shadow-lg sticky top-0 z-40 border-b border-slate-800">
+        {/* Floating Clean White Header */}
+        <header className="bg-white/80 backdrop-blur-xl text-slate-800 px-4 sm:px-6 py-3.5 shadow-[0_4px_20px_rgba(37,99,235,0.05)] sticky top-0 z-40 border-b border-blue-100/80">
           <div className="container mx-auto max-w-5xl flex items-center justify-between gap-3">
             {/* Logo Brand */}
             <Link to="/jobs" className="flex items-center gap-3 group">
-              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white rounded-2xl font-black text-xl flex items-center justify-center shadow-md border border-cyan-300/40 group-hover:scale-105 transition-transform duration-300">
+              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white rounded-2xl font-black text-xl flex items-center justify-center shadow-md border border-blue-300/40 group-hover:scale-105 transition-transform duration-300">
                 <Mic className="w-5 h-5 text-white stroke-[2.5]" />
               </div>
               <div>
-                <span className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-white">{t.brandName}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 px-2 py-0.5 rounded-full hidden sm:inline-block">
+                <span className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-1.5">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600">{t.brandName}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full hidden sm:inline-block">
                     VOICE FIRST
                   </span>
                 </span>
-                <span className="text-xs text-cyan-400/80 font-extrabold block -mt-0.5 uppercase tracking-wider hidden sm:block">
+                <span className="text-xs text-blue-600 font-extrabold block -mt-0.5 uppercase tracking-wider hidden sm:block">
                   {t.tagline}
                 </span>
               </div>
@@ -126,15 +123,15 @@ function AppContent() {
 
               <Link
                 to="/login"
-                className="text-xs sm:text-sm font-bold text-cyan-300 hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/10 transition-colors border border-cyan-500/30 flex items-center gap-1.5"
+                className="text-xs sm:text-sm font-bold text-blue-700 hover:text-blue-900 px-3.5 py-2 rounded-xl hover:bg-blue-50 transition-colors border border-blue-200/80 flex items-center gap-1.5 bg-white/80 shadow-sm"
               >
-                <LogIn className="w-3.5 h-3.5 text-cyan-400" />
+                <LogIn className="w-3.5 h-3.5 text-blue-600" />
                 <span className="hidden sm:inline">लॉगिन (Sign In)</span>
               </Link>
 
               <Link
                 to="/register"
-                className="bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm shadow-md hover:shadow-cyan-500/25 flex items-center gap-1.5 border border-white/20 active:scale-95 hover:scale-[1.02] transition-all duration-300"
+                className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm shadow-md hover:shadow-blue-500/25 flex items-center gap-1.5 border border-blue-300/40 active:scale-95 hover:scale-[1.02] transition-all duration-300"
               >
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
                 <span className="hidden sm:inline">पंजीकरण (Register)</span>

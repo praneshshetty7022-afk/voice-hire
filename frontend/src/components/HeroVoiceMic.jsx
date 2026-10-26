@@ -1,114 +1,148 @@
 import React from 'react'
 import { Mic, MicOff, CheckCircle2, Loader2, Sparkles } from 'lucide-react'
 import { getTranslation } from '../utils/translations'
+import VoiceWaveform from './VoiceWaveform'
 
+/**
+ * HeroVoiceMic Component
+ * 
+ * Central voice-search interaction area featuring:
+ * - Symmetrical decorative audio waveforms flanking the microphone
+ * - Dynamic microphone glow and waveform animation connected to actual recording state
+ * - Soft animated ambient light halo around the voice-search area
+ * - Return to calm tranquil idle state when recording stops
+ */
 export default function HeroVoiceMic({ voiceState = 'IDLE', onMicClick, lang = 'en', transcript = '' }) {
   const t = getTranslation(lang)
+  const isListening = voiceState === 'LISTENING'
 
   return (
-    <div className="flex flex-col items-center justify-center my-6 text-center">
-      {/* Voice Status Fluid Capsule */}
-      <div className="mb-6 min-h-[36px] flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center my-4 text-center relative z-10">
+      {/* 1. Voice Status Fluid Capsule */}
+      <div className="mb-6 min-h-[40px] flex items-center justify-center">
         {voiceState === 'IDLE' && (
-          <span className="text-slate-200 font-extrabold text-sm sm:text-base flex items-center gap-2 bg-slate-800/80 backdrop-blur-xl px-5 py-2 rounded-full border border-cyan-500/30 shadow-sm">
-            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-200 font-black">{t.tapToSpeak}</span>
+          <span className="text-slate-700 font-extrabold text-sm sm:text-base flex items-center gap-2 bg-white/90 backdrop-blur-xl px-5 py-2 rounded-full border border-blue-200/80 shadow-[0_4px_20px_rgba(37,99,235,0.06)] transition-all hover:border-blue-300">
+            <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600 font-black">
+              {t.tapToSpeak}
+            </span>
           </span>
         )}
 
         {voiceState === 'LISTENING' && (
-          <span className="text-cyan-300 font-black text-sm sm:text-base flex items-center gap-2 bg-cyan-500/15 backdrop-blur-xl px-6 py-2.5 rounded-full border border-cyan-400/50 shadow-[0_0_20px_rgba(56,189,248,0.35)] animate-bounce">
-            <span className="w-2.5 h-2.5 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-ping" />
+          <span className="text-blue-700 font-black text-sm sm:text-base flex items-center gap-2.5 bg-blue-50/95 backdrop-blur-xl px-6 py-2.5 rounded-full border border-blue-400 shadow-[0_0_25px_rgba(37,99,235,0.25)] animate-bounce">
+            <span className="w-2.5 h-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full animate-ping" />
             <span>{t.listening}</span>
           </span>
         )}
 
         {voiceState === 'PROCESSING' && (
-          <span className="text-sky-300 font-black text-sm sm:text-base flex items-center gap-2 bg-sky-500/15 backdrop-blur-xl px-6 py-2 rounded-full border border-sky-400/40">
-            <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+          <span className="text-indigo-700 font-black text-sm sm:text-base flex items-center gap-2 bg-indigo-50/90 backdrop-blur-xl px-6 py-2 rounded-full border border-indigo-200 shadow-sm">
+            <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
             <span>{t.findingJobs}</span>
           </span>
         )}
 
         {voiceState === 'SUCCESS' && (
-          <span className="text-emerald-300 font-black text-sm sm:text-base flex items-center gap-2 bg-emerald-500/15 backdrop-blur-xl px-6 py-2 rounded-full border border-emerald-400/40 shadow-sm">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span className="text-emerald-700 font-black text-sm sm:text-base flex items-center gap-2 bg-emerald-50/90 backdrop-blur-xl px-6 py-2 rounded-full border border-emerald-300 shadow-sm">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             <span>{t.jobsFound}</span>
           </span>
         )}
 
         {voiceState === 'ERROR' && (
-          <span className="text-rose-400 font-black text-sm sm:text-base flex items-center gap-2 bg-rose-500/15 backdrop-blur-xl px-5 py-2 rounded-full border border-rose-400/40">
-            <MicOff className="w-5 h-5 text-rose-400" />
+          <span className="text-rose-700 font-black text-sm sm:text-base flex items-center gap-2 bg-rose-50/90 backdrop-blur-xl px-5 py-2 rounded-full border border-rose-300 shadow-sm">
+            <MicOff className="w-5 h-5 text-rose-600" />
             <span>{t.couldNotHear}</span>
           </span>
         )}
       </div>
 
-      {/* Multi-Layered Vibrant Sapphire & Cyan Voice Orb */}
-      <div className="relative flex items-center justify-center p-6">
-        {/* Layer 1: Ambient Reflection Flare Glow */}
-        <div className="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-gradient-to-tr from-blue-600/25 via-sky-400/20 to-transparent blur-2xl pointer-events-none" />
-
-        {/* Layer 2: Translucent Glass Ring with Pulse */}
-        <div className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full border border-cyan-400/30 bg-white/[0.03] backdrop-blur-xl pointer-events-none animate-pulse" />
-
-        {/* Dynamic Waveform Rings when listening */}
-        {voiceState === 'LISTENING' && (
-          <>
-            <div className="absolute w-44 h-44 sm:w-52 sm:h-52 rounded-full border border-cyan-400/50 bg-cyan-400/10 animate-ping pointer-events-none" />
-            <div className="absolute w-40 h-40 sm:w-48 sm:h-48 rounded-full border border-sky-300/30 animate-pulse pointer-events-none" />
-          </>
-        )}
-
-        {/* Layer 3: Core Interactive Vibrant Blue/Cyan Orb Button */}
-        <button
-          type="button"
-          onClick={onMicClick}
-          className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center transition-all duration-300 transform active:scale-95 border-2 relative z-10 overflow-hidden group shadow-lg ${
-            voiceState === 'IDLE'
-              ? 'bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white border-cyan-300/80 hover:scale-105 shadow-[0_10px_35px_rgba(37,99,235,0.45)]'
-              : voiceState === 'LISTENING'
-              ? 'bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white border-cyan-200 scale-105 ring-4 ring-cyan-400/40 shadow-[0_0_40px_rgba(56,189,248,0.55)]'
-              : voiceState === 'PROCESSING'
-              ? 'bg-gradient-to-br from-sky-500 to-indigo-600 text-white border-sky-300'
-              : voiceState === 'SUCCESS'
-              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-emerald-300 shadow-emerald-500/50'
-              : 'bg-gradient-to-br from-slate-700 to-slate-900 text-white border-slate-500'
+      {/* 2. Interactive Voice Search Area with Flanking Waveforms & Ambient Light */}
+      <div className="relative flex items-center justify-center gap-2 sm:gap-6 p-4">
+        {/* Soft Animated Ambient Light Aura */}
+        <div
+          className={`absolute rounded-full blur-3xl pointer-events-none transition-all duration-700 ${
+            isListening
+              ? 'w-64 h-64 sm:w-80 sm:h-80 bg-gradient-to-tr from-blue-500/35 via-sky-400/30 to-indigo-500/30 scale-125 animate-pulse'
+              : 'w-52 h-52 sm:w-64 sm:h-64 bg-gradient-to-tr from-blue-400/20 via-indigo-300/15 to-sky-300/15 scale-100'
           }`}
-        >
-          {/* Continuous Glass Sheen Highlight */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent opacity-60 pointer-events-none" />
+        />
 
-          {voiceState === 'IDLE' && <Mic className="w-12 h-12 stroke-[2.5] text-white group-hover:scale-110 transition-transform" />}
+        {/* Left Decorative Waveform */}
+        <VoiceWaveform voiceState={voiceState} side="left" />
 
-          {voiceState === 'LISTENING' && (
-            <div className="flex items-center gap-1.5 h-10 z-10">
-              <span className="w-2.5 bg-white rounded-full wave-bar-1" />
-              <span className="w-2.5 bg-white rounded-full wave-bar-2" />
-              <span className="w-2.5 bg-white rounded-full wave-bar-3" />
-              <span className="w-2.5 bg-white rounded-full wave-bar-4" />
-              <span className="w-2.5 bg-white rounded-full wave-bar-5" />
-            </div>
+        {/* Central Voice Mic Button with Dynamic Concentric Glow Rings */}
+        <div className="relative flex items-center justify-center">
+          {/* Outer Concentric Translucent Ring */}
+          <div
+            className={`absolute rounded-full border pointer-events-none transition-all duration-500 ${
+              isListening
+                ? 'w-40 h-40 sm:w-48 sm:h-48 border-blue-400/50 bg-blue-100/30 animate-ping'
+                : 'w-36 h-36 sm:w-44 sm:h-44 border-blue-200/60 bg-blue-50/20 animate-pulse'
+            }`}
+          />
+
+          {/* Inner Soft Ring */}
+          {isListening && (
+            <div className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full border border-indigo-400/40 bg-indigo-100/20 animate-pulse pointer-events-none" />
           )}
 
-          {voiceState === 'PROCESSING' && (
-            <Loader2 className="w-12 h-12 animate-spin stroke-[2.5] text-white" />
-          )}
+          {/* Core Interactive Royal Blue Microphone Button */}
+          <button
+            type="button"
+            onClick={onMicClick}
+            aria-label={isListening ? 'Stop voice recording' : 'Start voice search'}
+            className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center transition-all duration-300 transform active:scale-95 border-2 relative z-10 overflow-hidden group shadow-lg ${
+              voiceState === 'IDLE'
+                ? 'bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white border-blue-300/80 hover:scale-105 shadow-[0_12px_35px_rgba(37,99,235,0.35)] hover:shadow-[0_16px_45px_rgba(37,99,235,0.45)]'
+                : voiceState === 'LISTENING'
+                ? 'bg-gradient-to-br from-blue-600 via-sky-500 to-indigo-600 text-white border-white scale-105 ring-4 ring-blue-400/40 shadow-[0_0_40px_rgba(37,99,235,0.55)]'
+                : voiceState === 'PROCESSING'
+                ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white border-indigo-300 shadow-md'
+                : voiceState === 'SUCCESS'
+                ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.35)]'
+                : 'bg-gradient-to-br from-slate-600 to-slate-800 text-white border-slate-400'
+            }`}
+          >
+            {/* Glass Sheen Reflection Highlight */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/35 via-transparent to-transparent opacity-75 pointer-events-none" />
 
-          {voiceState === 'SUCCESS' && (
-            <CheckCircle2 className="w-12 h-12 stroke-[2.5] text-white" />
-          )}
+            {voiceState === 'IDLE' && (
+              <Mic className="w-12 h-12 stroke-[2.5] text-white group-hover:scale-110 transition-transform duration-300" />
+            )}
 
-          {voiceState === 'ERROR' && (
-            <MicOff className="w-12 h-12 stroke-[2.5] text-white" />
-          )}
-        </button>
+            {voiceState === 'LISTENING' && (
+              <div className="flex items-center gap-1.5 h-10 z-10">
+                <span className="w-2.5 bg-white rounded-full wave-bar-1" />
+                <span className="w-2.5 bg-white rounded-full wave-bar-2" />
+                <span className="w-2.5 bg-white rounded-full wave-bar-3" />
+                <span className="w-2.5 bg-white rounded-full wave-bar-4" />
+                <span className="w-2.5 bg-white rounded-full wave-bar-5" />
+              </div>
+            )}
+
+            {voiceState === 'PROCESSING' && (
+              <Loader2 className="w-12 h-12 animate-spin stroke-[2.5] text-white" />
+            )}
+
+            {voiceState === 'SUCCESS' && (
+              <CheckCircle2 className="w-12 h-12 stroke-[2.5] text-white" />
+            )}
+
+            {voiceState === 'ERROR' && (
+              <MicOff className="w-12 h-12 stroke-[2.5] text-white" />
+            )}
+          </button>
+        </div>
+
+        {/* Right Decorative Waveform */}
+        <VoiceWaveform voiceState={voiceState} side="right" />
       </div>
 
-      {/* Spoken Transcript Preview */}
+      {/* 3. Spoken Transcript Preview */}
       {transcript && (
-        <div className="mt-2 max-w-md mx-auto px-4 py-2 bg-slate-800/80 rounded-2xl border border-cyan-500/30 text-xs font-bold text-cyan-300 animate-fade-in shadow-sm">
+        <div className="mt-3 max-w-md mx-auto px-4 py-2.5 bg-white/95 backdrop-blur-xl rounded-2xl border border-blue-200/90 text-xs sm:text-sm font-bold text-blue-900 animate-fade-in shadow-[0_4px_20px_rgba(37,99,235,0.08)]">
           <span>{transcript}</span>
         </div>
       )}

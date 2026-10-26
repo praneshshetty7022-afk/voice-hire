@@ -137,19 +137,19 @@ export default function JobListingPage() {
   const safeJobs = Array.isArray(jobs) ? jobs : []
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 relative z-10">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.035] backdrop-blur-2xl p-6 rounded-3xl shadow-glass-edge border border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/85 backdrop-blur-2xl p-6 rounded-3xl shadow-[0_10px_35px_rgba(37,99,235,0.06)] border border-blue-100/90 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-200/60 to-transparent pointer-events-none" />
         <div>
           <div className="flex items-center gap-2.5">
             <span className="text-3xl">{activeProf ? activeProf.icon : '🔎'}</span>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
               {activeProf ? activeProf.title : t.viewAllJobs}
             </h1>
           </div>
-          <p className="text-xs font-semibold text-slate-400 mt-1">
-            {jobs.length} {t.jobsAvailable} • <span className="text-cyan-300">{selectedCity === 'ALL' ? t.allCities : selectedCity}</span>
+          <p className="text-xs font-semibold text-slate-500 mt-1">
+            {jobs.length} {t.jobsAvailable} • <span className="text-blue-700 font-bold">{selectedCity === 'ALL' ? t.allCities : selectedCity}</span>
           </p>
         </div>
 
@@ -161,12 +161,12 @@ export default function JobListingPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search work..."
-            className="w-full pl-11 pr-9 py-3 bg-white/[0.04] border border-white/15 rounded-2xl outline-none focus:border-cyan-400 font-bold text-sm text-white placeholder-slate-500 shadow-sm transition-all"
+            className="w-full pl-11 pr-9 py-3 bg-white border border-blue-200/80 rounded-2xl outline-none focus:border-blue-500 font-bold text-sm text-slate-800 placeholder-slate-400 shadow-sm transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
             >
               <X className="w-4 h-4" />
             </button>
@@ -176,8 +176,8 @@ export default function JobListingPage() {
 
       {/* City Chips Filter */}
       <div className="space-y-2">
-        <p className="text-[11px] font-black text-cyan-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-cyan-400" /> Select City / స్థలం
+        <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest px-1 flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-blue-600" /> Select City / స్థలం
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -185,8 +185,8 @@ export default function JobListingPage() {
             onClick={() => setSelectedCity('ALL')}
             className={`px-4 py-2 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
               selectedCity === 'ALL'
-                ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black border-cyan-300/40 shadow-md'
-                : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
+                ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black border-blue-400/40 shadow-md'
+                : 'bg-white text-slate-600 border-blue-200/80 hover:bg-blue-50 hover:text-blue-900 shadow-sm'
             }`}
           >
             All Cities
@@ -198,8 +198,8 @@ export default function JobListingPage() {
               onClick={() => setSelectedCity(city.name)}
               className={`px-4 py-2 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
                 selectedCity === city.name
-                  ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black border-cyan-300/40 shadow-md'
-                  : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black border-blue-400/40 shadow-md'
+                  : 'bg-white text-slate-600 border-blue-200/80 hover:bg-blue-50 hover:text-blue-900 shadow-sm'
               }`}
             >
               {city.name} ({city.native[selectedLang.split('-')[0]] || city.name})
@@ -210,8 +210,8 @@ export default function JobListingPage() {
 
       {/* Category Filter Chips */}
       <div className="space-y-2">
-        <p className="text-[11px] font-black text-cyan-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-cyan-400" /> Profession Category
+        <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest px-1 flex items-center gap-1.5">
+          <Filter className="w-3.5 h-3.5 text-blue-600" /> Profession Category
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -222,8 +222,8 @@ export default function JobListingPage() {
             }}
             className={`px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
               selectedCategory === 'ALL'
-                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-sm'
-                : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
+                ? 'bg-blue-100 text-blue-800 border-blue-300 shadow-sm'
+                : 'bg-white text-slate-600 border-blue-200/80 hover:bg-blue-50 hover:text-blue-900 shadow-sm'
             }`}
           >
             All Professions
@@ -238,8 +238,8 @@ export default function JobListingPage() {
               }}
               className={`px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 flex items-center gap-2 transition-all ${
                 selectedCategory === key
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-sm'
-                  : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
+                  ? 'bg-blue-100 text-blue-800 border-blue-300 shadow-sm'
+                  : 'bg-white text-slate-600 border-blue-200/80 hover:bg-blue-50 hover:text-blue-900 shadow-sm'
               }`}
             >
               <span>{prof.icon}</span>
@@ -251,9 +251,9 @@ export default function JobListingPage() {
 
       {/* Jobs Grid */}
       {loading ? (
-        <div className="p-12 text-center bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/60 shadow-lg space-y-3">
-          <RefreshCw className="w-9 h-9 animate-spin text-cyan-400 mx-auto" />
-          <p className="text-base font-black text-white">Loading Available Jobs...</p>
+        <div className="p-12 text-center bg-white/85 backdrop-blur-2xl rounded-3xl border border-blue-100/90 shadow-[0_10px_35px_rgba(37,99,235,0.06)] space-y-3">
+          <RefreshCw className="w-9 h-9 animate-spin text-blue-600 mx-auto" />
+          <p className="text-base font-black text-slate-900">Loading Available Jobs...</p>
         </div>
       ) : safeJobs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -267,24 +267,24 @@ export default function JobListingPage() {
         </div>
       ) : (
         /* EMPTY STATE */
-        <div className="p-12 text-center bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/60 shadow-lg space-y-4 text-white">
-          <div className="w-16 h-16 bg-slate-800 text-cyan-400 border border-cyan-400/30 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-sm">
+        <div className="p-12 text-center bg-white/85 backdrop-blur-2xl rounded-3xl border border-blue-100/90 shadow-[0_10px_35px_rgba(37,99,235,0.06)] space-y-4 text-slate-800">
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 border border-blue-200 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-sm">
             🚗
           </div>
-          <h3 className="text-2xl font-black text-white">No jobs available here right now</h3>
-          <p className="text-sm text-slate-400 font-semibold max-w-md mx-auto">
+          <h3 className="text-2xl font-black text-slate-900">No jobs available here right now</h3>
+          <p className="text-sm text-slate-500 font-semibold max-w-md mx-auto">
             Try searching nearby cities or select another profession category.
           </p>
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
               onClick={() => setSelectedCity('ALL')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
             >
               Search Nearby
             </button>
             <button
               onClick={() => setSelectedCategory('ALL')}
-              className="px-6 py-3 bg-white/[0.06] text-slate-300 font-extrabold rounded-2xl border border-white/10 hover:bg-white/[0.1] transition-all text-sm"
+              className="px-6 py-3 bg-white text-slate-700 font-extrabold rounded-2xl border border-blue-200 hover:bg-blue-50 transition-all text-sm shadow-sm"
             >
               Choose Another Work
             </button>
