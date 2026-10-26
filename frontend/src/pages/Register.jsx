@@ -1,41 +1,155 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Lock, Mail, User, Building2, Briefcase, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle, AlertCircle } from 'lucide-react';
+import { Phone, Lock, User, Volume2, Mic, MicOff, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../api/axios';
 import ThreeBackground from '../components/ThreeBackground';
 import styles from '../styles/auth.module.css';
 
 /**
- * Register Component - VeriProof Executive Corporate Platform
- * Pre-fills corporate email from login redirection & applies Black & Gold luxury aesthetic.
+ * Worker Register Component - Udyoga Mitra / VoiceHire
+ * Specially designed for low-literacy informal & blue-collar workers.
+ * Features: Visual work type emoji grid, Voice Mic entry, Audio TTS guides, Black & Gold theme.
  */
 export const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Extract pre-filled email from route state or URL search query (?email=...)
+  // Extract pre-filled phone/identifier from location state or search params
   const queryParams = new URLSearchParams(location.search);
-  const initialEmail = location.state?.email || queryParams.get('email') || '';
-  const isAutoRedirected = Boolean(location.state?.autoFilled || queryParams.get('email'));
+  const initialPhone = location.state?.phone || location.state?.email || queryParams.get('phone') || queryParams.get('email') || '';
+  const isAutoRedirected = Boolean(location.state?.autoFilled || queryParams.get('phone'));
 
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState(initialEmail);
+  const [phoneNumber, setPhoneNumber] = useState(initialPhone);
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('candidate');
-  const [company, setCompany] = useState('');
-  const [experienceLevel, setExperienceLevel] = useState('Senior Executive');
+  const [selectedWork, setSelectedWork] = useState('Driver');
+  const [city, setCity] = useState('Bengaluru');
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [isListeningName, setIsListeningName] = useState(false);
+  const [isListeningPhone, setIsListeningPhone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Sync if location state changes
-  useEffect(() => {
-    if (location.state?.email && !email) {
-      setEmail(location.state.email);
+  // Visual Work Types with Clear Emojis & Bilingual Names
+  const WORK_TYPES = [
+    { id: 'Driver', hindi: 'गाड़ी ड्राइवर', english: 'Driver', emoji: '🚗' },
+    { id: 'Cook', hindi: 'रसोइया / खाना', english: 'Cook', emoji: '🧑‍🍳' },
+    { id: 'Househelp', hindi: 'सफाई / घरेलू', english: 'Househelp', emoji: '🧹' },
+    { id: 'Delivery', hindi: 'डिलीवरी बॉय', english: 'Delivery', emoji: '📦' },
+    { id: 'Helper', hindi: 'मजदूर / मिस्त्री', english: 'Helper', emoji: '🏗️' },
+    { id: 'Security', hindi: 'सुरक्षा गार्ड', english: 'Security', emoji: '👮' },
+    { id: 'Electrician', hindi: 'बिजली मिस्त्री', english: 'Electrician', emoji: '⚡' },
+    { id: 'Carpenter', hindi: 'बढ़ई / कारपेंटर', english: 'Carpenter', emoji: '🪚' },
+  ];
+
+  // Speech Synthesis Audio Guidance
+  const speakInstruction = (text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN';
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
     }
-  }, [location.state, email]);
+  };
+
+  const handleAudioHelp = () => {
+    speakInstruction(
+      'नमस्ते! अपना नाम बोलें या लिखें, मोबाइल नंबर भरें, और नीचे अपना काम चुनें जैसे ड्राइवर, रसोइया, या डिलीवरी। फिर 4 अंकों का पिन बनाकर रजिस्टर करें।'
+    );
+    toast('🔊 निर्देश सुने जा रहे हैं (Playing audio instructions)...', {
+      icon: '📢',
+      style: { background: '#121212', color: '#FCF6BA', border: '1px solid #BF953F' },
+    });
+  };
+
+  useEffect(() => {
+    if (location.state?.phone && !phoneNumber) {
+      setPhoneNumber(location.state.phone);
+    }
+    if (isAutoRedirected) {
+      speakInstruction('आपका मोबाइल नंबर पहले से भरा हुआ है। बस अपना नाम और काम चुनें।');
+    }
+  }, [location.state, phoneNumber, isAutoRedirected]);
+
+  // Voice Input for Worker Name
+  const startNameVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Voice input not supported in browser.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'hi-IN';
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        setIsListeningName(true);
+        speakInstruction('बोलिए अपना पूरा नाम');
+        toast('🎤 बोलिए अपना नाम...', {
+          style: { background: '#121212', color: '#FCF6BA', border: '1px solid #BF953F' },
+        });
+      };
+
+      recognition.onresult = (event) => {
+        const spoken = event.results[0][0].transcript.trim();
+        const cleanName = spoken.replace(/[0-9]/g, '').trim();
+        if (cleanName) {
+          setFullName(cleanName);
+          speakInstruction(`धन्यवाद ${cleanName}! अब नीचे अपना काम चुनें।`);
+          toast.success(`नाम दर्ज हुआ: ${cleanName}`);
+        }
+      };
+
+      recognition.onerror = () => setIsListeningName(false);
+      recognition.onend = () => setIsListeningName(false);
+      recognition.start();
+    } catch (err) {
+      setIsListeningName(false);
+    }
+  };
+
+  // Voice Input for Phone
+  const startPhoneVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'hi-IN';
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        setIsListeningPhone(true);
+        speakInstruction('बोलिए अपना 10 अंकों का मोबाइल नंबर');
+      };
+
+      recognition.onresult = (event) => {
+        const spoken = event.results[0][0].transcript;
+        const numbers = spoken.replace(/\D/g, '');
+        if (numbers.length >= 10) {
+          setPhoneNumber(numbers.slice(-10));
+          toast.success(`नंबर: ${numbers.slice(-10)}`);
+        }
+      };
+
+      recognition.onerror = () => setIsListeningPhone(false);
+      recognition.onend = () => setIsListeningPhone(false);
+      recognition.start();
+    } catch (err) {
+      setIsListeningPhone(false);
+    }
+  };
+
+  // Select Work Type
+  const handleSelectWork = (work) => {
+    setSelectedWork(work.id);
+    speakInstruction(`${work.hindi} चुना गया`);
+    toast.success(`काम चुना: ${work.hindi} (${work.english})`);
+  };
 
   // Framer Motion Animation Variants
   const cardVariants = {
@@ -54,79 +168,43 @@ export const Register = () => {
     },
   };
 
-  // Password Strength Calculation
-  const getPasswordStrength = () => {
-    if (!password) return { label: 'Required', color: 'bg-zinc-700', width: '5%' };
-    if (password.length < 6) return { label: 'Weak', color: 'bg-red-500', width: '25%' };
-    if (password.length < 10) return { label: 'Moderate', color: 'bg-amber-400', width: '60%' };
-    return { label: 'Executive Gold Standard', color: 'bg-gradient-to-r from-[#BF953F] to-[#FCF6BA]', width: '100%' };
-  };
-
-  const strength = getPasswordStrength();
-
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
-      toast.error('Please complete all required fields.', {
+    if (!fullName.trim() || !phoneNumber.trim() || !password.trim()) {
+      toast.error('कृपया नाम, मोबाइल नंबर और पिन भरें (Please fill all fields).', {
         style: { background: '#121212', color: '#ffffff', border: '1px solid rgba(191, 149, 63, 0.3)' },
       });
+      speakInstruction('कृपया अपना नाम, फ़ोन नंबर और 4 अंकों का पिन भरें।');
       return;
     }
 
-    if (password.length < 6) {
-      toast.error('Password must contain at least 6 characters.', {
-        style: { background: '#121212', color: '#ffffff', border: '1px solid rgba(239, 68, 68, 0.5)' },
-      });
-      return;
-    }
-
-    if (!agreeTerms) {
-      toast.error('Please accept the Executive Terms of Verification.', {
-        style: { background: '#121212', color: '#ffffff', border: '1px solid rgba(191, 149, 63, 0.3)' },
-      });
+    if (password.length < 4) {
+      toast.error('पिन कम से कम 4 अंकों का होना चाहिए (PIN min 4 digits).');
       return;
     }
 
     setLoading(true);
-    const normalizedEmail = email.trim().toLowerCase();
+    const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
 
     try {
-      // 1. Submit Registration Request
       const response = await axios.post('/auth/register', {
         fullName: fullName.trim(),
-        email: normalizedEmail,
+        phoneNumber: cleanPhone || phoneNumber.trim(),
         password,
-        role,
-        company: company.trim() || 'VeriProof Corporate Network',
-        headline: `${experienceLevel} | Verified Member`,
-        experienceLevel,
+        workType: selectedWork,
+        city,
+        role: 'WORKER',
       });
 
       if (response.data.success) {
-        // Save auth data
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('user_explicit_login', 'true');
 
-        // Also persist in demo mock list for offline resilience
-        const existingUsers = JSON.parse(localStorage.getItem('veriproof_users') || '[]');
-        if (!existingUsers.find((u) => u.email === normalizedEmail)) {
-          existingUsers.push({
-            id: response.data.user?.id || 'usr_' + Date.now(),
-            fullName: fullName.trim(),
-            email: normalizedEmail,
-            password,
-            role,
-            company,
-            experienceLevel,
-            verificationStatus: 'verified',
-            trustScore: 95,
-          });
-          localStorage.setItem('veriproof_users', JSON.stringify(existingUsers));
-        }
+        speakInstruction(`बधाई हो ${fullName}! आपका खाता बन गया है।`);
 
-        toast.success(`Executive profile verified! Welcome to VeriProof, ${fullName}.`, {
+        toast.success(`खाता सफलतापूर्वक बना! स्वागत है, ${fullName}`, {
           icon: '👑',
           style: {
             background: '#121212',
@@ -139,31 +217,30 @@ export const Register = () => {
         navigate('/jobs');
       }
     } catch (error) {
-      console.warn('[VeriProof Register API]:', error.response?.data || error.message);
-
       const status = error.response?.status;
       const code = error.response?.data?.code;
 
       if (status === 409 || code === 'USER_ALREADY_EXISTS') {
-        toast.error('An account with this email already exists. Redirecting to login...', {
+        speakInstruction('यह नंबर पहले से पंजीकृत है। आइए लॉगिन करें।');
+        toast.error('यह नंबर पहले से पंजीकृत है। लॉगिन करें (Already registered).', {
           style: { background: '#121212', color: '#ffffff', border: '1px solid #BF953F' },
         });
         setTimeout(() => {
-          navigate('/login', { state: { email: normalizedEmail } });
+          navigate('/login', { state: { phone: cleanPhone } });
         }, 1500);
         return;
       }
 
-      // 2. Demo offline fallback if network is unreachable
+      // Offline fallback
       if (!error.response) {
         const fallbackUser = {
-          id: 'usr_' + Date.now(),
+          id: 'worker_' + Date.now(),
           fullName: fullName.trim(),
-          email: normalizedEmail,
+          phoneNumber: cleanPhone || '9876543210',
           password,
-          role,
-          company: company.trim() || 'VeriProof Corporate Network',
-          experienceLevel,
+          workType: selectedWork,
+          city,
+          role: 'WORKER',
           verificationStatus: 'verified',
           trustScore: 95,
         };
@@ -176,23 +253,13 @@ export const Register = () => {
         localStorage.setItem('user', JSON.stringify(fallbackUser));
         localStorage.setItem('user_explicit_login', 'true');
 
-        toast.success(`Executive profile registered successfully! Welcome, ${fullName}.`, {
-          icon: '👑',
-          style: {
-            background: '#121212',
-            color: '#FCF6BA',
-            border: '1px solid #BF953F',
-            boxShadow: '0 0 25px rgba(191, 149, 63, 0.4)',
-          },
-        });
-
+        speakInstruction(`बधाई हो ${fullName}! आपका खाता बन गया है।`);
+        toast.success(`खाता बन गया! स्वागत है, ${fullName}`);
         navigate('/jobs');
         return;
       }
 
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.', {
-        style: { background: '#121212', color: '#ffffff', border: '1px solid rgba(239, 68, 68, 0.5)' },
-      });
+      toast.error(error.response?.data?.message || 'पंजीकरण विफल (Registration failed).');
     } finally {
       setLoading(false);
     }
@@ -210,27 +277,33 @@ export const Register = () => {
         animate="visible"
         exit="exit"
       >
-        {/* Corporate Brand Identity Header */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#BF953F] via-[#FCF6BA] to-[#AA771C] p-[1.5px] shadow-[0_0_25px_rgba(191,149,63,0.35)] mb-3">
+        {/* Header */}
+        <div className="flex flex-col items-center text-center mb-5">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#BF953F] via-[#FCF6BA] to-[#AA771C] p-[1.5px] shadow-[0_0_25px_rgba(191,149,63,0.35)] mb-2">
             <div className="w-full h-full bg-[#0b0b0b] rounded-[15px] flex items-center justify-center">
-              <Shield className="w-8 h-8 text-[#FCF6BA]" strokeWidth={2.2} />
+              <span className="text-3xl">📝</span>
             </div>
           </div>
 
-          <h1 className={`${styles.goldGradientText} text-3xl font-black tracking-tight mb-1`}>
-            VERIPROOF
+          <h1 className={`${styles.goldGradientText} text-2xl sm:text-3xl font-black tracking-tight mb-1`}>
+            श्रमिक पंजीकरण • NEW WORKER
           </h1>
 
-          <p className="text-xs font-bold tracking-[0.2em] text-[#C5A880] uppercase">
-            Executive Membership & Profile Verification
+          <p className="text-sm font-bold text-[#FCF6BA]">
+            नया खाता बनाएं • 1 मिनट में शुरू करें
           </p>
 
+          {/* Audio Instruction Speaker Pill */}
           <div className="mt-2.5">
-            <span className={styles.corporateBadge}>
-              <Sparkles className="w-3.5 h-3.5 text-[#FCF6BA]" />
-              Elite Talent & Employer Network
-            </span>
+            <button
+              type="button"
+              onClick={handleAudioHelp}
+              className={styles.audioHelpBtn}
+              aria-label="Listen to audio instructions"
+            >
+              <Volume2 className="w-4 h-4 text-[#FCF6BA]" />
+              <span>🔊 आवाज से निर्देश सुनें (Listen Audio)</span>
+            </button>
           </div>
         </div>
 
@@ -241,26 +314,29 @@ export const Register = () => {
             animate={{ opacity: 1, y: 0 }}
             className={styles.redirectNoticeBanner}
           >
-            <Sparkles className="w-5 h-5 text-[#FCF6BA] shrink-0" />
-            <div className="text-xs">
-              <span className="font-bold text-[#FCF6BA]">Account not found for sign-in: </span>
-              <span className="text-[#C5A880]">
-                We have automatically pre-filled your corporate email (<strong className="text-white">{email}</strong>) below so you can register your profile.
+            <Sparkles className="w-6 h-6 text-[#FCF6BA] shrink-0" />
+            <div className="text-xs sm:text-sm">
+              <span className="font-bold text-[#FCF6BA]">यह नंबर नया है! </span>
+              <span className="text-[#ffffff]">
+                आपका मोबाइल नंबर (<strong className="text-[#FCF6BA]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम और काम चुनें।
               </span>
             </div>
           </motion.div>
         )}
 
-        {/* Registration Form */}
+        {/* Worker Registration Form */}
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
-          {/* Full Name Field */}
+          {/* Field 1: Worker Full Name with Mic */}
           <div>
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-[#C5A880] mb-1.5">
-              Executive Full Name <span className="text-[#BF953F]">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
+                👤 आपका पूरा नाम (Your Full Name) <span className="text-[#BF953F]">*</span>
+              </label>
+              <span className="text-[11px] text-[#C5A880]">बोलकर भर सकते हैं</span>
+            </div>
             <div className="relative">
               <div className={styles.inputIconWrapper}>
-                <User className="w-4 h-4 text-[#BF953F]" />
+                <User className="w-5 h-5 text-[#BF953F]" />
               </div>
               <input
                 id="register-name-input"
@@ -268,132 +344,96 @@ export const Register = () => {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Alexandra Vance"
+                placeholder="उदा. रमेश कुमार (Ramesh Kumar)"
                 className={styles.goldInput}
                 autoComplete="name"
               />
+              <button
+                type="button"
+                onClick={startNameVoiceInput}
+                className={`${styles.micActionBtn} ${isListeningName ? styles.micActionBtnActive : ''}`}
+                title="बोलकर नाम भरें"
+              >
+                {isListeningName ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
-          {/* Corporate Email Field (Pre-filled) */}
+          {/* Field 2: Mobile Number (Pre-filled if redirected) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#C5A880]">
-                Corporate Email Address <span className="text-[#BF953F]">*</span>
+              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
+                📱 मोबाइल नंबर (Mobile Number) <span className="text-[#BF953F]">*</span>
               </label>
               {isAutoRedirected && (
-                <span className="text-[10px] font-bold text-[#FCF6BA] bg-[#BF953F]/15 border border-[#BF953F]/40 px-2 py-0.5 rounded-full">
-                  Pre-filled
+                <span className="text-[10px] font-bold text-[#0c0c0e] bg-gradient-to-r from-[#BF953F] to-[#FCF6BA] px-2 py-0.5 rounded-full">
+                  पहले से भरा हुआ (Pre-filled)
                 </span>
               )}
             </div>
             <div className="relative">
               <div className={styles.inputIconWrapper}>
-                <Mail className="w-4 h-4 text-[#BF953F]" />
+                <Phone className="w-5 h-5 text-[#BF953F]" />
               </div>
               <input
                 id="register-email-input"
-                type="email"
+                type="tel"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="alexandra@vanguard.com"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="उदा. 9876543210"
                 className={`${styles.goldInput} ${isAutoRedirected ? '!border-[#BF953F] !bg-[#141414]' : ''}`}
-                autoComplete="email"
+                autoComplete="tel"
               />
+              <button
+                type="button"
+                onClick={startPhoneVoiceInput}
+                className={`${styles.micActionBtn} ${isListeningPhone ? styles.micActionBtnActive : ''}`}
+                title="बोलकर नंबर भरें"
+              >
+                {isListeningPhone ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
-          {/* Seniority / Experience Level & Role Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {/* Account Role Track */}
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#C5A880] mb-1.5">
-                Membership Track
-              </label>
-              <div className="relative">
-                <div className={styles.inputIconWrapper}>
-                  <Briefcase className="w-4 h-4 text-[#BF953F]" />
-                </div>
-                <select
-                  id="register-role-select"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className={`${styles.goldInput} appearance-none cursor-pointer`}
-                >
-                  <option value="candidate" className="bg-[#121212] text-white">
-                    Corporate Candidate
-                  </option>
-                  <option value="recruiter" className="bg-[#121212] text-white">
-                    Talent Acquisition / Partner
-                  </option>
-                  <option value="corporate_admin" className="bg-[#121212] text-white">
-                    Corporate Enterprise Admin
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            {/* Seniority Level */}
-            <div>
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-[#C5A880] mb-1.5">
-                Seniority Level
-              </label>
-              <div className="relative">
-                <div className={styles.inputIconWrapper}>
-                  <Building2 className="w-4 h-4 text-[#BF953F]" />
-                </div>
-                <select
-                  id="register-seniority-select"
-                  value={experienceLevel}
-                  onChange={(e) => setExperienceLevel(e.target.value)}
-                  className={`${styles.goldInput} appearance-none cursor-pointer`}
-                >
-                  <option value="Senior Executive" className="bg-[#121212] text-white">
-                    Senior Executive
-                  </option>
-                  <option value="Director / VP" className="bg-[#121212] text-white">
-                    Director / VP
-                  </option>
-                  <option value="C-Suite" className="bg-[#121212] text-white">
-                    C-Suite / Founder
-                  </option>
-                  <option value="Mid-Level" className="bg-[#121212] text-white">
-                    Mid-Level Professional
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Current / Previous Company */}
+          {/* Field 3: Visual Work Type Emoji Grid (Crucial for Low Literacy Workers) */}
           <div>
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-[#C5A880] mb-1.5">
-              Current / Target Enterprise
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
+                🛠️ अपना काम चुनें (Choose Your Work) <span className="text-[#BF953F]">*</span>
+              </label>
+              <span className="text-[11px] text-[#C5A880]">एक चुनें (Tap Icon)</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {WORK_TYPES.map((work) => {
+                const isSelected = selectedWork === work.id;
+                return (
+                  <button
+                    key={work.id}
+                    type="button"
+                    onClick={() => handleSelectWork(work)}
+                    className={`${styles.workTypeCard} ${isSelected ? styles.workTypeCardSelected : ''}`}
+                  >
+                    <span className="text-3xl mb-1">{work.emoji}</span>
+                    <span className="text-xs font-black text-white">{work.hindi}</span>
+                    <span className="text-[10px] text-[#C5A880]">{work.english}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Field 4: 4-Digit PIN or Password */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
+                🔒 4 अंकों का गुप्त पिन बनाएं (Create 4-Digit PIN) <span className="text-[#BF953F]">*</span>
+              </label>
+              <span className="text-[11px] text-[#C5A880]">उदा. 1234 या 2580</span>
+            </div>
             <div className="relative">
               <div className={styles.inputIconWrapper}>
-                <Building2 className="w-4 h-4 text-[#BF953F]" />
-              </div>
-              <input
-                id="register-company-input"
-                type="text"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="e.g. Goldman Sachs, Morgan Stanley, Apple"
-                className={styles.goldInput}
-              />
-            </div>
-          </div>
-
-          {/* Password Field & Strength Indicator */}
-          <div>
-            <label className="block text-xs font-extrabold uppercase tracking-wider text-[#C5A880] mb-1.5">
-              Master Access Password <span className="text-[#BF953F]">*</span>
-            </label>
-            <div className="relative">
-              <div className={styles.inputIconWrapper}>
-                <Lock className="w-4 h-4 text-[#BF953F]" />
+                <Lock className="w-5 h-5 text-[#BF953F]" />
               </div>
               <input
                 id="register-password-input"
@@ -401,7 +441,7 @@ export const Register = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                placeholder="4 अंकों का पिन बनाएं"
                 className={styles.goldInput}
                 autoComplete="new-password"
               />
@@ -409,51 +449,11 @@ export const Register = () => {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A39171] hover:text-[#FCF6BA] transition-colors focus:outline-none"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? 'Hide PIN' : 'Show PIN'}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-
-            {/* Password Strength Indicator */}
-            {password && (
-              <div className="mt-2 space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-[#A39171]">Security Rating:</span>
-                  <span className="font-bold text-[#FCF6BA]">{strength.label}</span>
-                </div>
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${strength.color} transition-all duration-300 rounded-full`}
-                    style={{ width: strength.width }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Terms Acceptance */}
-          <div className="pt-1">
-            <label className="flex items-start gap-2.5 cursor-pointer text-xs select-none text-[#C5A880]">
-              <input
-                id="register-terms-checkbox"
-                type="checkbox"
-                checked={agreeTerms}
-                onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded border-amber-600/40 bg-black/60 text-[#BF953F] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#BF953F] shrink-0"
-              />
-              <span>
-                I accept the{' '}
-                <a
-                  href="#terms"
-                  onClick={(e) => e.preventDefault()}
-                  className="text-[#FCF6BA] underline underline-offset-2 decoration-[#BF953F]"
-                >
-                  VeriProof Executive Charter & Verification Standard
-                </a>
-                .
-              </span>
-            </label>
           </div>
 
           {/* Submit Registration Button */}
@@ -465,12 +465,12 @@ export const Register = () => {
           >
             {loading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                <span>Creating Executive Profile...</span>
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <span>खाता बन रहा है...</span>
               </div>
             ) : (
               <>
-                <span>Initialize Executive Profile</span>
+                <span>✨ खाता बनाएं और काम पाएं (REGISTER NOW)</span>
                 <ArrowRight className="w-5 h-5 stroke-[2.5]" />
               </>
             )}
@@ -479,21 +479,18 @@ export const Register = () => {
 
         {/* Divider */}
         <div className={styles.goldDivider}>
-          <span>Already Verified?</span>
+          <span>पहले से खाता है? (Already Registered)</span>
         </div>
 
         {/* Link to Login */}
         <div className="text-center">
-          <p className="text-xs text-[#A39171]">
-            Already hold an active credential?{' '}
-            <Link
-              to="/login"
-              state={{ email }}
-              className="font-bold text-[#FCF6BA] hover:underline underline-offset-4 decoration-[#BF953F] transition-all"
-            >
-              Sign In to VeriProof
-            </Link>
-          </p>
+          <Link
+            to="/login"
+            state={{ phone: phoneNumber }}
+            className="inline-flex items-center gap-2 font-black text-sm text-[#FCF6BA] bg-[#BF953F]/15 hover:bg-[#BF953F]/25 border border-[#BF953F]/40 px-5 py-3 rounded-2xl shadow-sm transition-all"
+          >
+            <span>👉 लॉगिन करें (Sign In Here)</span>
+          </Link>
         </div>
       </motion.div>
     </div>
