@@ -5,12 +5,14 @@ import { Phone, UserCheck, ArrowRight, Sparkles, CheckCircle2, Mic, MicOff, Volu
 import toast from 'react-hot-toast';
 import axios from '../api/axios';
 import { useVoice } from '../context/VoiceContext';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 /**
  * Worker Login Component - VoiceHire
  * 
  * Design & Theme Guidelines:
- * - Color Palette: Primary Blue (#2563EB / #1D4ED8), Dark Navy (#0F172A), Light Sky Blue (#EFF6FF), Background White (#FFFFFF)
+ * - Dual Theme: Dark Mode (#151C2C) & Light Mode (#FFFFFF)
  * - Required Form Field: Phone Number ONLY (No password or email)
  * - 1-Tap sample login buttons for instant demo testing
  */
@@ -18,6 +20,7 @@ export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedLang } = useVoice();
+  const { isDark } = useTheme();
 
   const [phoneNumber, setPhoneNumber] = useState(location.state?.phone || '');
   const [isListeningPhone, setIsListeningPhone] = useState(false);
@@ -194,28 +197,36 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE] text-slate-800 flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden">
-      {/* Soft Ambient Light Halo Orbs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden transition-colors duration-300">
+      {/* Background Soft Glow Orbs */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Login Card */}
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(37,99,235,0.12)] border border-blue-100/90 relative z-10"
+        className="w-full max-w-lg bg-white dark:bg-[#151C2C] rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-slate-200 dark:border-white/10 relative z-10"
       >
+        {/* Top Header with ThemeToggle */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 mb-6">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB] dark:text-[#60A5FA]">
+            Worker Login
+          </span>
+          <ThemeToggle className="!w-9 !h-9 !rounded-xl" />
+        </div>
+
         {/* Brand Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white shadow-lg shadow-blue-500/25 mb-3">
             <Mic className="w-7 h-7 stroke-[2.5]" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-[#F8FAFC] tracking-tight">
             Sign In to VoiceHire
           </h1>
-          <p className="text-sm font-semibold text-slate-500 mt-1">
+          <p className="text-sm font-semibold text-slate-500 dark:text-[#94A3B8] mt-1">
             Log in with your mobile number • No password needed
           </p>
 
@@ -223,7 +234,7 @@ export const Login = () => {
             <button
               type="button"
               onClick={handleAudioHelp}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100/80 text-[#2563EB] font-bold text-xs border border-blue-200 transition-all active:scale-95 shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 text-[#2563EB] dark:text-[#60A5FA] font-bold text-xs border border-blue-200 dark:border-blue-500/30 transition-all active:scale-95 shadow-sm cursor-pointer"
             >
               <Volume2 className="w-3.5 h-3.5 text-[#2563EB]" />
               <span>🔊 Listen Audio Instructions</span>
@@ -232,16 +243,16 @@ export const Login = () => {
         </div>
 
         {/* Quick 1-Tap Demo Chips */}
-        <div className="mb-5 bg-blue-50/60 border border-blue-200/80 rounded-2xl p-3.5">
-          <p className="text-[11px] font-bold text-slate-500 mb-2 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+        <div className="mb-5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-500/30 rounded-2xl p-3.5">
+          <p className="text-[11px] font-bold text-slate-500 dark:text-[#94A3B8] mb-2 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#60A5FA]" />
             Quick Test Accounts (1-Tap):
           </p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setPhoneNumber('9876543210')}
-              className="text-xs font-bold bg-white hover:bg-blue-50 text-slate-700 border border-blue-200 px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold bg-white dark:bg-[#0B0F19] hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer"
             >
               🚗 Driver Ramesh (9876543210)
             </button>
