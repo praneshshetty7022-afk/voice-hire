@@ -5,33 +5,60 @@ const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      required: [true, 'Worker name is required / नाम आवश्यक है'],
+      required: [true, 'Full name is required'],
       trim: true,
-      maxlength: [80, 'Name cannot exceed 80 characters'],
+      maxlength: [100, 'Name cannot exceed 100 characters'],
     },
-    phoneNumber: {
+    phone: {
       type: String,
-      required: [true, 'Phone number is required / फ़ोन नंबर आवश्यक है'],
+      required: [true, 'Phone number is required'],
       trim: true,
+      unique: true,
       index: true,
-    },
-    workType: {
-      type: String,
-      enum: ['Driver', 'Cook', 'Househelp', 'Delivery', 'Helper', 'Security', 'Electrician', 'Carpenter', 'Worker', 'Other'],
-      default: 'Driver',
-    },
-    city: {
-      type: String,
-      default: 'Bengaluru',
-    },
-    preferredLanguage: {
-      type: String,
-      default: 'hi-IN',
     },
     role: {
       type: String,
-      enum: ['WORKER', 'EMPLOYER', 'ADMIN', 'candidate'],
-      default: 'WORKER',
+      enum: ['employee', 'employer'],
+      required: [true, 'Role must be employee or employer'],
+      default: 'employee',
+      lowercase: true,
+    },
+    preferredLanguage: {
+      type: String,
+      default: 'en',
+    },
+    location: {
+      type: String,
+      default: 'Bengaluru',
+      trim: true,
+    },
+    // Employee Specific Profile Fields
+    tradeCategory: {
+      type: String,
+      default: 'DRIVER',
+      uppercase: true,
+      trim: true,
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    experience: {
+      type: String,
+      default: '1-3 Years',
+    },
+    expectedWage: {
+      type: Number,
+      default: 1000,
+    },
+    wageType: {
+      type: String,
+      enum: ['daily', 'monthly'],
+      default: 'daily',
+    },
+    bio: {
+      type: String,
+      default: '',
     },
     verificationStatus: {
       type: String,
@@ -44,6 +71,21 @@ const userSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    // Employer Specific Profile Fields
+    companyName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    businessType: {
+      type: String,
+      default: 'Logistics & Commercial',
+      trim: true,
+    },
+    businessDescription: {
+      type: String,
+      default: '',
+    },
     lastLogin: {
       type: Date,
       default: Date.now,
@@ -54,18 +96,25 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// Virtual alias to support both phone and phoneNumber
+userSchema.virtual('phoneNumber').get(function () {
+  return this.phone;
+});
+userSchema.virtual('phoneNumber').set(function (val) {
+  this.phone = val;
+});
+
 // Generate JWT token
 userSchema.methods.generateAuthToken = function () {
-  const secret = process.env.JWT_SECRET || 'udyoga_mitra_gold_worker_jwt_secret_2026';
+  const secret = process.env.JWT_SECRET || 'voicehire_secure_corporate_platform_jwt_key_2026';
   const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
 
   return jwt.sign(
     {
       id: this._id,
-      phoneNumber: this.phoneNumber,
-      fullName: this.fullName,
-      workType: this.workType,
+      phone: this.phone,
       role: this.role,
+      fullName: this.fullName,
     },
     secret,
     { expiresIn }
@@ -73,7 +122,8 @@ userSchema.methods.generateAuthToken = function () {
 };
 
 userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
+  const obj = this.toObject({ virtuals: true });
+  delete obj.__v;
   return obj;
 };
 

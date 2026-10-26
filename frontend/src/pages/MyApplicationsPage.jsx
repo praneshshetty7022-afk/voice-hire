@@ -22,20 +22,24 @@ export default function MyApplicationsPage() {
   const fetchMyApplications = async () => {
     setLoading(true)
     try {
-      const userStr = localStorage.getItem('user')
-      const user = userStr ? JSON.parse(userStr) : { id: 'worker_1' }
+      let data = null
+      try {
+        const res = await axios.get('/applications/my')
+        data = Array.isArray(res?.data) ? res.data : null
+      } catch (err) {
+        // Fallback to worker id endpoint
+        const userStr = localStorage.getItem('user')
+        const user = userStr ? JSON.parse(userStr) : { id: 'worker_1' }
+        const res2 = await axios.get(`/applications/worker/${user._id || user.id || 'worker_1'}`)
+        data = Array.isArray(res2?.data) ? res2.data : null
+      }
 
-      const res = await axios.get(`/applications/worker/${user.id || 'worker_1'}`)
-      const data = Array.isArray(res?.data) 
-        ? res.data 
-        : (Array.isArray(res?.data?.applications) ? res.data.applications : (Array.isArray(res?.data?.data) ? res.data.data : null))
       if (data && data.length > 0) {
         setApplications(data)
       } else {
         setApplications(getMockApplications())
       }
     } catch (e) {
-      console.error(e)
       setApplications(getMockApplications())
     } finally {
       setLoading(false)

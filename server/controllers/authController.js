@@ -1,39 +1,14 @@
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-// Pre-seeded verified worker accounts for testing
-const fallbackUsers = [
-  {
-    id: 'worker_demo_01',
-    fullName: 'Ramesh Kumar (रमेश कुमार)',
-    phoneNumber: '9876543210',
-    workType: 'Driver',
-    city: 'Bengaluru',
-    role: 'WORKER',
-    verificationStatus: 'verified',
-    trustScore: 96,
-  },
-  {
-    id: 'worker_demo_02',
-    fullName: 'Sunita Devi (सुनीता देवी)',
-    phoneNumber: '9123456780',
-    workType: 'Cook',
-    city: 'Bengaluru',
-    role: 'WORKER',
-    verificationStatus: 'verified',
-    trustScore: 98,
-  },
-];
-
-const generateToken = (payload) => {
-  const secret = process.env.JWT_SECRET || 'udyoga_mitra_gold_worker_jwt_secret_2026';
-  const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
-  return jwt.sign(payload, secret, { expiresIn });
+// Clean and normalize 10-digit Indian phone number
+const normalizePhone = (p) => {
+  if (!p) return '';
+  return String(p).replace(/\D/g, '').slice(-10);
 };
 
 /**
- * @desc    Register a new worker with ONLY Name and Phone Number
+ * @desc    Register a new user (employee or employer)
  * @route   POST /api/auth/register
  * @access  Public
  */
@@ -41,69 +16,89 @@ export const register = async (req, res) => {
   try {
     const {
       fullName,
+      phone,
       phoneNumber,
-      workType = 'Driver',
-      city = 'Bengaluru',
-      preferredLanguage = 'en-IN',
+      role = 'employee',
+      preferredLanguage = 'en',
+      location = 'Bengaluru',
+      tradeCategory = 'DRIVER',
+      skills = [],
+      experience = '1-3 Years',
+      expectedWage = 1000,
+      wageType = 'daily',
+      bio = '',
+      companyName = '',
+      businessType = 'Logistics & Commercial',
+      businessDescription = '',
     } = req.body;
 
-    // ONLY Name and Phone Number are required
-    if (!fullName || !phoneNumber) {
+    const rawPhone = phone || phoneNumber;
+    if (!fullName || !rawPhone) {
       return res.status(400).json({
         success: false,
-        code: 'MISSING_FIELDS',
-        message: 'Please enter Name and Phone Number (कृपया अपना नाम और मोबाइल नंबर दर्ज करें).',
+        message: 'Full Name and Phone Number are required.',
       });
     }
 
-    const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
-    if (!cleanPhone || cleanPhone.length < 10) {
+    const cleanPhone = normalizePhone(rawPhone);
+    if (cleanPhone.length < 10) {
       return res.status(400).json({
         success: false,
-        code: 'INVALID_PHONE',
-        message: 'Please enter a valid 10-digit mobile number (कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें).',
+        message: 'Please provide a valid 10-digit mobile number.',
       });
     }
 
-    const isMongoConnected = mongoose.connection.readyState === 1;
+    const validRole = role.toLowerCase() === 'employer' ? 'employer' : 'employee';
 
-    if (isMongoConnected) {
-      // Check if phone number already exists
-      let user = await User.findOne({ phoneNumber: cleanPhone });
-      if (user) {
-        user.lastLogin = new Date();
-        if (fullName) user.fullName = fullName.trim();
-        if (preferredLanguage) user.preferredLanguage = preferredLanguage;
-        await user.save({ validateBeforeSave: false });
+    const isDbConnected = mongoose.connection.readyState === 1;
 
-        const token = user.generateAuthToken();
+    if (isDbConnected) {
+      let existing = await User.findOne({ phone: cleanPhone });
+
+      if (existing) {
+        existing.fullName = fullName.trim();
+        existing.role = validRole;
+        existing.preferredLanguage = preferredLanguage;
+        existing.location = location;
+        if (validRole === 'employee') {
+          existing.tradeCategory = tradeCategory.toUpperCase();
+          if (skills.length) existing.skills = skills;
+          if (experience) existing.experience = experience;
+          if (expectedWage) existing.expectedWage = Number(expectedWage);
+          if (wageType) existing.wageType = wageType;
+          if (bio) existing.bio = bio;
+        } else {
+          existing.companyName = companyName.trim() || `${fullName}'s Enterprise`;
+          existing.businessType = businessType;
+          if (businessDescription) existing.businessDescription = businessDescription;
+        }
+        existing.lastLogin = new Date();
+        await existing.save();
+
+        const token = existing.generateAuthToken();
         return res.status(200).json({
           success: true,
-          message: `Welcome back, ${user.fullName}!`,
+          message: `Welcome back, ${existing.fullName}!`,
           token,
-          user: {
-            id: user._id,
-            fullName: user.fullName,
-            phoneNumber: user.phoneNumber,
-            workType: user.workType,
-            city: user.city,
-            role: user.role,
-            verificationStatus: user.verificationStatus,
-            trustScore: user.trustScore,
-          },
+          user: existing.toJSON(),
         });
       }
 
-      // Create new worker record with ONLY Name and Phone Number
       const newUser = new User({
         fullName: fullName.trim(),
-        phoneNumber: cleanPhone,
-        workType,
-        city,
+        phone: cleanPhone,
+        role: validRole,
         preferredLanguage,
-        role: 'WORKER',
-        verificationStatus: 'verified',
-        trustScore: 95,
+        location,
+        tradeCategory: tradeCategory.toUpperCase(),
+        skills: Array.isArray(skills) ? skills : [],
+        experience,
+        expectedWage: Number(expectedWage) || 1000,
+        wageType,
+        bio,
+        companyName: validRole === 'employer' ? (companyName.trim() || `${fullName}'s Enterprise`) : '',
+        businessType: validRole === 'employer' ? businessType : '',
+        businessDescription: validRole === 'employer' ? businessDescription : '',
       });
 
       await newUser.save();
@@ -111,229 +106,244 @@ export const register = async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: `Welcome, ${newUser.fullName}! Your registration is complete.`,
+        message: 'Profile created successfully.',
         token,
-        user: {
-          id: newUser._id,
-          fullName: newUser.fullName,
-          phoneNumber: newUser.phoneNumber,
-          workType: newUser.workType,
-          city: newUser.city,
-          role: newUser.role,
-          verificationStatus: newUser.verificationStatus,
-          trustScore: newUser.trustScore,
-        },
-      });
-    } else {
-      // In-Memory Resilient Fallback Mode
-      let existing = fallbackUsers.find((u) => u.phoneNumber === cleanPhone);
-      if (existing) {
-        existing.fullName = fullName.trim();
-        existing.preferredLanguage = preferredLanguage;
-        const token = generateToken({
-          id: existing.id,
-          phoneNumber: existing.phoneNumber,
-          fullName: existing.fullName,
-          workType: existing.workType || 'Driver',
-          role: existing.role || 'WORKER',
-        });
-
-        return res.status(200).json({
-          success: true,
-          message: `Welcome back, ${existing.fullName}!`,
-          token,
-          user: existing,
-        });
-      }
-
-      const newWorker = {
-        id: 'worker_' + Date.now(),
-        fullName: fullName.trim(),
-        phoneNumber: cleanPhone,
-        workType,
-        city,
-        preferredLanguage,
-        role: 'WORKER',
-        verificationStatus: 'verified',
-        trustScore: 95,
-      };
-
-      fallbackUsers.push(newWorker);
-
-      const token = generateToken({
-        id: newWorker.id,
-        phoneNumber: newWorker.phoneNumber,
-        fullName: newWorker.fullName,
-        workType: newWorker.workType,
-        role: newWorker.role,
-      });
-
-      return res.status(201).json({
-        success: true,
-        message: `Welcome, ${newWorker.fullName}! Your registration is complete.`,
-        token,
-        user: newWorker,
+        user: newUser.toJSON(),
       });
     }
+
+    // In-memory resilient response if MongoDB is offline in dev
+    const fallbackUser = {
+      _id: 'usr_' + Date.now(),
+      id: 'usr_' + Date.now(),
+      fullName: fullName.trim(),
+      phone: cleanPhone,
+      phoneNumber: cleanPhone,
+      role: validRole,
+      preferredLanguage,
+      location,
+      tradeCategory: tradeCategory.toUpperCase(),
+      skills: Array.isArray(skills) ? skills : [],
+      experience,
+      expectedWage: Number(expectedWage) || 1000,
+      wageType,
+      bio,
+      companyName: validRole === 'employer' ? (companyName.trim() || `${fullName}'s Enterprise`) : '',
+      businessType,
+      verificationStatus: 'verified',
+      trustScore: 98,
+    };
+
+    const token = new User(fallbackUser).generateAuthToken();
+
+    return res.status(201).json({
+      success: true,
+      message: 'Profile initialized successfully.',
+      token,
+      user: fallbackUser,
+    });
   } catch (error) {
-    console.error('Error during worker registration:', error);
+    console.error('[Register Error]:', error);
     return res.status(500).json({
       success: false,
-      code: 'REGISTRATION_ERROR',
-      message: error.message || 'Registration failed.',
+      message: error.message || 'Server error during registration.',
     });
   }
 };
 
 /**
- * @desc    Authenticate worker by Mobile Number & get token
+ * @desc    Login with phone number and role selection
  * @route   POST /api/auth/login
  * @access  Public
  */
 export const login = async (req, res) => {
   try {
-    const { phoneNumber, identifier } = req.body;
-    const rawInput = (phoneNumber || identifier || '').trim();
+    const { phone, phoneNumber, role = 'employee' } = req.body;
+    const rawPhone = phone || phoneNumber;
 
-    if (!rawInput) {
+    if (!rawPhone) {
       return res.status(400).json({
         success: false,
-        code: 'MISSING_FIELDS',
-        message: 'कृपया अपना मोबाइल नंबर दर्ज करें (Please enter phone number).',
+        message: 'Please enter your 10-digit mobile number.',
       });
     }
 
-    const cleanPhone = rawInput.replace(/\D/g, '').slice(-10);
-    const isMongoConnected = mongoose.connection.readyState === 1;
+    const cleanPhone = normalizePhone(rawPhone);
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit mobile number.',
+      });
+    }
 
-    let user = null;
+    const requestedRole = role.toLowerCase() === 'employer' ? 'employer' : 'employee';
+    const isDbConnected = mongoose.connection.readyState === 1;
 
-    if (isMongoConnected) {
-      // 1. SMART LOOKUP: Check if phone number exists in MongoDB
-      user = await User.findOne({ phoneNumber: cleanPhone });
+    if (isDbConnected) {
+      let user = await User.findOne({ phone: cleanPhone });
 
-      // 2. USER NOT FOUND: Return 404 with pre-fill details for Register redirection
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          code: 'USER_NOT_FOUND',
-          message: 'खाता नहीं मिला। आइए नया पंजीकरण करें! (Account not found. Let us register you!)',
-          phoneNumber: cleanPhone,
-          redirectTo: `/register?phone=${encodeURIComponent(cleanPhone)}`,
+      if (user) {
+        // Update role if explicitly selected or keep existing
+        if (user.role !== requestedRole) {
+          user.role = requestedRole;
+        }
+        user.lastLogin = new Date();
+        await user.save({ validateBeforeSave: false });
+
+        const token = user.generateAuthToken();
+        return res.status(200).json({
+          success: true,
+          message: `Welcome back, ${user.fullName}!`,
+          token,
+          user: user.toJSON(),
         });
       }
 
-      user.lastLogin = new Date();
-      await user.save({ validateBeforeSave: false });
+      // If phone is new, automatically register frictionless worker/employer account
+      const defaultName = requestedRole === 'employer' ? 'Hiring Manager' : 'Verified Worker';
+      const autoUser = new User({
+        fullName: defaultName,
+        phone: cleanPhone,
+        role: requestedRole,
+        companyName: requestedRole === 'employer' ? 'VoiceHire Partner' : '',
+      });
 
-      const token = user.generateAuthToken();
+      await autoUser.save();
+      const token = autoUser.generateAuthToken();
 
       return res.status(200).json({
         success: true,
-        message: `स्वागत है, ${user.fullName}! लॉगिन सफल रहा (Login successful).`,
+        message: `Welcome to VoiceHire! Profile created.`,
         token,
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          phoneNumber: user.phoneNumber,
-          workType: user.workType,
-          city: user.city,
-          role: user.role,
-          verificationStatus: user.verificationStatus,
-          trustScore: user.trustScore,
-        },
-      });
-    } else {
-      // In-Memory Fallback
-      const foundFallback = fallbackUsers.find((u) => u.phoneNumber === cleanPhone);
-
-      if (!foundFallback) {
-        return res.status(404).json({
-          success: false,
-          code: 'USER_NOT_FOUND',
-          message: 'खाता नहीं मिला। आइए नया पंजीकरण करें! (Account not found. Let us register you!)',
-          phoneNumber: cleanPhone,
-          redirectTo: `/register?phone=${encodeURIComponent(cleanPhone)}`,
-        });
-      }
-
-      const token = generateToken({
-        id: foundFallback.id,
-        phoneNumber: foundFallback.phoneNumber,
-        fullName: foundFallback.fullName,
-        workType: foundFallback.workType,
-        role: foundFallback.role,
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: `स्वागत है, ${foundFallback.fullName}! लॉगिन सफल रहा (Login successful).`,
-        token,
-        user: foundFallback,
+        user: autoUser.toJSON(),
       });
     }
-  } catch (error) {
-    console.error('Error during worker login:', error);
-    return res.status(500).json({
-      success: false,
-      code: 'SERVER_ERROR',
-      message: 'सर्वर त्रुटि (Server error during login).',
-    });
-  }
-};
 
-/**
- * @desc    Check whether a phone number is registered
- * @route   POST /api/auth/check-phone (or /api/auth/check-email)
- * @access  Public
- */
-export const checkPhone = async (req, res) => {
-  try {
-    const { phoneNumber, identifier } = req.body;
-    const rawInput = (phoneNumber || identifier || '').trim();
-    const cleanPhone = rawInput.replace(/\D/g, '').slice(-10);
+    // Resilient fallback
+    const fallbackUser = {
+      _id: 'usr_' + cleanPhone,
+      id: 'usr_' + cleanPhone,
+      fullName: requestedRole === 'employer' ? 'Nandi Logistics' : 'Ramesh Kumar',
+      phone: cleanPhone,
+      phoneNumber: cleanPhone,
+      role: requestedRole,
+      companyName: requestedRole === 'employer' ? 'Nandi Logistics & Motors' : '',
+      tradeCategory: 'DRIVER',
+      location: 'Bengaluru',
+      verificationStatus: 'verified',
+      trustScore: 98,
+    };
 
-    const isMongoConnected = mongoose.connection.readyState === 1;
-    let exists = false;
-
-    if (isMongoConnected) {
-      const found = await User.findOne({ phoneNumber: cleanPhone }).select('_id');
-      exists = !!found;
-    } else {
-      exists = fallbackUsers.some((u) => u.phoneNumber === cleanPhone);
-    }
+    const token = new User(fallbackUser).generateAuthToken();
 
     return res.status(200).json({
       success: true,
-      exists,
-      phoneNumber: cleanPhone,
-      message: exists ? 'नंबर पंजीकृत है' : 'नंबर पंजीकृत नहीं है',
+      message: 'Login successful.',
+      token,
+      user: fallbackUser,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Check failed' });
+    console.error('[Login Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error during login.',
+    });
   }
 };
 
 /**
- * @desc    Get current authenticated profile
+ * @desc    Get current authenticated user profile
  * @route   GET /api/auth/me
  * @access  Private
  */
 export const getProfile = async (req, res) => {
   try {
-    const isMongoConnected = mongoose.connection.readyState === 1;
-    if (isMongoConnected) {
-      const user = await User.findById(req.user.id);
-      if (!user) return res.status(404).json({ success: false, message: 'Worker not found.' });
-      return res.status(200).json({ success: true, user });
-    } else {
-      const user = fallbackUsers.find((u) => u.id === req.user.id);
-      if (!user) return res.status(404).json({ success: false, message: 'Worker not found.' });
-      return res.status(200).json({ success: true, user });
+    const isDbConnected = mongoose.connection.readyState === 1;
+
+    if (isDbConnected && req.user?._id) {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          user: user.toJSON(),
+        });
+      }
     }
+
+    return res.status(200).json({
+      success: true,
+      user: req.user,
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    console.error('[Get Profile Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error fetching profile.',
+    });
   }
 };
 
-export const checkEmail = checkPhone;
+/**
+ * @desc    Update authenticated user profile
+ * @route   PUT /api/auth/profile
+ * @access  Private
+ */
+export const updateProfile = async (req, res) => {
+  try {
+    const isDbConnected = mongoose.connection.readyState === 1;
+    const updates = req.body;
+
+    if (isDbConnected && req.user?._id) {
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found in database.' });
+      }
+
+      // Update allowed fields based on role
+      const allowedCommon = ['fullName', 'preferredLanguage', 'location'];
+      const allowedEmployee = ['tradeCategory', 'skills', 'experience', 'expectedWage', 'wageType', 'bio'];
+      const allowedEmployer = ['companyName', 'businessType', 'businessDescription'];
+
+      allowedCommon.forEach((field) => {
+        if (updates[field] !== undefined) user[field] = updates[field];
+      });
+
+      if (user.role === 'employee') {
+        allowedEmployee.forEach((field) => {
+          if (updates[field] !== undefined) user[field] = updates[field];
+        });
+      } else if (user.role === 'employer') {
+        allowedEmployer.forEach((field) => {
+          if (updates[field] !== undefined) user[field] = updates[field];
+        });
+      }
+
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully in MongoDB.',
+        user: user.toJSON(),
+      });
+    }
+
+    // In-memory fallback response
+    const updated = {
+      ...req.user,
+      ...updates,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully.',
+      user: updated,
+    });
+  } catch (error) {
+    console.error('[Update Profile Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error updating profile.',
+    });
+  }
+};
+
+export default { register, login, getProfile, updateProfile };

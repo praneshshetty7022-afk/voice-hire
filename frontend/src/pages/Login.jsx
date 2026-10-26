@@ -1,345 +1,292 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Phone, UserCheck, ArrowRight, Sparkles, CheckCircle2, Mic, MicOff, Volume2, ShieldCheck } from 'lucide-react';
-import toast from 'react-hot-toast';
-import axios from '../api/axios';
-import { useVoice } from '../context/VoiceContext';
-import { useTheme } from '../context/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
+import React, { useState, useRef } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
+import {
+  Phone,
+  User,
+  Building2,
+  Mic,
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  Lock,
+} from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
+import { useVoice } from '../context/VoiceContext'
+import ThemeToggle from '../components/ThemeToggle'
+import LanguageSelector from '../components/LanguageSelector'
 
-/**
- * Worker Login Component - VoiceHire
- * 
- * Design & Theme Guidelines:
- * - Dual Theme: Dark Mode (#151C2C) & Light Mode (#FFFFFF)
- * - Required Form Field: Phone Number ONLY (No password or email)
- * - 1-Tap sample login buttons for instant demo testing
- */
-export const Login = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { selectedLang } = useVoice();
-  const { isDark } = useTheme();
+export default function Login() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { login, loading } = useAuth()
+  const { selectedLang, setSelectedLang } = useVoice()
 
-  const [phoneNumber, setPhoneNumber] = useState(location.state?.phone || '');
-  const [isListeningPhone, setIsListeningPhone] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const phoneRecognitionRef = useRef(null);
+  const [role, setRole] = useState('employee')
+  const [phone, setPhone] = useState(location.state?.phone || '')
+  const [isListeningPhone, setIsListeningPhone] = useState(false)
+  const phoneRecognitionRef = useRef(null)
 
-  // Audio Text-To-Speech Guide
-  const speakInstruction = (text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = selectedLang || 'en-IN';
-      utterance.rate = 0.95;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  const handleAudioHelp = () => {
-    speakInstruction('Welcome to VoiceHire! Please enter your 10-digit mobile number or click microphone to speak it.');
-    toast('🔊 Playing audio instructions...', {
-      icon: '📢',
-      style: { background: '#0F172A', color: '#60A5FA' },
-    });
-  };
-
-  useEffect(() => {
-    return () => {
-      if (phoneRecognitionRef.current) {
-        try { phoneRecognitionRef.current.abort(); } catch (e) {}
-      }
-    };
-  }, []);
-
-  // Voice Input for Phone Number
-  const startPhoneVoiceInput = () => {
-    if (isListeningPhone && phoneRecognitionRef.current) {
-      try { phoneRecognitionRef.current.abort(); } catch (e) {}
-      setIsListeningPhone(false);
-      return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  // Voice speech-to-text for phone input
+  const startPhoneVoice = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
-      toast.error('Voice input is not supported in this browser.');
-      return;
+      toast.error('Voice input is not supported in this browser.')
+      return
     }
 
     try {
-      const recognition = new SpeechRecognition();
-      recognition.lang = selectedLang || 'en-IN';
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      if (phoneRecognitionRef.current) phoneRecognitionRef.current.abort()
+      const recognition = new SpeechRecognition()
+      recognition.lang = selectedLang === 'kn' ? 'kn-IN' : selectedLang === 'hi' ? 'hi-IN' : 'en-IN'
+      recognition.continuous = false
+      recognition.interimResults = false
 
       recognition.onstart = () => {
-        setIsListeningPhone(true);
-        toast('🎤 Listening... Speak your 10 digit mobile number', {
-          id: 'login-voice-phone',
-          style: { background: '#0F172A', color: '#38BDF8' },
-        });
-      };
+        setIsListeningPhone(true)
+        toast('🎤 Listening... Speak your 10-digit number', { id: 'voice-login' })
+      }
 
-      recognition.onresult = (event) => {
-        const spoken = event.results[0][0].transcript;
-        const numbers = spoken.replace(/\D/g, '');
-        if (numbers.length >= 10) {
-          const clean = numbers.slice(-10);
-          setPhoneNumber(clean);
-          toast.success(`Phone captured: ${clean}`, {
-            id: 'login-voice-phone',
-            style: { background: '#0F172A', color: '#34D399' },
-          });
-        } else if (numbers.length > 0) {
-          setPhoneNumber(numbers);
-          toast(`Captured: ${numbers}`, { id: 'login-voice-phone' });
+      recognition.onresult = (e) => {
+        const spoken = e.results[0][0].transcript
+        const digits = spoken.replace(/\D/g, '').slice(-10)
+        if (digits) {
+          setPhone(digits)
+          toast.success(`Captured: ${digits}`, { id: 'voice-login' })
         }
-      };
+      }
 
-      recognition.onerror = () => {
-        setIsListeningPhone(false);
-        phoneRecognitionRef.current = null;
-      };
+      recognition.onerror = () => setIsListeningPhone(false)
+      recognition.onend = () => setIsListeningPhone(false)
 
-      recognition.onend = () => {
-        setIsListeningPhone(false);
-        phoneRecognitionRef.current = null;
-      };
-
-      phoneRecognitionRef.current = recognition;
-      recognition.start();
-    } catch (err) {
-      setIsListeningPhone(false);
+      phoneRecognitionRef.current = recognition
+      recognition.start()
+    } catch (e) {
+      setIsListeningPhone(false)
     }
-  };
+  }
 
-  const handleLoginSubmit = async (e) => {
-    if (e) e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault()
 
-    if (!phoneNumber.trim()) {
-      toast.error('Please enter your 10-digit mobile number.');
-      return;
-    }
-
-    const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10)
     if (cleanPhone.length < 10) {
-      toast.error('Mobile number must be at least 10 digits.');
-      return;
+      toast.error('Please enter a valid 10-digit mobile number.')
+      return
     }
 
-    setLoading(true);
-
-    try {
-      const response = await axios.post('/auth/login', {
-        phoneNumber: cleanPhone,
-        identifier: cleanPhone,
-      });
-
-      if (response.data.success) {
-        const user = response.data.user || {};
-        if (!user.name && user.fullName) user.name = user.fullName;
-        if (!user.fullName && user.name) user.fullName = user.name;
-
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(user));
-        localStorage.setItem('user_explicit_login', 'true');
-
-        speakInstruction(`Welcome back, ${user.name || 'Worker'}!`);
-
-        toast.success(`Welcome back, ${user.name || 'Worker'}!`, {
-          icon: '🎉',
-          style: { background: '#0F172A', color: '#34D399' },
-        });
-
-        navigate('/jobs', { replace: true });
-        return;
+    const res = await login({ phone: cleanPhone, role })
+    if (res.success) {
+      if (role === 'employer') {
+        navigate('/employer/dashboard', { replace: true })
+      } else {
+        navigate('/jobs', { replace: true })
       }
-    } catch (error) {
-      const status = error.response?.status;
-      const responseCode = error.response?.data?.code;
-
-      // If user not found, auto redirect to Register with pre-filled phone number
-      if (status === 404 || responseCode === 'USER_NOT_FOUND') {
-        toast('New mobile number detected! Opening registration...', {
-          icon: '✨',
-          style: { background: '#0F172A', color: '#38BDF8' },
-        });
-
-        navigate('/register', {
-          state: { phone: cleanPhone, autoFilled: true },
-          replace: true,
-        });
-        return;
-      }
-
-      // Offline client fallback
-      const fallbackUser = {
-        id: 'worker_' + Date.now(),
-        fullName: 'Worker (' + cleanPhone.slice(-4) + ')',
-        name: 'Worker (' + cleanPhone.slice(-4) + ')',
-        phoneNumber: cleanPhone,
-        role: 'WORKER',
-        verificationStatus: 'verified',
-        trustScore: 95,
-      };
-
-      localStorage.setItem('token', 'jwt_demo_token_' + Date.now());
-      localStorage.setItem('user', JSON.stringify(fallbackUser));
-      localStorage.setItem('user_explicit_login', 'true');
-
-      toast.success('Signed in successfully!');
-      navigate('/jobs', { replace: true });
-    } finally {
-      setLoading(false);
     }
-  };
+  }
+
+  // 1-Tap Quick Sample Login for testing
+  const handleQuickLogin = (targetRole, samplePhone) => {
+    setRole(targetRole)
+    setPhone(samplePhone)
+    login({ phone: samplePhone, role: targetRole }).then((res) => {
+      if (res.success) {
+        if (targetRole === 'employer') {
+          navigate('/employer/dashboard', { replace: true })
+        } else {
+          navigate('/jobs', { replace: true })
+        }
+      }
+    })
+  }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden transition-colors duration-300">
-      {/* Background Soft Glow Orbs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Main Login Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-lg bg-white dark:bg-[#151C2C] rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-slate-200 dark:border-white/10 relative z-10"
-      >
-        {/* Top Header with ThemeToggle */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 mb-6">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB] dark:text-[#60A5FA]">
-            Worker Login
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-sans transition-colors duration-300">
+      {/* Header */}
+      <header className="px-6 py-4 flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-[#0B0F19]/70 backdrop-blur-md">
+        <Link to="/jobs" className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white flex items-center justify-center shadow-md shadow-blue-500/25">
+            <Mic className="w-5 h-5 text-white stroke-[2.5]" />
+          </div>
+          <span className="text-xl font-black tracking-tight text-[#0F172A] dark:text-white">
+            Voice<span className="text-[#2563EB] dark:text-[#60A5FA]">Hire</span>
           </span>
+        </Link>
+
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle className="!w-9 !h-9 !rounded-xl" />
+          <LanguageSelector selectedLang={selectedLang} onSelectLang={setSelectedLang} />
+          <Link
+            to="/register"
+            className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.08]"
+          >
+            Create Profile
+          </Link>
         </div>
+      </header>
 
-        {/* Brand Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white shadow-lg shadow-blue-500/25 mb-3">
-            <Mic className="w-7 h-7 stroke-[2.5]" />
+      {/* Main Split-Screen Layout */}
+      <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-4 sm:p-8 lg:p-12 gap-8 items-center justify-center">
+        {/* ===================================================================
+            LEFT COLUMN: Editorial Brand Narrative & Role Explainer
+            =================================================================== */}
+        <div className="w-full lg:w-5/12 flex flex-col space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-xs font-black uppercase tracking-wider w-fit">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Secure Passwordless Sign In</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-[#F8FAFC] tracking-tight">
-            Sign In to VoiceHire
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+            Welcome back to{' '}
+            <span className="text-[#2563EB] dark:text-[#60A5FA]">VoiceHire.</span>
           </h1>
-          <p className="text-sm font-semibold text-slate-500 dark:text-[#94A3B8] mt-1">
-            Log in with your mobile number • No password needed
+
+          <p className="text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+            Fast, secure access using your verified 10-digit mobile number. No password memorization required.
           </p>
 
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={handleAudioHelp}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 text-[#2563EB] dark:text-[#60A5FA] font-bold text-xs border border-blue-200 dark:border-blue-500/30 transition-all active:scale-95 shadow-sm cursor-pointer"
-            >
-              <Volume2 className="w-3.5 h-3.5 text-[#2563EB]" />
-              <span>🔊 Listen Audio Instructions</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Quick 1-Tap Demo Chips */}
-        <div className="mb-5 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-500/30 rounded-2xl p-3.5">
-          <p className="text-[11px] font-bold text-slate-500 dark:text-[#94A3B8] mb-2 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#60A5FA]" />
-            Quick Test Accounts (1-Tap):
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setPhoneNumber('9876543210')}
-              className="text-xs font-bold bg-white dark:bg-[#0B0F19] hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer"
-            >
-              🚗 Driver Ramesh (9876543210)
-            </button>
-            <button
-              type="button"
-              onClick={() => setPhoneNumber('9123456780')}
-              className="text-xs font-bold bg-white hover:bg-blue-50 text-slate-700 border border-blue-200 px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer"
-            >
-              🍳 Cook Sunita (9123456780)
-            </button>
-          </div>
-        </div>
-
-        {/* Login Form */}
-        <form onSubmit={handleLoginSubmit} className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label htmlFor="login-phone-input" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                📱 Mobile Number <span className="text-rose-500">*</span>
-              </label>
-              <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> No Password
-              </span>
+          {/* Quick Demo Access Card */}
+          <div className="p-6 rounded-3xl bg-white dark:bg-[#151C2C] border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-black/40 space-y-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                1-Tap Instant Testing Profiles
+              </h3>
             </div>
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <Phone className="w-5 h-5" />
-              </div>
-              <input
-                id="login-phone-input"
-                type="tel"
-                required
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="e.g. 9876543210"
-                className="w-full pl-12 pr-12 py-3.5 bg-[#F8FAFC] border border-slate-200 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 rounded-2xl text-slate-900 font-semibold placeholder-slate-400 text-sm sm:text-base outline-none transition-all"
-                autoComplete="tel"
-              />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               <button
                 type="button"
-                onClick={startPhoneVoiceInput}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all cursor-pointer ${
-                  isListeningPhone
-                    ? 'bg-rose-500 text-white animate-pulse'
-                    : 'bg-blue-50 hover:bg-blue-100 text-[#2563EB]'
-                }`}
-                title="Speak phone number"
+                onClick={() => handleQuickLogin('employee', '9876543210')}
+                className="p-3 rounded-2xl bg-blue-50 dark:bg-white/[0.04] hover:bg-blue-100 dark:hover:bg-white/[0.08] border border-blue-200/80 dark:border-white/10 text-left transition-all cursor-pointer group"
               >
-                {isListeningPhone ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-black text-slate-900 dark:text-white">Worker Account</span>
+                </div>
+                <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                  Ramesh Kumar • Driver
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('employer', '9123456789')}
+                className="p-3 rounded-2xl bg-amber-50 dark:bg-white/[0.04] hover:bg-amber-100 dark:hover:bg-white/[0.08] border border-amber-200/80 dark:border-white/10 text-left transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-amber-600" />
+                  <span className="text-xs font-black text-slate-900 dark:text-white">Employer Account</span>
+                </div>
+                <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                  Nandi Logistics • Hiring
+                </p>
               </button>
             </div>
           </div>
-
-          <button
-            id="login-submit-button"
-            type="submit"
-            disabled={loading}
-            className="w-full mt-4 py-4 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.98] text-white font-black text-base rounded-2xl shadow-[0_8px_25px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 cursor-pointer"
-          >
-            {loading ? (
-              <span>Signing in...</span>
-            ) : (
-              <>
-                <UserCheck className="w-5 h-5 stroke-[2.5]" />
-                <span>Sign In (लॉगिन करें)</span>
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Footer / Create Account Link */}
-        <div className="mt-6 pt-5 border-t border-slate-100 text-center">
-          <p className="text-xs sm:text-sm font-semibold text-slate-500">
-            Don't have an account?{' '}
-            <Link
-              to="/register"
-              state={{ phone: phoneNumber }}
-              className="text-[#2563EB] hover:text-[#1D4ED8] font-black underline underline-offset-4"
-            >
-              Create Worker Profile (पंजीकरण करें)
-            </Link>
-          </p>
         </div>
-      </motion.div>
-    </div>
-  );
-};
 
-export default Login;
+        {/* ===================================================================
+            RIGHT COLUMN: Clean High-Contrast Tactile Login Form
+            =================================================================== */}
+        <div className="w-full lg:w-7/12 max-w-md">
+          <div className="bg-white dark:bg-[#151C2C] rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-black/50">
+            {/* Role Switcher Tabs */}
+            <div className="mb-6">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
+                Sign In As:
+              </label>
+              <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setRole('employee')}
+                  className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    role === 'employee'
+                      ? 'bg-[#2563EB] text-white shadow-md shadow-blue-500/30'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>Worker</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole('employer')}
+                  className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    role === 'employer'
+                      ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>Employer</span>
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                  Registered 10-Digit Mobile Number
+                </label>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-xs font-bold text-slate-500 border-r border-slate-300 dark:border-slate-700 pr-2">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                    placeholder="98765 43210"
+                    className="w-full pl-16 pr-12 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/20 text-sm font-bold text-slate-900 dark:text-white outline-none tracking-wider transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={startPhoneVoice}
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all cursor-pointer ${
+                      isListeningPhone
+                        ? 'bg-rose-500 text-white animate-pulse'
+                        : 'text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-white/[0.08]'
+                    }`}
+                    title="Speak Mobile Number"
+                  >
+                    <Mic className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit CTA */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-sm sm:text-base shadow-xl shadow-blue-500/30 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+              >
+                {loading ? (
+                  <span>Signing In...</span>
+                ) : (
+                  <>
+                    <span>Sign In to {role === 'employer' ? 'Employer Portal' : 'Worker Portal'}</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-5 border-t border-slate-100 dark:border-white/10 text-center">
+              <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-[#2563EB] dark:text-[#60A5FA] font-black hover:underline">
+                  Create New Profile
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}

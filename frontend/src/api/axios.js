@@ -11,7 +11,7 @@ const api = axios.create({
   },
 })
 
-// Request interceptor to add auth token
+// Request interceptor to attach JWT auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -25,15 +25,17 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor to handle errors
+// Response interceptor to handle errors gracefully
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Disable automatic 401 redirect for now since we're using simple auth
-    // if (error.response?.status === 401) {
-    //   localStorage.removeItem('token')
-    //   window.location.href = '/login'
-    // }
+    if (error.response?.status === 401) {
+      // Clear token if invalid and on protected route
+      const currentPath = window.location.pathname
+      if (currentPath !== '/login' && currentPath !== '/register' && currentPath !== '/' && currentPath !== '/intro') {
+        localStorage.removeItem('token')
+      }
+    }
     return Promise.reject(error)
   }
 )

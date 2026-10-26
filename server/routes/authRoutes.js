@@ -1,16 +1,15 @@
 import express from 'express';
-import { login, register, checkPhone, checkEmail, getProfile } from '../controllers/authController.js';
+import { login, register, getProfile, updateProfile } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // Public Authentication Endpoints
-router.post('/login', login);
 router.post('/register', register);
-router.post('/check-phone', checkPhone);
-router.post('/check-email', checkEmail);
+router.post('/login', login);
 
-// Protected Profile Endpoint
+// Protected Profile Endpoints
 router.get('/me', protect, getProfile);
+router.put('/profile', protect, updateProfile);
 
 export default router;

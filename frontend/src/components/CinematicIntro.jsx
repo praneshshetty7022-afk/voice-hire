@@ -3,36 +3,27 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
   Mic,
-  MicOff,
   Volume2,
   VolumeX,
   Play,
   Pause,
   RotateCcw,
-  X,
   Sparkles,
-  ShieldCheck,
-  CheckCircle2,
   ArrowRight,
-  AlertTriangle,
-  FileText,
-  Lock,
   Globe,
-  Phone,
-  User,
+  CheckCircle2,
+  Lock,
   ChevronRight,
   Maximize2,
-  Minimize2
+  Minimize2,
 } from 'lucide-react'
 
 /**
- * Cinematic Sound Synthesizer via Web Audio API
- * Generates futuristic drone, heartbeat, glitches, whooshes, chimes, and cinematic boom without external audio files.
+ * Web Audio Synthesizer for rich cinematic audio without external mp3 dependencies
  */
-class CinematicSoundEngine {
+class CinematicAudioEngine {
   constructor() {
     this.ctx = null
-    this.droneOsc = null
     this.droneGain = null
     this.isMuted = false
   }
@@ -40,9 +31,7 @@ class CinematicSoundEngine {
   init() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext
-      if (AudioCtx) {
-        this.ctx = new AudioCtx()
-      }
+      if (AudioCtx) this.ctx = new AudioCtx()
     }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume()
@@ -51,91 +40,26 @@ class CinematicSoundEngine {
 
   setMuted(muted) {
     this.isMuted = muted
-    if (this.droneGain) {
-      this.droneGain.gain.setValueAtTime(muted ? 0 : 0.08, this.ctx?.currentTime || 0)
+    if (this.droneGain && this.ctx) {
+      this.droneGain.gain.setValueAtTime(muted ? 0 : 0.08, this.ctx.currentTime)
     }
   }
 
-  startAmbientDrone() {
-    if (this.isMuted || !this.ctx) return
-    try {
-      this.stopAmbientDrone()
-      const osc = this.ctx.createOscillator()
-      const gain = this.ctx.createGain()
-      const filter = this.ctx.createBiquadFilter()
-
-      osc.type = 'sawtooth'
-      osc.frequency.setValueAtTime(45, this.ctx.currentTime)
-
-      filter.type = 'lowpass'
-      filter.frequency.setValueAtTime(110, this.ctx.currentTime)
-
-      gain.gain.setValueAtTime(0.01, this.ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.08, this.ctx.currentTime + 2)
-
-      osc.connect(filter)
-      filter.connect(gain)
-      gain.connect(this.ctx.destination)
-
-      osc.start()
-      this.droneOsc = osc
-      this.droneGain = gain
-    } catch (e) {}
-  }
-
-  stopAmbientDrone() {
-    if (this.droneOsc) {
-      try {
-        this.droneOsc.stop()
-        this.droneOsc.disconnect()
-      } catch (e) {}
-      this.droneOsc = null
-      this.droneGain = null
-    }
-  }
-
-  playHeartbeat() {
+  playBoom() {
     if (this.isMuted || !this.ctx) return
     try {
       const t = this.ctx.currentTime
       const osc = this.ctx.createOscillator()
       const gain = this.ctx.createGain()
-
       osc.type = 'sine'
-      osc.frequency.setValueAtTime(65, t)
-      osc.frequency.exponentialRampToValueAtTime(35, t + 0.18)
-
-      gain.gain.setValueAtTime(0.3, t)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22)
-
+      osc.frequency.setValueAtTime(120, t)
+      osc.frequency.exponentialRampToValueAtTime(30, t + 1.2)
+      gain.gain.setValueAtTime(0.4, t)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.5)
       osc.connect(gain)
       gain.connect(this.ctx.destination)
-
       osc.start(t)
-      osc.stop(t + 0.25)
-    } catch (e) {}
-  }
-
-  playGlitch() {
-    if (this.isMuted || !this.ctx) return
-    try {
-      const t = this.ctx.currentTime
-      const osc = this.ctx.createOscillator()
-      const gain = this.ctx.createGain()
-
-      osc.type = 'sawtooth'
-      osc.frequency.setValueAtTime(180, t)
-      osc.frequency.setValueAtTime(320, t + 0.04)
-      osc.frequency.setValueAtTime(90, t + 0.08)
-
-      gain.gain.setValueAtTime(0.12, t)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12)
-
-      osc.connect(gain)
-      gain.connect(this.ctx.destination)
-
-      osc.start(t)
-      osc.stop(t + 0.15)
+      osc.stop(t + 1.6)
     } catch (e) {}
   }
 
@@ -143,449 +67,400 @@ class CinematicSoundEngine {
     if (this.isMuted || !this.ctx) return
     try {
       const t = this.ctx.currentTime
-      const bufferSize = this.ctx.sampleRate * 0.8
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate)
-      const data = buffer.getChannelData(0)
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1
-      }
-
-      const noise = this.ctx.createBufferSource()
-      noise.buffer = buffer
-
-      const filter = this.ctx.createBiquadFilter()
-      filter.type = 'bandpass'
-      filter.frequency.setValueAtTime(250, t)
-      filter.frequency.exponentialRampToValueAtTime(2400, t + 0.6)
-
-      const gain = this.ctx.createGain()
-      gain.gain.setValueAtTime(0.02, t)
-      gain.gain.exponentialRampToValueAtTime(0.28, t + 0.4)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8)
-
-      noise.connect(filter)
-      filter.connect(gain)
-      gain.connect(this.ctx.destination)
-
-      noise.start(t)
-      noise.stop(t + 0.8)
-    } catch (e) {}
-  }
-
-  playChime() {
-    if (this.isMuted || !this.ctx) return
-    try {
-      const t = this.ctx.currentTime
-      ;[1046.5, 1318.51, 1567.98].forEach((freq, idx) => {
-        const osc = this.ctx.createOscillator()
-        const gain = this.ctx.createGain()
-        osc.type = 'sine'
-        osc.frequency.setValueAtTime(freq, t + idx * 0.08)
-
-        gain.gain.setValueAtTime(0.15, t + idx * 0.08)
-        gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.08 + 0.7)
-
-        osc.connect(gain)
-        gain.connect(this.ctx.destination)
-
-        osc.start(t + idx * 0.08)
-        osc.stop(t + idx * 0.08 + 0.75)
-      })
-    } catch (e) {}
-  }
-
-  playCinematicBoom() {
-    if (this.isMuted || !this.ctx) return
-    try {
-      const t = this.ctx.currentTime
       const osc = this.ctx.createOscillator()
       const gain = this.ctx.createGain()
-
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(140, t)
-      osc.frequency.exponentialRampToValueAtTime(32, t + 1.2)
-
-      gain.gain.setValueAtTime(0.45, t)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.8)
-
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(180, t)
+      osc.frequency.exponentialRampToValueAtTime(800, t + 0.4)
+      gain.gain.setValueAtTime(0.01, t)
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.2)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5)
       osc.connect(gain)
       gain.connect(this.ctx.destination)
-
       osc.start(t)
-      osc.stop(t + 2.0)
+      osc.stop(t + 0.55)
     } catch (e) {}
   }
 
   cleanup() {
-    this.stopAmbientDrone()
+    if (this.ctx && this.ctx.state !== 'closed') {
+      try {
+        this.ctx.close()
+      } catch (e) {}
+      this.ctx = null
+    }
   }
 }
 
-const soundEngine = new CinematicSoundEngine()
+const audioEngine = new CinematicAudioEngine()
 
-/**
- * 5 Canonical Story Acts as specified in the script:
- */
-const STORY_ACTS = [
+// 3 Impactful Acts totaling strictly 27 seconds (< 30s)
+const ACTS = [
   {
     id: 'act1',
-    timeRange: '[0:00 - 0:05]',
-    title: 'THE SILENCE BEFORE THE STORM',
+    number: '1',
+    pillTitle: '1. The Problem',
+    title: 'THE BARRIER',
+    subtitle: 'Text-Heavy Portals Lock Out Real Workers',
     startSec: 0,
-    endSec: 5,
-    voiceover: 'For millions of workers... the modern job market has been a locked door.',
-    theme: 'obsidian',
+    endSec: 7,
+    theme: 'problem',
+    voiceovers: {
+      en: 'For millions of workers, job applications are a locked door. Complicated text forms, language barriers, and endless paperwork.',
+      kn: 'ಲಕ್ಷಾಂತರ ಶ್ರಮಿಕರಿಗೆ, ಉದ್ಯೋಗ ಹುಡುಕಾಟ ಕಷ್ಟಕರವಾಗಿದೆ. ಸಂಕೀರ್ಣ ಫಾರ್ಮ್‌ಗಳು ಮತ್ತು ಭಾಷೆಯ ಅಡೆತಡೆಗಳು.',
+      hi: 'लाखों मेहनती कामगारों के लिए नौकरी ढूंढना एक बंद दरवाज़ा रहा है। कठिन फॉर्म, भाषा की रुकावटें और दस्तावेज़।',
+      ta: 'கோடிக்கணக்கான தொழிலாளர்களுக்கு வேலைவாய்ப்பு கதவுகள் மூடப்பட்டிருந்தன. சிக்கலான விண்ணப்ப படிவங்கள் மற்றும் மொழி தடைகள்.',
+      te: 'లక్షలాది మంది శ్రామికులకు ఉద్యోగ పోర్టల్స్ కష్టంగా మారాయి. క్లిష్టమైన ఫారమ్‌లు మరియు భాషా సమస్యలు.',
+    },
   },
   {
     id: 'act2',
-    timeRange: '[0:05 - 0:12]',
-    title: 'THE STRUGGLE',
-    startSec: 5,
-    endSec: 13,
-    voiceover: 'Complicated forms. Endless paperwork. Language barriers. A system built for text... when what you really need... is to be heard.',
-    theme: 'gritty-red',
+    number: '2',
+    pillTitle: '2. Voice Power',
+    title: 'THE POWER OF VOICE',
+    subtitle: 'Your Native Tongue is Your Resume',
+    startSec: 7,
+    endSec: 18,
+    theme: 'voice',
+    voiceovers: {
+      en: 'Until now. With VoiceHire, your voice is your power. Just speak your name, your trade, your language. No typing required.',
+      kn: 'ಇನ್ನು ಮುಂದೆ ಅಲ್ಲ. ವಾಯ್ಸ್‌ಹೈರ್ ಮೂಲಕ ನಿಮ್ಮ ಧ್ವನಿಯೇ ನಿಮ್ಮ ಶಕ್ತಿ. ನಿಮ್ಮ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡಿ ಉದ್ಯೋಗ ಪಡೆಯಿರಿ.',
+      hi: 'अब नहीं। वॉयसहायर के साथ आपकी आवाज़ ही आपकी ताक़त है। बस अपनी भाषा में बोलें और काम पाएं।',
+      ta: 'இனி இல்லை. வாய்ஸ்ஹையர் மூலம் உங்கள் குரலே உங்கள் அடையாளம். தட்டச்சு செய்யாமல் பேசி வேலை பெறுங்கள்.',
+      te: 'ఇకపై కాదు. వాయిస్‌హైర్ ద్వారా మీ గొంతే మీ రెజ్యూమ్. టైప్ చేయకుండా మాట్లాడి వెంటనే దరఖాస్తు చేసుకోండి.',
+    },
   },
   {
     id: 'act3',
-    timeRange: '[0:12 - 0:25]',
-    title: 'THE AWAKENING & INNOVATION',
-    startSec: 13,
-    endSec: 25,
-    voiceover: 'Until now.',
-    theme: 'royal-burst',
-  },
-  {
-    id: 'act4',
-    timeRange: '[0:25 - 0:40]',
-    title: 'THE SOLUTION (VOICEHIRE)',
-    startSec: 25,
-    endSec: 40,
-    voiceover: 'Introducing VoiceHire. No resumes. No typing. No barriers. Just speak your name, your trade, your language... and let your voice open doors.',
-    theme: 'voicehire-blue',
-  },
-  {
-    id: 'act5',
-    timeRange: '[0:40 - 0:46]',
-    title: 'THE CLIMAX & LOGO REVEAL',
-    startSec: 40,
-    endSec: 46,
-    voiceover: 'Your Voice. Real Jobs. Welcome to the future of work.',
-    theme: 'climax-gold',
+    number: '3',
+    pillTitle: '3. Instant Jobs',
+    title: 'INSTANT HIRING',
+    subtitle: 'Direct Employer Calls & Fair Wages',
+    startSec: 18,
+    endSec: 27,
+    theme: 'jobs',
+    voiceovers: {
+      en: 'Verified local jobs. Direct employer calls. Instant hiring. Welcome to VoiceHire, the future of accessible work.',
+      kn: 'ಖಚಿತ ದೈನಂದಿನ ಉದ್ಯೋಗಗಳು. ಮಾಲೀಕರಿಂದ ನೇರ ಕರೆಗಳು. ಉದ್ಯೋಗ ಮಿತ್ರಕ್ಕೆ ಸುಸ್ವಾಗತ.',
+      hi: 'सत्यापित स्थानीय नौकरियां। नियोक्ताओं से सीधे फोन। वॉयसहायर में आपका स्वागत है।',
+      ta: 'உறுதி செய்யப்பட்ட உள்ளூர் வேலைகள். முதலாளிகளிடமிருந்து நேரடி அழைப்புகள். வாய்ஸ்ஹையருக்கு வரவேற்கிறோம்.',
+      te: 'ధృవీకరించబడిన స్థానిక ఉద్యోగాలు. యజమానుల నుండి నేరుగా ఫోన్ కాల్స్. వాయిస్‌హైర్‌కు స్వాగతం.',
+    },
   },
 ]
+
+const TOTAL_DURATION = 27
 
 export default function CinematicIntro({ isOpen = true, onClose }) {
   const navigate = useNavigate()
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(false)
-  const [showSubtitles, setShowSubtitles] = useState(true)
   const [audioUnlocked, setAudioUnlocked] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showSubtitles, setShowSubtitles] = useState(true)
 
-  const containerRef = useRef(null)
-  const speechRef = useRef(null)
+  // Language auto-detection state
+  const [lang, setLang] = useState(() => {
+    return localStorage.getItem('voicehire_lang') || 'en'
+  })
+  const [detectedLocation, setDetectedLocation] = useState('Detecting location...')
+
   const currentActIndexRef = useRef(-1)
 
-  // Identify current act based on currentTime
-  const currentActIndex = STORY_ACTS.findIndex(
-    (act) => currentTime >= act.startSec && currentTime < act.endSec
-  )
-  const activeAct = STORY_ACTS[currentActIndex !== -1 ? currentActIndex : STORY_ACTS.length - 1]
+  // 1. Automatic Location & Regional Language Detection on Mount
+  useEffect(() => {
+    const detectRegionalLanguage = () => {
+      try {
+        const stored = localStorage.getItem('voicehire_lang')
+        if (stored) {
+          setLang(stored)
+          setDetectedLocation('User Preference')
+          return
+        }
 
-  // Play natural voiceover using SpeechSynthesis
-  const speakCurrentAct = (act) => {
-    if (isMuted) return
-    if (!('speechSynthesis' in window)) return
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+        const browserLocale = navigator.language || navigator.userLanguage || ''
+
+        // Check browser language tag first (e.g. kn, hi, ta, te)
+        if (browserLocale.startsWith('kn')) {
+          setLang('kn')
+          setDetectedLocation('Karnataka Region (ಕನ್ನಡ)')
+          return
+        }
+        if (browserLocale.startsWith('hi')) {
+          setLang('hi')
+          setDetectedLocation('Northern Region (हिंदी)')
+          return
+        }
+        if (browserLocale.startsWith('ta')) {
+          setLang('ta')
+          setDetectedLocation('Tamil Nadu (தமிழ்)')
+          return
+        }
+        if (browserLocale.startsWith('te')) {
+          setLang('te')
+          setDetectedLocation('Andhra/Telangana (తెలుగు)')
+          return
+        }
+
+        // Check Indian Timezone -> Default to Kannada for Karnataka hub or English
+        if (tz.includes('Calcutta') || tz.includes('Kolkata')) {
+          // If Geolocation is accessible, check Karnataka latitude/longitude coordinates
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const lat = pos.coords.latitude
+                const lon = pos.coords.longitude
+                // Karnataka boundary roughly 11.5°N - 18.5°N, 74°E - 78.5°E
+                if (lat >= 11.5 && lat <= 18.5 && lon >= 74.0 && lon <= 78.8) {
+                  setLang('kn')
+                  setDetectedLocation('Bengaluru / Karnataka (ಕನ್ನಡ)')
+                  localStorage.setItem('voicehire_lang', 'kn')
+                } else {
+                  setLang('hi')
+                  setDetectedLocation('India (हिंदी)')
+                }
+              },
+              () => {
+                // Default to Kannada / English for Bengaluru platform
+                setLang('kn')
+                setDetectedLocation('Bengaluru Hub (ಕನ್ನಡ)')
+              },
+              { timeout: 3000 }
+            )
+          } else {
+            setLang('kn')
+            setDetectedLocation('India (ಕನ್ನಡ)')
+          }
+        } else {
+          setLang('en')
+          setDetectedLocation('Global (English)')
+        }
+      } catch (err) {
+        setLang('en')
+        setDetectedLocation('Standard')
+      }
+    }
+
+    detectRegionalLanguage()
+  }, [])
+
+  // Current Act computation
+  const activeAct =
+    ACTS.find((act) => currentTime >= act.startSec && currentTime < act.endSec) || ACTS[ACTS.length - 1]
+  const currentActIndex = ACTS.findIndex((a) => a.id === activeAct.id)
+
+  // Text-To-Speech SpeechSynthesis in detected regional language
+  const speakActNarration = (act, targetLang = lang) => {
+    if (isMuted || !('speechSynthesis' in window)) return
 
     try {
       window.speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(act.voiceover)
-      utterance.rate = 0.92
-      utterance.pitch = 0.88 // Deep cinematic tone
+      const textToSpeak = act.voiceovers[targetLang] || act.voiceovers.en
+      const utterance = new SpeechSynthesisUtterance(textToSpeak)
 
-      // Pick natural voice if available
-      const voices = window.speechSynthesis.getVoices()
-      const englishVoice = voices.find(
-        (v) => (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('David') || v.name.includes('Alex')) && v.lang.startsWith('en')
-      ) || voices.find((v) => v.lang.startsWith('en'))
-      if (englishVoice) {
-        utterance.voice = englishVoice
+      const langMap = {
+        en: 'en-IN',
+        kn: 'kn-IN',
+        hi: 'hi-IN',
+        ta: 'ta-IN',
+        te: 'te-IN',
       }
+      utterance.lang = langMap[targetLang] || 'en-IN'
+      utterance.rate = 0.95
+      utterance.pitch = 0.9
+
+      // Pick localized voice if browser supports it
+      const voices = window.speechSynthesis.getVoices()
+      const match = voices.find((v) => v.lang.startsWith(targetLang) || v.lang.includes(langMap[targetLang]))
+      if (match) utterance.voice = match
 
       window.speechSynthesis.speak(utterance)
-      speechRef.current = utterance
     } catch (e) {}
   }
 
-  // Audio & Voiceover Trigger upon act transition
+  // Act change triggers sound cues and voiceover
   useEffect(() => {
     if (!isPlaying) return
+
     if (currentActIndex !== currentActIndexRef.current && currentActIndex !== -1) {
       currentActIndexRef.current = currentActIndex
-      const act = STORY_ACTS[currentActIndex]
+      const act = ACTS[currentActIndex]
 
       if (audioUnlocked && !isMuted) {
-        speakCurrentAct(act)
-
-        // Trigger sound cues per act
-        if (act.id === 'act1') {
-          soundEngine.startAmbientDrone()
-          soundEngine.playHeartbeat()
-        } else if (act.id === 'act2') {
-          soundEngine.playGlitch()
-        } else if (act.id === 'act3') {
-          soundEngine.playWhoosh()
-        } else if (act.id === 'act4') {
-          soundEngine.playChime()
-        } else if (act.id === 'act5') {
-          soundEngine.playCinematicBoom()
-        }
+        speakActNarration(act, lang)
+        if (act.id === 'act1') audioEngine.playBoom()
+        else if (act.id === 'act2') audioEngine.playWhoosh()
+        else if (act.id === 'act3') audioEngine.playBoom()
       }
     }
-  }, [currentActIndex, isPlaying, audioUnlocked, isMuted])
+  }, [currentActIndex, isPlaying, audioUnlocked, isMuted, lang])
 
-  // Periodic sounds inside acts
-  useEffect(() => {
-    if (!isPlaying || !audioUnlocked || isMuted) return
-
-    // Act 1: periodic heartbeat
-    if (activeAct.id === 'act1') {
-      const beatInterval = setInterval(() => {
-        soundEngine.playHeartbeat()
-      }, 1600)
-      return () => clearInterval(beatInterval)
-    }
-
-    // Act 2: frantic typing / glitch ticks
-    if (activeAct.id === 'act2') {
-      const glitchInterval = setInterval(() => {
-        soundEngine.playGlitch()
-      }, 1400)
-      return () => clearInterval(glitchInterval)
-    }
-  }, [activeAct.id, isPlaying, audioUnlocked, isMuted])
-
-  // Master Timeline Loop (0 to 46 seconds)
+  // Master Timeline (0s to 27s)
   useEffect(() => {
     if (!isOpen || !isPlaying) return
 
     const interval = setInterval(() => {
       setCurrentTime((prev) => {
-        if (prev >= 46) {
+        if (prev >= TOTAL_DURATION) {
           setIsPlaying(false)
-          return 46
+          return TOTAL_DURATION
         }
-        return Math.min(46, +(prev + 0.25).toFixed(2))
+        return Math.min(TOTAL_DURATION, +(prev + 0.25).toFixed(2))
       })
     }, 250)
 
     return () => clearInterval(interval)
   }, [isOpen, isPlaying])
 
-  // Automatically advance to Sign Up page once the cinematic story concludes
+  // Auto advance to Sign Up page when intro finishes (strictly after Act 3 concludes)
   useEffect(() => {
-    if (currentTime >= 46) {
+    if (currentTime >= TOTAL_DURATION) {
       const autoTimer = setTimeout(() => {
-        soundEngine.cleanup()
-        if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-        if (onClose) {
-          onClose()
-        } else {
-          navigate('/register')
-        }
-      }, 3500)
+        handleProceedToSignUp()
+      }, 2500)
       return () => clearTimeout(autoTimer)
     }
-  }, [currentTime, onClose, navigate])
+  }, [currentTime])
 
-  // User unlocks sound via initial tap/click
   const handleUserInteraction = () => {
     if (!audioUnlocked) {
-      soundEngine.init()
+      audioEngine.init()
       setAudioUnlocked(true)
-      soundEngine.startAmbientDrone()
-      if (activeAct) {
-        speakCurrentAct(activeAct)
-      }
+      if (activeAct) speakActNarration(activeAct, lang)
     }
   }
 
-  // Handle Mute toggle
-  const toggleMute = (e) => {
-    e.stopPropagation()
-    const nextMuted = !isMuted
-    setIsMuted(nextMuted)
-    soundEngine.setMuted(nextMuted)
-    if (nextMuted && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel()
-    } else if (!nextMuted && activeAct) {
-      speakCurrentAct(activeAct)
+  const handleProceedToSignUp = () => {
+    audioEngine.cleanup()
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+    if (onClose) onClose()
+    else navigate('/register')
+  }
+
+  const handleLanguageChange = (newLang) => {
+    setLang(newLang)
+    localStorage.setItem('voicehire_lang', newLang)
+    if (activeAct && audioUnlocked && !isMuted) {
+      speakActNarration(activeAct, newLang)
     }
   }
-
-  // Scrub / Jump to specific Act
-  const jumpToAct = (act, e) => {
-    if (e) e.stopPropagation()
-    handleUserInteraction()
-    setCurrentTime(act.startSec)
-    setIsPlaying(true)
-    currentActIndexRef.current = -1
-  }
-
-  // Replay Story
-  const handleReplay = (e) => {
-    if (e) e.stopPropagation()
-    handleUserInteraction()
-    setCurrentTime(0)
-    currentActIndexRef.current = -1
-    setIsPlaying(true)
-  }
-
-  // Fullscreen Toggle
-  const toggleFullscreen = (e) => {
-    e.stopPropagation()
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen?.()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen?.()
-      setIsFullscreen(false)
-    }
-  }
-
-  // Cleanup on unmount or close
-  useEffect(() => {
-    return () => {
-      soundEngine.cleanup()
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
-    }
-  }, [])
 
   if (!isOpen) return null
 
-  const progressPercent = Math.min(100, (currentTime / 46) * 100)
+  const progressPercent = Math.min(100, (currentTime / TOTAL_DURATION) * 100)
 
   return (
     <div
-      ref={containerRef}
       onClick={handleUserInteraction}
       className="fixed inset-0 z-50 bg-[#0B0F19] text-white flex flex-col justify-between overflow-hidden select-none font-sans"
     >
       {/* ===================================================================
-          TOP CINEMATIC BAR: Timeline Header, Stage Indicator & Quick Controls
+          TOP CINEMATIC BAR: Logo, Clean Pills (No Truncation), Language & Skip
           =================================================================== */}
-      <div className="relative z-30 flex items-center justify-between p-4 sm:p-6 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
-        {/* Left: Brand & Stage Badge */}
+      <div className="relative z-30 flex items-center justify-between p-4 sm:p-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+        {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center shadow-lg shadow-blue-500/30">
             <Mic className="w-5 h-5 text-white stroke-[2.5]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-black tracking-tight text-white">
+              <span className="text-base font-black tracking-tight text-white">
                 Voice<span className="text-[#3B82F6]">Hire</span>
               </span>
-              <span className="text-[10px] sm:text-xs font-black uppercase px-2 py-0.5 rounded-full bg-blue-500/20 text-[#60A5FA] border border-blue-500/30">
-                Cinematic Story
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-500/20 text-[#60A5FA] border border-blue-500/30">
+                &lt; 30s Story
               </span>
             </div>
             <p className="text-[11px] font-semibold text-slate-400">
-              {activeAct.timeRange} — {activeAct.title}
+              {detectedLocation}
             </p>
           </div>
         </div>
 
-        {/* Center: Stage Pill Navigation */}
-        <div className="hidden md:flex items-center gap-1.5 bg-white/[0.06] backdrop-blur-xl border border-white/10 p-1 rounded-2xl">
-          {STORY_ACTS.map((act, idx) => {
-            const isActActive = activeAct.id === act.id
+        {/* Center: Clean Progress Stage Pills (Non-Truncated) */}
+        <div className="hidden md:flex items-center gap-2 bg-white/[0.08] backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl">
+          {ACTS.map((act) => {
+            const isActive = activeAct.id === act.id
             return (
               <button
                 key={act.id}
                 type="button"
-                onClick={(e) => jumpToAct(act, e)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  isActActive
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleUserInteraction()
+                  setCurrentTime(act.startSec)
+                  currentActIndexRef.current = -1
+                  setIsPlaying(true)
+                }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
                     ? 'bg-[#2563EB] text-white shadow-md shadow-blue-500/30 scale-105'
                     : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                 }`}
               >
-                {idx + 1}. {act.title.split(' ')[0]}
+                {act.pillTitle}
               </button>
             )
           })}
         </div>
 
-        {/* Right: Sound, Subtitles & Exit Controls */}
+        {/* Right: Audio Toggle, Language Pill Selector, Skip to Sign Up */}
         <div className="flex items-center gap-2">
-          {/* Audio Unlocked Pill / Prompt */}
-          {!audioUnlocked && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: [1, 1.05, 1], opacity: 1 }}
-              transition={{ repeat: Infinity, duration: 1.6 }}
-              className="px-3 py-1.5 rounded-xl bg-blue-600/90 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-blue-500/40 cursor-pointer"
-            >
-              <Volume2 className="w-3.5 h-3.5 animate-bounce" />
-              <span className="hidden sm:inline">Tap to Enable Sound</span>
-            </motion.div>
-          )}
+          {/* Quick Language Pill Switcher */}
+          <div className="flex items-center bg-white/[0.08] border border-white/10 rounded-xl p-1 text-xs">
+            <Globe className="w-3.5 h-3.5 text-blue-400 mx-1.5" />
+            {[
+              { code: 'en', label: 'EN' },
+              { code: 'kn', label: 'ಕನ್ನಡ' },
+              { code: 'hi', label: 'हिंदी' },
+              { code: 'ta', label: 'தமிழ்' },
+              { code: 'te', label: 'తెలుగు' },
+            ].map((item) => (
+              <button
+                key={item.code}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleLanguageChange(item.code)
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all ${
+                  lang === item.code ? 'bg-[#2563EB] text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
 
-          {/* Mute / Unmute Toggle */}
+          {/* Mute Toggle */}
           <button
             type="button"
-            onClick={toggleMute}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMuted(!isMuted)
+              audioEngine.setMuted(!isMuted)
+              if (!isMuted && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel()
+              } else if (isMuted && activeAct) {
+                speakActNarration(activeAct, lang)
+              }
+            }}
             className="p-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] border border-white/10 text-white transition-all cursor-pointer"
             title={isMuted ? 'Unmute' : 'Mute'}
           >
             {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
           </button>
 
-          {/* Subtitles CC Toggle */}
+          {/* Skip directly to Step 2: Sign Up */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation()
-              setShowSubtitles(!showSubtitles)
+              handleProceedToSignUp()
             }}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer ${
-              showSubtitles
-                ? 'bg-[#2563EB]/40 border-blue-400 text-blue-200'
-                : 'bg-white/[0.08] border-white/10 text-slate-400'
-            }`}
-            title="Toggle Subtitles"
-          >
-            CC
-          </button>
-
-          {/* Fullscreen Toggle */}
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className="hidden sm:flex p-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] border border-white/10 text-white transition-all cursor-pointer"
-            title="Toggle Fullscreen"
-          >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
-
-          {/* Close / Skip to Sign Up */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              soundEngine.cleanup()
-              if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-              if (onClose) {
-                onClose()
-              } else {
-                navigate('/register')
-              }
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2563EB]/80 hover:bg-[#2563EB] text-white font-black text-xs transition-all cursor-pointer shadow-md shadow-blue-500/20"
-            title="Skip to Sign Up"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-xs transition-all shadow-md shadow-blue-500/30 cursor-pointer"
           >
             <span>Skip to Sign Up</span>
             <ArrowRight className="w-4 h-4" />
@@ -594,471 +469,117 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
       </div>
 
       {/* ===================================================================
-          STAGE CANVAS: DYNAMIC VISUALS DRIVEN BY THE 5 STORY SCENES
+          STAGE CANVAS: Visual Storytelling Driven by the 3 Acts
           =================================================================== */}
-      <div className="relative flex-1 flex items-center justify-center p-4 sm:p-8 overflow-hidden">
+      <div className="relative flex-1 flex items-center justify-center p-6 sm:p-12 overflow-hidden">
+        {/* Soft Ambient Background Orbs */}
+        <div
+          className={`absolute w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none transition-all duration-700 ${
+            activeAct.id === 'act1'
+              ? 'bg-rose-900/25 -top-20 -left-20'
+              : activeAct.id === 'act2'
+              ? 'bg-blue-600/30 top-1/4 -right-20'
+              : 'bg-emerald-600/25 top-1/3 left-1/4'
+          }`}
+        />
+
         <AnimatePresence mode="wait">
-          {/* =================================================================
-              ACT 1: [0:00 - 0:05] THE SILENCE BEFORE THE STORM
-              Visual: Pitch-black screen. A single, rhythmic, neon-blue voice waveform
-              pulses in the center, reacting to a distant sound like a heartbeat.
-              ================================================================= */}
+          {/* ACT 1: The Problem */}
           {activeAct.id === 'act1' && (
             <motion.div
-              key="scene-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
-              className="w-full max-w-2xl flex flex-col items-center justify-center text-center space-y-8"
+              key="act1"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl text-center space-y-6 relative z-10"
             >
-              {/* Pulsing Concentric Heartbeat Rings */}
-              <div className="relative flex items-center justify-center w-64 h-64 sm:w-80 sm:h-80">
-                <motion.div
-                  animate={{ scale: [1, 1.4, 1], opacity: [0.35, 0.05, 0.35] }}
-                  transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-                  className="absolute inset-0 rounded-full border-2 border-[#3B82F6]/40 blur-sm"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.15, 0.5] }}
-                  transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: 0.1 }}
-                  className="absolute inset-6 rounded-full border border-[#60A5FA]/50"
-                />
-
-                {/* Central Neon Heartbeat Waveform */}
-                <div className="relative z-10 flex items-center gap-2 p-6 rounded-3xl bg-black/60 border border-white/10 backdrop-blur-2xl shadow-[0_0_60px_rgba(59,130,246,0.35)]">
-                  {[18, 36, 68, 92, 68, 36, 18].map((h, i) => (
-                    <motion.span
-                      key={i}
-                      animate={{
-                        height: [h * 0.35, h * 1.25, h * 0.35],
-                        opacity: [0.6, 1, 0.6],
-                      }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 1.6,
-                        delay: i * 0.08,
-                        ease: 'easeInOut',
-                      }}
-                      className="w-2 sm:w-2.5 rounded-full bg-gradient-to-t from-[#1D4ED8] via-[#2563EB] to-[#60A5FA] shadow-[0_0_15px_#3B82F6]"
-                      style={{ height: `${h}px` }}
-                    />
-                  ))}
-                </div>
+              <div className="inline-flex p-4 rounded-3xl bg-rose-500/10 border border-rose-500/25 text-rose-400 shadow-2xl">
+                <Lock className="w-12 h-12 stroke-[2]" />
               </div>
-
-              {/* Subdued Scene Caption */}
               <div className="space-y-2">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-500">
-                  Act I • The Silence Before The Storm
+                <span className="text-xs font-black tracking-widest text-rose-400 uppercase">
+                  Act 1 • The Old Barrier
                 </span>
-                <p className="text-sm font-semibold text-slate-400">
-                  A locked door for millions of workers worldwide
+                <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
+                  Employment Was Built for Text.
+                </h1>
+                <p className="text-sm sm:text-base font-semibold text-slate-300">
+                  Complicated forms. Résumé uploads. Language barriers that shut out skilled tradesmen.
                 </p>
               </div>
             </motion.div>
           )}
 
-          {/* =================================================================
-              ACT 2: [0:05 - 0:12] THE STRUGGLE
-              Visual: Fast-paced, gritty montage of traditional job boards—complex forms,
-              endless text fields, tiny blinking cursors, and frustrated expressions.
-              UI elements glitch and fade out with red error lines.
-              ================================================================= */}
+          {/* ACT 2: Voice Power */}
           {activeAct.id === 'act2' && (
             <motion.div
-              key="scene-2"
-              initial={{ opacity: 0, scale: 0.95 }}
+              key="act2"
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-3xl space-y-6"
+              className="max-w-2xl text-center space-y-6 relative z-10"
             >
-              {/* Glitch Overlay Banner */}
-              <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-300 flex items-center justify-between shadow-[0_0_40px_rgba(244,63,94,0.2)]">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-rose-400 animate-pulse" />
-                  <span className="font-black text-xs sm:text-sm tracking-wide">
-                    SYSTEM REJECTED: Resumes required in English (PDF only). 5+ Years experience.
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-rose-400">ERROR #403</span>
-              </div>
-
-              {/* Gritty Traditional Job Board Mockup with Red Error Glitches */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-[#121622] border-2 border-rose-500/30 relative overflow-hidden shadow-2xl">
-                {/* Red Glitch Scanline */}
+              <div className="relative inline-flex items-center justify-center">
                 <motion.div
-                  animate={{ y: ['-100%', '300%'] }}
-                  transition={{ repeat: Infinity, duration: 2.2, ease: 'linear' }}
-                  className="absolute inset-x-0 h-16 bg-gradient-to-b from-transparent via-rose-500/10 to-transparent pointer-events-none"
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.6 }}
+                  className="absolute -inset-4 rounded-full bg-blue-500/30 blur-xl"
                 />
-
-                <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-rose-500" />
-                    <span className="w-3 h-3 rounded-full bg-amber-500" />
-                    <span className="w-3 h-3 rounded-full bg-slate-600" />
-                    <span className="text-xs font-mono text-slate-400 ml-2">JobPortal_Traditional_v1.html</span>
-                  </div>
-                  <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
-                    <Lock className="w-3.5 h-3.5" /> High Literacy Required
-                  </span>
+                <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center text-white shadow-2xl shadow-blue-500/50 border-2 border-white/20">
+                  <Mic className="w-12 h-12 stroke-[2.5]" />
                 </div>
-
-                <div className="space-y-4 text-left">
-                  {/* Intimidating Field 1 */}
-                  <div>
-                    <label className="block text-xs font-mono text-slate-400 mb-1">
-                      Upload Curriculum Vitae / Resume (Max 2MB, English only) *
-                    </label>
-                    <div className="p-4 rounded-xl border border-dashed border-rose-500/40 bg-rose-950/20 text-center text-xs text-rose-300 font-mono">
-                      ❌ "Error: Document format rejected. Please format in ATS-compliant syntax."
-                    </div>
-                  </div>
-
-                  {/* Intimidating Field 2 */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-mono text-slate-400 mb-1">
-                        12-Character Alphanumeric Password *
-                      </label>
-                      <input
-                        disabled
-                        value="••••••••••••"
-                        className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-slate-500 text-xs font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-mono text-slate-400 mb-1">
-                        Professional Portfolio URL *
-                      </label>
-                      <input
-                        disabled
-                        value="https://..."
-                        className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-slate-500 text-xs font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Glitch Strikethrough Badge */}
-                <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 font-semibold">
-                  <span className="text-rose-400 font-bold">⚠️ Language Barrier: English text only</span>
-                  <span className="text-slate-500 font-mono">Session Timeout in 00:23</span>
-                </div>
+              </div>
+              <div className="space-y-2">
+                <span className="text-xs font-black tracking-widest text-blue-400 uppercase">
+                  Act 2 • The Voice Revolution
+                </span>
+                <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
+                  Your Voice Is Your Résumé.
+                </h1>
+                <p className="text-sm sm:text-base font-semibold text-slate-300">
+                  Speak in Kannada, Hindi, Tamil, Telugu, or English. No typing required.
+                </p>
               </div>
             </motion.div>
           )}
 
-          {/* =================================================================
-              ACT 3: [0:12 - 0:25] THE AWAKENING & INNOVATION
-              Visual: Screen abruptly shifts. Dark background bursts into vibrant
-              royal blue and clean liquid-glass gradients. A worker taps a glowing
-              microphone button on a sleek mobile and web interface. Waveform surges.
-              ================================================================= */}
+          {/* ACT 3: Instant Jobs & Climax CTA */}
           {activeAct.id === 'act3' && (
             <motion.div
-              key="scene-3"
-              initial={{ opacity: 0, scale: 0.88 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-2xl flex flex-col items-center justify-center text-center space-y-6"
-            >
-              {/* Radial Energy Burst Atmosphere */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(37,99,235,0.45),_transparent_70%)] pointer-events-none" />
-
-              {/* Title Surge: "Until Now." */}
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[#60A5FA] to-[#3B82F6] tracking-tight uppercase"
-              >
-                Until Now.
-              </motion.h2>
-
-              {/* Worker Tapping Glowing Mic Button */}
-              <div className="relative my-4 flex items-center justify-center">
-                {/* Concentric Vibrant Shockwaves */}
-                <motion.div
-                  animate={{ scale: [1, 2.2], opacity: [0.8, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: 'easeOut' }}
-                  className="absolute w-28 h-28 rounded-full border-4 border-[#3B82F6] blur-sm"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.8], opacity: [0.6, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5, delay: 0.4, ease: 'easeOut' }}
-                  className="absolute w-28 h-28 rounded-full bg-blue-500/20 blur-md"
-                />
-
-                {/* Central Glowing Mic Button */}
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center text-white shadow-[0_0_80px_rgba(37,99,235,0.85)] border-2 border-white/40 ring-8 ring-blue-500/30"
-                >
-                  <Mic className="w-14 h-14 stroke-[2.5]" />
-                </motion.div>
-              </div>
-
-              {/* Active Surging Energy Waveform */}
-              <div className="flex items-center gap-2 p-4 px-6 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 shadow-xl">
-                <span className="text-xs font-black text-[#60A5FA] uppercase tracking-wider mr-2">
-                  Voice Energy Online
-                </span>
-                {[20, 48, 80, 100, 75, 45, 95, 60, 30].map((h, i) => (
-                  <motion.span
-                    key={i}
-                    animate={{
-                      height: [h * 0.4, h, h * 0.4],
-                      backgroundColor: ['#2563EB', '#60A5FA', '#2563EB'],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.9,
-                      delay: i * 0.07,
-                      ease: 'easeInOut',
-                    }}
-                    className="w-2 rounded-full shadow-[0_0_12px_#3B82F6]"
-                    style={{ height: `${h * 0.6}px` }}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* =================================================================
-              ACT 4: [0:25 - 0:40] THE SOLUTION (VOICEHIRE)
-              Visual: Smooth cinematic panning shots of VoiceHire.
-              A user speaks: "Find carpenter jobs near me."
-              Instant, real-time voice matching ripples across the screen.
-              3 simple registration fields auto-filling magically.
-              ================================================================= */}
-          {activeAct.id === 'act4' && (
-            <motion.div
-              key="scene-4"
-              initial={{ opacity: 0, y: 25 }}
+              key="act3"
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -25 }}
-              transition={{ duration: 0.55 }}
-              className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl text-center space-y-6 relative z-10"
             >
-              {/* Left Column: Simulated Voice Command & Ripple */}
-              <div className="md:col-span-6 space-y-4">
-                <div className="p-5 rounded-3xl bg-[#151C2C]/90 backdrop-blur-xl border border-blue-500/30 shadow-2xl space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center shadow-lg shadow-blue-500/40">
-                      <Mic className="w-5 h-5 stroke-[2.5]" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-black uppercase text-[#60A5FA] tracking-wider block">
-                        Spoken Voice Input
-                      </span>
-                      <p className="text-lg font-black text-white">
-                        "Find carpenter jobs near me"
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Real-time Matching Ripple */}
-                  <div className="p-3 rounded-2xl bg-blue-950/40 border border-blue-500/20 flex items-center justify-between text-xs font-bold text-blue-200">
-                    <span className="flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-emerald-400" />
-                      Semantic Voice AI: Matched Trade & GPS Location
-                    </span>
-                    <span className="text-emerald-400 font-extrabold">0.12s</span>
-                  </div>
-                </div>
-
-                {/* Magic 3-Field Auto-Fill Registration Demo */}
-                <div className="p-5 rounded-3xl bg-[#151C2C]/90 backdrop-blur-xl border border-white/10 shadow-xl space-y-3">
-                  <div className="flex items-center justify-between text-xs font-black uppercase text-slate-400">
-                    <span>1-Minute Voice Registration</span>
-                    <span className="text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> No Password / No Email
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.05] border border-blue-500/40 text-xs">
-                      <User className="w-4 h-4 text-[#3B82F6]" />
-                      <span className="text-slate-400">Name:</span>
-                      <span className="font-extrabold text-white">Rahul Sharma</span>
-                      <span className="ml-auto text-[10px] text-emerald-400 font-bold">✓ Captured</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.05] border border-blue-500/40 text-xs">
-                      <Phone className="w-4 h-4 text-[#3B82F6]" />
-                      <span className="text-slate-400">Phone:</span>
-                      <span className="font-extrabold text-white">+91 98765 43210</span>
-                      <span className="ml-auto text-[10px] text-emerald-400 font-bold">✓ Verified</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.05] border border-blue-500/40 text-xs">
-                      <Globe className="w-4 h-4 text-[#3B82F6]" />
-                      <span className="text-slate-400">Language:</span>
-                      <span className="font-extrabold text-white">🇮🇳 Hindi (हिंदी)</span>
-                      <span className="ml-auto text-[10px] text-emerald-400 font-bold">✓ Active</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="inline-flex p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 shadow-2xl">
+                <Sparkles className="w-12 h-12 stroke-[2]" />
               </div>
-
-              {/* Right Column: Instant Match Verified Cards */}
-              <div className="md:col-span-6 space-y-3">
-                <p className="text-xs font-black uppercase tracking-wider text-slate-400">
-                  Instant Verified Job Matches
-                </p>
-
-                {/* Match Card 1 */}
-                <motion.div
-                  initial={{ x: 30, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.15 }}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-[#151C2C] to-[#1E293B] border border-emerald-500/40 shadow-xl space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-white flex items-center gap-1.5">
-                      🔨 Master Carpenter
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/40">
-                      ✓ Verified Payout
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-300">
-                    <span>TimberCraft Interiors • Whitefield</span>
-                    <span className="font-black text-[#60A5FA]">₹1,400 / day</span>
-                  </div>
-                </motion.div>
-
-                {/* Match Card 2 */}
-                <motion.div
-                  initial={{ x: 30, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-[#151C2C] to-[#1E293B] border border-blue-500/40 shadow-xl space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-white flex items-center gap-1.5">
-                      🚚 Commercial Driver
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black border border-blue-500/40">
-                      Instant WhatsApp Alert
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-300">
-                    <span>CityLogistics Fleet • Koramangala</span>
-                    <span className="font-black text-[#60A5FA]">₹1,250 / day</span>
-                  </div>
-                </motion.div>
-
-                {/* Match Card 3 */}
-                <motion.div
-                  initial={{ x: 30, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.45 }}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-[#151C2C] to-[#1E293B] border border-white/10 shadow-xl space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-white flex items-center gap-1.5">
-                      🏗️ General Skilled Worker
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/40">
-                      Direct Employer Call
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-300">
-                    <span>Metro Infra Projects • Indiranagar</span>
-                    <span className="font-black text-[#60A5FA]">₹1,100 / day</span>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* =================================================================
-              ACT 5: [0:40 - 0:46] THE CLIMAX & LOGO REVEAL
-              Visual: Screen widens to reveal full desktop and mobile dashboard in
-              dual theme perfection. The iconic VoiceHire mic logo pulses brightly.
-              Super: "YOUR VOICE. REAL JOBS. BETTER FUTURE."
-              ================================================================= */}
-          {activeAct.id === 'act5' && (
-            <motion.div
-              key="scene-5"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7 }}
-              className="w-full max-w-3xl flex flex-col items-center justify-center text-center space-y-6"
-            >
-              {/* Iconic VoiceHire Glowing Emblem */}
-              <div className="relative">
-                <motion.div
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.1, 0.5] }}
-                  transition={{ repeat: Infinity, duration: 2.2 }}
-                  className="absolute -inset-4 rounded-3xl bg-blue-500/30 blur-2xl pointer-events-none"
-                />
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center text-white shadow-[0_0_60px_rgba(37,99,235,0.7)] border-2 border-white/30">
-                  <Mic className="w-12 h-12 sm:w-14 sm:h-14 stroke-[2.5]" />
-                </div>
-              </div>
-
-              {/* Super Text on Screen */}
               <div className="space-y-2">
-                <h1 className="text-3xl sm:text-5xl font-black tracking-tight uppercase text-white">
-                  YOUR VOICE.{' '}
-                  <span className="text-[#3B82F6]">REAL JOBS.</span>{' '}
-                  <span className="text-[#60A5FA]">BETTER FUTURE.</span>
+                <span className="text-xs font-black tracking-widest text-emerald-400 uppercase">
+                  Act 3 • Verified Results
+                </span>
+                <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
+                  Your Voice. Real Jobs. Instant Hiring.
                 </h1>
-                <p className="text-sm sm:text-lg font-semibold text-slate-300">
-                  Welcome to the future of work. Simple, voice-first, barrier-free.
+                <p className="text-sm sm:text-base font-semibold text-slate-300">
+                  Direct connections between verified workers and licensed employers across India.
                 </p>
               </div>
 
-              {/* Interactive Direct CTAs */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              {/* Action Buttons to Transition into Step 2: Sign Up */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    soundEngine.cleanup()
-                    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-                    if (onClose) {
-                      onClose()
-                    } else {
-                      navigate('/register')
-                    }
-                  }}
+                  onClick={handleProceedToSignUp}
                   className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-sm sm:text-base shadow-xl shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Sparkles className="w-5 h-5 text-amber-300" />
                   <span>Continue to Sign Up</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    soundEngine.cleanup()
-                    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-                    navigate('/login')
-                  }}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white/[0.1] hover:bg-white/[0.18] border border-white/20 text-white font-extrabold text-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Already registered? Sign In</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleReplay}
-                  className="w-full sm:w-auto p-3.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold"
-                  title="Replay Story"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span className="sm:hidden">Replay</span>
                 </button>
               </div>
             </motion.div>
@@ -1067,21 +588,20 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
       </div>
 
       {/* ===================================================================
-          BOTTOM CINEMATIC CONTROLS & SUBTITLE LETTERBOX
+          BOTTOM CINEMATIC CONTROLS: Subtitles in Localized Language & Timeline
           =================================================================== */}
-      <div className="relative z-30 p-4 sm:p-6 bg-gradient-to-t from-black via-black/85 to-transparent space-y-4">
-        {/* Cinematic Subtitles Display */}
+      <div className="relative z-30 p-4 sm:p-6 bg-gradient-to-t from-black via-black/85 to-transparent space-y-3">
+        {/* Dynamic Regional Subtitles */}
         {showSubtitles && (
-          <div className="max-w-3xl mx-auto px-6 py-3 rounded-2xl bg-black/75 border border-white/10 backdrop-blur-xl text-center shadow-2xl">
+          <div className="max-w-3xl mx-auto px-6 py-3 rounded-2xl bg-black/80 border border-white/10 backdrop-blur-xl text-center shadow-2xl">
             <p className="text-sm sm:text-base font-bold text-white tracking-wide leading-relaxed">
-              "{activeAct.voiceover}"
+              "{activeAct.voiceovers[lang] || activeAct.voiceovers.en}"
             </p>
           </div>
         )}
 
-        {/* Master Timeline Scrubber & Controls */}
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          {/* Play/Pause Button */}
+        {/* Master Timeline Scrubber (< 30s) */}
+        <div className="max-w-3xl mx-auto flex items-center gap-4">
           <button
             type="button"
             onClick={(e) => {
@@ -1091,21 +611,19 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
               if (isPlaying && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel()
               } else if (!isPlaying && activeAct) {
-                speakCurrentAct(activeAct)
+                speakActNarration(activeAct, lang)
               }
             }}
-            className="w-10 h-10 rounded-xl bg-white/[0.1] hover:bg-[#2563EB] text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-xl bg-white/[0.1] hover:bg-[#2563EB] text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
             title={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
           </button>
 
-          {/* Time Display */}
           <span className="text-xs font-mono font-bold text-slate-400 w-16 shrink-0">
-            0:{currentTime < 10 ? `0${Math.floor(currentTime)}` : Math.floor(currentTime)} / 0:46
+            0:{currentTime < 10 ? `0${Math.floor(currentTime)}` : Math.floor(currentTime)} / 0:27
           </span>
 
-          {/* Scrub Track */}
           <div
             onClick={(e) => {
               e.stopPropagation()
@@ -1113,7 +631,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
               const rect = e.currentTarget.getBoundingClientRect()
               const clickX = e.clientX - rect.left
               const ratio = Math.max(0, Math.min(1, clickX / rect.width))
-              const newTime = +(ratio * 46).toFixed(2)
+              const newTime = +(ratio * TOTAL_DURATION).toFixed(2)
               setCurrentTime(newTime)
               currentActIndexRef.current = -1
             }}
@@ -1123,16 +641,21 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
               className="h-full rounded-full bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] relative"
               style={{ width: `${progressPercent}%` }}
             >
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white shadow-md shadow-blue-500 scale-0 group-hover:scale-100 transition-transform" />
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md shadow-blue-500 scale-0 group-hover:scale-100 transition-transform" />
             </div>
           </div>
 
-          {/* Replay Button */}
           <button
             type="button"
-            onClick={handleReplay}
-            className="w-10 h-10 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] text-slate-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
-            title="Restart Cinematic Intro"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleUserInteraction()
+              setCurrentTime(0)
+              currentActIndexRef.current = -1
+              setIsPlaying(true)
+            }}
+            className="w-9 h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] text-slate-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shrink-0"
+            title="Replay Story"
           >
             <RotateCcw className="w-4 h-4" />
           </button>

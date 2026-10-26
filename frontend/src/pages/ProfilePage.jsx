@@ -1,212 +1,393 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { PROFESSIONS } from '../styles/theme'
-import { useVoice } from '../context/VoiceContext'
-import { getTranslation } from '../utils/translations'
-import { User, Star, MapPin, Globe, Mic, ShieldCheck, Sparkles, LogOut, Phone, UserPlus, LogIn, ArrowRight } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import {
+  User,
+  Phone,
+  MapPin,
+  Briefcase,
+  DollarSign,
+  Globe,
+  Award,
+  ShieldCheck,
+  Building2,
+  CheckCircle2,
+  Save,
+  Mic,
+  ArrowRight,
+  Clock,
+  Sparkles,
+} from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
+import { useVoice } from '../context/VoiceContext'
 
 export default function ProfilePage() {
-  const navigate = useNavigate()
-  const { selectedLang, startListening } = useVoice()
-  const t = getTranslation(selectedLang)
+  const { user, isEmployer, isEmployee, updateProfile, refreshUser } = useAuth()
+  const { selectedLang, setSelectedLang } = useVoice()
 
-  const [user, setUser] = useState(() => {
-    try {
-      const u = localStorage.getItem('user') || sessionStorage.getItem('user')
-      return u ? JSON.parse(u) : null
-    } catch (e) {
-      return null
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [locationCity, setLocationCity] = useState('Bengaluru')
+  const [preferredLanguage, setPreferredLanguage] = useState('en')
+
+  // Employee State
+  const [tradeCategory, setTradeCategory] = useState('DRIVER')
+  const [experience, setExperience] = useState('2+ Years')
+  const [expectedWage, setExpectedWage] = useState('1200')
+  const [bio, setBio] = useState('')
+
+  // Employer State
+  const [companyName, setCompanyName] = useState('')
+  const [businessType, setBusinessType] = useState('Logistics & Fleet Transport')
+  const [businessDescription, setBusinessDescription] = useState('')
+
+  const [saving, setSaving] = useState(false)
+
+  // Populate from live MongoDB user on mount
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || '')
+      setPhone(user.phone || user.phoneNumber || '')
+      setLocationCity(user.location || user.city || 'Bengaluru')
+      setPreferredLanguage(user.preferredLanguage || selectedLang || 'en')
+
+      if (user.role === 'employer') {
+        setCompanyName(user.companyName || '')
+        setBusinessType(user.businessType || 'Logistics & Fleet Transport')
+        setBusinessDescription(user.businessDescription || '')
+      } else {
+        setTradeCategory(user.tradeCategory || user.workType || 'DRIVER')
+        setExperience(user.experience || '2+ Years')
+        setExpectedWage(String(user.expectedWage || 1200))
+        setBio(user.bio || '')
+      }
     }
-  })
+  }, [user, selectedLang])
 
-  const displayName = user?.name ? user.name.trim() : null
-  const profCategory = (user?.skill || user?.preferredJob || user?.category || 'DRIVER').toUpperCase()
-  const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
+  const handleSave = async (e) => {
+    e.preventDefault()
 
-  const handleUpdateProfileVoice = () => {
-    toast.success('Speak to update your profile details...')
-    startListening(navigate)
+    if (!fullName.trim()) {
+      toast.error('Name cannot be empty.')
+      return
+    }
+
+    try {
+      setSaving(true)
+      const payload = {
+        fullName: fullName.trim(),
+        location: locationCity.trim(),
+        preferredLanguage,
+      }
+
+      if (isEmployer) {
+        payload.companyName = companyName.trim()
+        payload.businessType = businessType
+        payload.businessDescription = businessDescription.trim()
+      } else {
+        payload.tradeCategory = tradeCategory.toUpperCase()
+        payload.experience = experience
+        payload.expectedWage = Number(expectedWage) || 1000
+        payload.bio = bio.trim()
+      }
+
+      const res = await updateProfile(payload)
+      if (res?.success) {
+        if (setSelectedLang) setSelectedLang(preferredLanguage)
+      }
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    localStorage.removeItem('user_explicit_login')
-    sessionStorage.removeItem('user')
-    sessionStorage.removeItem('token')
-    setUser(null)
-    toast.success('Logged out successfully.')
-    navigate('/register')
-  }
+  const TRADES = [
+    { code: 'DRIVER', label: 'Driver (Commercial & Private)' },
+    { code: 'CARPENTER', label: 'Carpenter & Modular Interior' },
+    { code: 'ELECTRICIAN', label: 'Electrician & Wireman' },
+    { code: 'PLUMBER', label: 'Plumber & Pipe Fitting' },
+    { code: 'COOK', label: 'Cook & Kitchen Assistant' },
+    { code: 'PAINTER', label: 'Painter & Wall Polisher' },
+    { code: 'HELPER', label: 'Warehouse & Construction Helper' },
+  ]
+
+  const LANGUAGES = [
+    { code: 'en', label: 'English' },
+    { code: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'ta', label: 'தமிழ் (Tamil)' },
+    { code: 'te', label: 'తెలుగు (Telugu)' },
+  ]
 
   return (
-    <div className="space-y-6 pb-12 max-w-3xl mx-auto">
-      {/* Profile Header Hero Card */}
-      <div className="bg-slate-900/80 backdrop-blur-2xl text-white rounded-3xl p-8 border border-slate-700/60 text-center relative overflow-hidden shadow-lg">
-        {/* Ambient Top Glow */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-32 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Large Avatar Badge */}
-        <div className="relative inline-block mb-4">
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-600/20 via-sky-500/10 to-cyan-500/20 border-2 border-cyan-400/40 shadow-md flex items-center justify-center text-6xl mx-auto backdrop-blur-xl">
-            {prof?.icon || '👤'}
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      {/* Profile Header Card */}
+      <div className="mb-8 p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#151C2C] border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-black/40 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+            {fullName ? fullName.charAt(0).toUpperCase() : 'U'}
           </div>
-          {displayName && (
-            <span className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-sky-400 to-cyan-500 border-2 border-[#0b132b] rounded-full flex items-center justify-center text-xs font-black text-white shadow-md">
-              ✓
-            </span>
-          )}
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                {isEmployer ? companyName || fullName : fullName || 'Worker Profile'}
+              </h1>
+              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Verified</span>
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
+              {isEmployer
+                ? `Employer Account • Contact: ${fullName}`
+                : `${tradeCategory} • ${locationCity} • Trust Score: ${user?.trustScore || 96}/100`}
+            </p>
+          </div>
         </div>
 
-        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300">
-          {displayName || 'Guest User'}
-        </h1>
-        
-        {/* Profession Badge Pill or Guest Tag */}
-        {displayName ? (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 font-extrabold text-base mt-2 shadow-sm">
-            <span>{prof.icon}</span>
-            <span>{user?.skill || prof.title}</span>
-          </div>
-        ) : (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 text-slate-300 border border-white/10 font-extrabold text-sm mt-2">
-            <span>👋 Browsing as Guest</span>
-          </div>
-        )}
-
-        {/* Profile Completion or Guest Prompt */}
-        {displayName ? (
-          <div className="mt-6 max-w-sm mx-auto bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-black mb-1.5">
-              <span className="text-slate-400 uppercase tracking-wider">{t.profileCompletion}</span>
-              <span className="text-cyan-400 font-extrabold text-sm">{user?.profileCompletion || '85%'}</span>
-            </div>
-            <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-700">
-              <div className="h-full bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 rounded-full w-[85%] shadow-md" />
-            </div>
-          </div>
-        ) : (
-          <div className="mt-6 max-w-md mx-auto bg-slate-800/80 p-5 rounded-2xl border border-cyan-400/20 shadow-sm">
-            <p className="text-sm text-slate-300 font-medium mb-4 leading-relaxed">
-              You are currently using VoiceHire without a registered session. Create a profile to save applications and get contacted by employers.
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
+            <span className="text-xs font-black uppercase text-slate-400">Role</span>
+            <p className="text-sm font-black text-[#2563EB] dark:text-[#60A5FA] capitalize">
+              {user?.role || (isEmployer ? 'Employer' : 'Employee')}
             </p>
-            <div className="flex items-center justify-center gap-3">
-              <Link
-                to="/register"
-                className="btn-primary px-5 py-2.5 rounded-xl text-white font-black text-sm shadow-md inline-flex items-center gap-1.5"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>Register Now</span>
-              </Link>
-              <Link
-                to="/login"
-                className="btn-secondary px-5 py-2.5 rounded-xl text-slate-200 font-extrabold text-sm inline-flex items-center gap-1.5"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Log In</span>
-              </Link>
-            </div>
           </div>
-        )}
+
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
+            <span className="text-xs font-black uppercase text-slate-400">Trust Score</span>
+            <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+              {user?.trustScore || 96}%
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Profile Information List (If logged in) */}
-      {displayName && (
-        <div className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-slate-700/60 shadow-lg space-y-5">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <h3 className="text-xl font-black text-white">{t.profileTitle}</h3>
-            <span className="text-xs font-black bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 px-3 py-1 rounded-full uppercase tracking-wider">
-              {user?.accountStatus || 'ACTIVE'}
-            </span>
+      {/* Main Profile Form */}
+      <form
+        onSubmit={handleSave}
+        className="bg-white dark:bg-[#151C2C] rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-black/40 space-y-6"
+      >
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
+          <div>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">
+              {isEmployer ? 'Company & Contact Details' : 'Personal & Trade Credentials'}
+            </h2>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Directly synced with MongoDB for instant profile verification.
+            </p>
           </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>{saving ? 'Saving...' : 'Save Profile'}</span>
+          </button>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
-                <User className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Full Name</p>
-                <p className="text-base font-black text-white">{displayName}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-xl shrink-0">
-                {prof.icon}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Profession</p>
-                <p className="text-base font-black text-white">{user?.skill || prof.title}</p>
-              </div>
-            </div>
-
-            {user?.phoneNumber && (
-              <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400 shrink-0">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Phone Number</p>
-                  <p className="text-base font-black text-white">{user.phoneNumber}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
-                <Star className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.experience}</p>
-                <p className="text-base font-black text-white">{user?.experience || '1+ Year'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-sky-400/10 border border-sky-400/20 flex items-center justify-center text-sky-400 shrink-0">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.location}</p>
-                <p className="text-base font-black text-white">{user?.location || user?.preferredLocation || 'Bengaluru'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all col-span-1 sm:col-span-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center text-purple-400 shrink-0">
-                <Globe className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Preferred Language</p>
-                <p className="text-base font-black text-white">{user?.preferredLanguage || 'English / Regional'}</p>
-              </div>
+        {/* Common Info: Name & Mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              {isEmployer ? 'Contact Person Name' : 'Full Name'}
+            </label>
+            <div className="relative">
+              <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+              />
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-4 flex flex-col sm:flex-row gap-3">
-            <button
-              type="button"
-              onClick={handleUpdateProfileVoice}
-              className="btn-primary flex-1 py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all text-white"
-            >
-              <Mic className="w-5 h-5 animate-pulse" />
-              <span>{t.updateProfileVoice}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="px-6 py-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-black text-base rounded-2xl shadow transition-all active:scale-95 flex items-center justify-center gap-2"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Log Out</span>
-            </button>
+          <div>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              Registered Phone Number
+            </label>
+            <div className="relative">
+              <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                disabled
+                value={`+91 ${phone}`}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-not-allowed outline-none"
+              />
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Common Location & Preferred Language */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              Location / City
+            </label>
+            <div className="relative">
+              <MapPin className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={locationCity}
+                onChange={(e) => setLocationCity(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              Preferred Language
+            </label>
+            <select
+              value={preferredLanguage}
+              onChange={(e) => setPreferredLanguage(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code} className="dark:bg-[#151C2C]">
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Role Specific Section */}
+        {isEmployer ? (
+          <>
+            <div className="pt-2 border-t border-slate-100 dark:border-white/10">
+              <h3 className="text-sm font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-4">
+                Enterprise & Hiring Specifications
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                    Company / Organization Name
+                  </label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="e.g. Nandi Transport Logistics"
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                    Industry / Business Domain
+                  </label>
+                  <input
+                    type="text"
+                    value={businessType}
+                    onChange={(e) => setBusinessType(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                  Company Bio & Typical Hiring Roles
+                </label>
+                <textarea
+                  rows={3}
+                  value={businessDescription}
+                  onChange={(e) => setBusinessDescription(e.target.value)}
+                  placeholder="Tell workers about your company, work culture, and prompt payout reliability."
+                  className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-medium text-slate-900 dark:text-white outline-none resize-none"
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="pt-2 border-t border-slate-100 dark:border-white/10">
+              <h3 className="text-sm font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-4">
+                Worker Trade & Wage Credentials
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                    Primary Trade
+                  </label>
+                  <select
+                    value={tradeCategory}
+                    onChange={(e) => setTradeCategory(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  >
+                    {TRADES.map((t) => (
+                      <option key={t.code} value={t.code} className="dark:bg-[#151C2C]">
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                    Experience Level
+                  </label>
+                  <select
+                    value={experience}
+                    onChange={(e) => setExperience(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  >
+                    <option value="Fresher">Fresher / Learner</option>
+                    <option value="1-2 Years">1-2 Years</option>
+                    <option value="2+ Years">2+ Years</option>
+                    <option value="3-5 Years">3-5 Years</option>
+                    <option value="5+ Years">5+ Years</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                    Expected Daily Wage (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={expectedWage}
+                    onChange={(e) => setExpectedWage(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                  Worker Audio Intro / Spoken Bio
+                </label>
+                <textarea
+                  rows={3}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="e.g. 4 years commercial car driving experience in Bengaluru. Familiar with Airport and Electronic City routes."
+                  className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-medium text-slate-900 dark:text-white outline-none resize-none"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Submit */}
+        <div className="pt-4 flex justify-end">
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-sm shadow-xl shadow-blue-500/30 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>{saving ? 'Updating MongoDB Profile...' : 'Save & Update Profile'}</span>
+          </button>
+        </div>
+      </form>
     </div>
   )
 }

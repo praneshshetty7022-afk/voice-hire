@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useVoice } from '../context/VoiceContext'
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 import { getTranslation } from '../utils/translations'
 import VoiceWaveform from '../components/VoiceWaveform'
 import {
@@ -29,19 +30,13 @@ import toast from 'react-hot-toast'
 
 export default function WorkerDashboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { selectedLang, voiceState, debugLog, startListening, stopListening } = useVoice()
   const { isDark } = useTheme()
   const t = getTranslation(selectedLang)
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [userState, setUserState] = useState(() => {
-    try {
-      const u = localStorage.getItem('user') || sessionStorage.getItem('user')
-      return u ? JSON.parse(u) : null
-    } catch (e) {
-      return null
-    }
-  })
+  const userState = user || null
 
   const [acceptedApps, setAcceptedApps] = useState([])
 
@@ -70,39 +65,17 @@ export default function WorkerDashboardPage() {
   }, [debugLog?.rawSpeech])
 
   useEffect(() => {
-    syncWorkerProfile()
     fetchAcceptedApps()
   }, [])
 
   const fetchAcceptedApps = async () => {
     try {
-      const localU = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null')
-      if (!localU) return
-      const workerId = localU.id || localU.phoneNumber
-      if (!workerId) return
-      const res = await axios.get(`/applications/accepted?workerId=${workerId}`)
-      const list = Array.isArray(res?.data)
-        ? res.data
-        : (Array.isArray(res?.data?.applications) ? res.data.applications : [])
+      const res = await axios.get('/applications/my')
+      const list = Array.isArray(res?.data) ? res.data : []
       setAcceptedApps(list)
     } catch (e) {
       setAcceptedApps([])
     }
-  }
-
-  const syncWorkerProfile = async () => {
-    try {
-      const localU = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null')
-      if (!localU) return
-      const targetId = localU.id || localU.phoneNumber
-      if (!targetId) return
-      const res = await axios.get(`/workers/profile?id=${targetId}`)
-      if (res.data) {
-        const updated = { ...localU, ...res.data }
-        localStorage.setItem('user', JSON.stringify(updated))
-        setUserState(updated)
-      }
-    } catch (e) {}
   }
 
   const handleMicTap = () => {
