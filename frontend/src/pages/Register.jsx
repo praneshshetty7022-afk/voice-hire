@@ -10,7 +10,7 @@ import styles from '../styles/auth.module.css';
 /**
  * Worker Register Component - Udyoga Mitra / VoiceHire
  * Specially designed for low-literacy informal & blue-collar workers.
- * Features: Visual work type emoji grid, Voice Mic entry, Audio TTS guides, Black & Gold theme.
+ * Features: Vibrant, cheerful, welcoming colors, visual emoji cards, Voice Mic entry, Audio TTS guides.
  */
 export const Register = () => {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export const Register = () => {
     );
     toast('🔊 निर्देश सुने जा रहे हैं (Playing audio instructions)...', {
       icon: '📢',
-      style: { background: '#121212', color: '#FCF6BA', border: '1px solid #BF953F' },
+      style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
     });
   };
 
@@ -90,7 +90,7 @@ export const Register = () => {
         setIsListeningName(true);
         speakInstruction('बोलिए अपना पूरा नाम');
         toast('🎤 बोलिए अपना नाम...', {
-          style: { background: '#121212', color: '#FCF6BA', border: '1px solid #BF953F' },
+          style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
         });
       };
 
@@ -100,7 +100,9 @@ export const Register = () => {
         if (cleanName) {
           setFullName(cleanName);
           speakInstruction(`धन्यवाद ${cleanName}! अब नीचे अपना काम चुनें।`);
-          toast.success(`नाम दर्ज हुआ: ${cleanName}`);
+          toast.success(`नाम दर्ज हुआ: ${cleanName}`, {
+            style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+          });
         }
       };
 
@@ -132,7 +134,9 @@ export const Register = () => {
         const numbers = spoken.replace(/\D/g, '');
         if (numbers.length >= 10) {
           setPhoneNumber(numbers.slice(-10));
-          toast.success(`नंबर: ${numbers.slice(-10)}`);
+          toast.success(`नंबर: ${numbers.slice(-10)}`, {
+            style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+          });
         }
       };
 
@@ -148,7 +152,9 @@ export const Register = () => {
   const handleSelectWork = (work) => {
     setSelectedWork(work.id);
     speakInstruction(`${work.hindi} चुना गया`);
-    toast.success(`काम चुना: ${work.hindi} (${work.english})`);
+    toast.success(`काम चुना: ${work.hindi} (${work.english})`, {
+      style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
+    });
   };
 
   // Framer Motion Animation Variants
@@ -173,7 +179,7 @@ export const Register = () => {
 
     if (!fullName.trim() || !phoneNumber.trim() || !password.trim()) {
       toast.error('कृपया नाम, मोबाइल नंबर और पिन भरें (Please fill all fields).', {
-        style: { background: '#121212', color: '#ffffff', border: '1px solid rgba(191, 149, 63, 0.3)' },
+        style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
       });
       speakInstruction('कृपया अपना नाम, फ़ोन नंबर और 4 अंकों का पिन भरें।');
       return;
@@ -205,12 +211,12 @@ export const Register = () => {
         speakInstruction(`बधाई हो ${fullName}! आपका खाता बन गया है।`);
 
         toast.success(`खाता सफलतापूर्वक बना! स्वागत है, ${fullName}`, {
-          icon: '👑',
+          icon: '🎉',
           style: {
-            background: '#121212',
-            color: '#FCF6BA',
-            border: '1px solid #BF953F',
-            boxShadow: '0 0 25px rgba(191, 149, 63, 0.4)',
+            background: '#0f172a',
+            color: '#34d399',
+            border: '1.5px solid #10b981',
+            boxShadow: '0 0 25px rgba(16, 185, 129, 0.4)',
           },
         });
 
@@ -223,7 +229,7 @@ export const Register = () => {
       if (status === 409 || code === 'USER_ALREADY_EXISTS') {
         speakInstruction('यह नंबर पहले से पंजीकृत है। आइए लॉगिन करें।');
         toast.error('यह नंबर पहले से पंजीकृत है। लॉगिन करें (Already registered).', {
-          style: { background: '#121212', color: '#ffffff', border: '1px solid #BF953F' },
+          style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
         });
         setTimeout(() => {
           navigate('/login', { state: { phone: cleanPhone } });
@@ -254,7 +260,9 @@ export const Register = () => {
         localStorage.setItem('user_explicit_login', 'true');
 
         speakInstruction(`बधाई हो ${fullName}! आपका खाता बन गया है।`);
-        toast.success(`खाता बन गया! स्वागत है, ${fullName}`);
+        toast.success(`खाता बन गया! स्वागत है, ${fullName}`, {
+          style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+        });
         navigate('/jobs');
         return;
       }
@@ -267,7 +275,7 @@ export const Register = () => {
 
   return (
     <div className={styles.authContainer}>
-      {/* Three.js Interactive 3D Wireframe & Particle Background */}
+      {/* Three.js Interactive 3D Vibrant Constellation Background */}
       <ThreeBackground />
 
       <motion.div
@@ -279,17 +287,17 @@ export const Register = () => {
       >
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#BF953F] via-[#FCF6BA] to-[#AA771C] p-[1.5px] shadow-[0_0_25px_rgba(191,149,63,0.35)] mb-2">
-            <div className="w-full h-full bg-[#0b0b0b] rounded-[15px] flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-500 p-[2px] shadow-[0_0_25px_rgba(52,211,153,0.35)] mb-2">
+            <div className="w-full h-full bg-[#0f172a] rounded-[14px] flex items-center justify-center">
               <span className="text-3xl">📝</span>
             </div>
           </div>
 
-          <h1 className={`${styles.goldGradientText} text-2xl sm:text-3xl font-black tracking-tight mb-1`}>
+          <h1 className={`${styles.colorfulGradientText} text-2xl sm:text-3xl font-black tracking-tight mb-1`}>
             श्रमिक पंजीकरण • NEW WORKER
           </h1>
 
-          <p className="text-sm font-bold text-[#FCF6BA]">
+          <p className="text-sm font-bold text-[#e2e8f0]">
             नया खाता बनाएं • 1 मिनट में शुरू करें
           </p>
 
@@ -301,7 +309,7 @@ export const Register = () => {
               className={styles.audioHelpBtn}
               aria-label="Listen to audio instructions"
             >
-              <Volume2 className="w-4 h-4 text-[#FCF6BA]" />
+              <Volume2 className="w-4 h-4 text-[#38bdf8]" />
               <span>🔊 आवाज से निर्देश सुनें (Listen Audio)</span>
             </button>
           </div>
@@ -314,11 +322,11 @@ export const Register = () => {
             animate={{ opacity: 1, y: 0 }}
             className={styles.redirectNoticeBanner}
           >
-            <Sparkles className="w-6 h-6 text-[#FCF6BA] shrink-0" />
+            <Sparkles className="w-6 h-6 text-[#34d399] shrink-0" />
             <div className="text-xs sm:text-sm">
-              <span className="font-bold text-[#FCF6BA]">यह नंबर नया है! </span>
-              <span className="text-[#ffffff]">
-                आपका मोबाइल नंबर (<strong className="text-[#FCF6BA]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम और काम चुनें।
+              <span className="font-bold text-[#34d399]">यह नंबर नया है! </span>
+              <span className="text-[#f8fafc]">
+                आपका मोबाइल नंबर (<strong className="text-[#38bdf8]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम और काम चुनें।
               </span>
             </div>
           </motion.div>
@@ -329,14 +337,14 @@ export const Register = () => {
           {/* Field 1: Worker Full Name with Mic */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
-                👤 आपका पूरा नाम (Your Full Name) <span className="text-[#BF953F]">*</span>
+              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
+                👤 आपका पूरा नाम (Your Full Name) <span className="text-rose-400">*</span>
               </label>
-              <span className="text-[11px] text-[#C5A880]">बोलकर भर सकते हैं</span>
+              <span className="text-[11px] text-[#94a3b8]">बोलकर भर सकते हैं</span>
             </div>
             <div className="relative">
               <div className={styles.inputIconWrapper}>
-                <User className="w-5 h-5 text-[#BF953F]" />
+                <User className="w-5 h-5 text-[#38bdf8]" />
               </div>
               <input
                 id="register-name-input"
@@ -345,7 +353,7 @@ export const Register = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="उदा. रमेश कुमार (Ramesh Kumar)"
-                className={styles.goldInput}
+                className={styles.friendlyInput}
                 autoComplete="name"
               />
               <button
@@ -362,18 +370,18 @@ export const Register = () => {
           {/* Field 2: Mobile Number (Pre-filled if redirected) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
-                📱 मोबाइल नंबर (Mobile Number) <span className="text-[#BF953F]">*</span>
+              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
+                📱 मोबाइल नंबर (Mobile Number) <span className="text-rose-400">*</span>
               </label>
               {isAutoRedirected && (
-                <span className="text-[10px] font-bold text-[#0c0c0e] bg-gradient-to-r from-[#BF953F] to-[#FCF6BA] px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 px-2.5 py-0.5 rounded-full shadow-sm">
                   पहले से भरा हुआ (Pre-filled)
                 </span>
               )}
             </div>
             <div className="relative">
               <div className={styles.inputIconWrapper}>
-                <Phone className="w-5 h-5 text-[#BF953F]" />
+                <Phone className="w-5 h-5 text-[#38bdf8]" />
               </div>
               <input
                 id="register-email-input"
@@ -382,7 +390,7 @@ export const Register = () => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="उदा. 9876543210"
-                className={`${styles.goldInput} ${isAutoRedirected ? '!border-[#BF953F] !bg-[#141414]' : ''}`}
+                className={`${styles.friendlyInput} ${isAutoRedirected ? '!border-[#34d399] !bg-slate-900/90' : ''}`}
                 autoComplete="tel"
               />
               <button
@@ -399,10 +407,10 @@ export const Register = () => {
           {/* Field 3: Visual Work Type Emoji Grid (Crucial for Low Literacy Workers) */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
-                🛠️ अपना काम चुनें (Choose Your Work) <span className="text-[#BF953F]">*</span>
+              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
+                🛠️ अपना काम चुनें (Choose Your Work) <span className="text-rose-400">*</span>
               </label>
-              <span className="text-[11px] text-[#C5A880]">एक चुनें (Tap Icon)</span>
+              <span className="text-[11px] text-[#94a3b8]">एक चुनें (Tap Icon)</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {WORK_TYPES.map((work) => {
@@ -416,7 +424,7 @@ export const Register = () => {
                   >
                     <span className="text-3xl mb-1">{work.emoji}</span>
                     <span className="text-xs font-black text-white">{work.hindi}</span>
-                    <span className="text-[10px] text-[#C5A880]">{work.english}</span>
+                    <span className="text-[10px] text-cyan-300">{work.english}</span>
                   </button>
                 );
               })}
@@ -426,14 +434,14 @@ export const Register = () => {
           {/* Field 4: 4-Digit PIN or Password */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#FCF6BA]">
-                🔒 4 अंकों का गुप्त पिन बनाएं (Create 4-Digit PIN) <span className="text-[#BF953F]">*</span>
+              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
+                🔒 4 अंकों का गुप्त पिन बनाएं (Create 4-Digit PIN) <span className="text-rose-400">*</span>
               </label>
-              <span className="text-[11px] text-[#C5A880]">उदा. 1234 या 2580</span>
+              <span className="text-[11px] text-[#94a3b8]">उदा. 1234 या 2580</span>
             </div>
             <div className="relative">
               <div className={styles.inputIconWrapper}>
-                <Lock className="w-5 h-5 text-[#BF953F]" />
+                <Lock className="w-5 h-5 text-[#38bdf8]" />
               </div>
               <input
                 id="register-password-input"
@@ -442,13 +450,13 @@ export const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="4 अंकों का पिन बनाएं"
-                className={styles.goldInput}
+                className={styles.friendlyInput}
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A39171] hover:text-[#FCF6BA] transition-colors focus:outline-none"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-white transition-colors focus:outline-none"
                 aria-label={showPassword ? 'Hide PIN' : 'Show PIN'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -461,11 +469,11 @@ export const Register = () => {
             id="register-submit-button"
             type="submit"
             disabled={loading}
-            className={`${styles.goldButton} mt-3`}
+            className={`${styles.primaryButton} mt-3`}
           >
             {loading ? (
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span>खाता बन रहा है...</span>
               </div>
             ) : (
@@ -478,7 +486,7 @@ export const Register = () => {
         </form>
 
         {/* Divider */}
-        <div className={styles.goldDivider}>
+        <div className={styles.cleanDivider}>
           <span>पहले से खाता है? (Already Registered)</span>
         </div>
 
@@ -487,7 +495,7 @@ export const Register = () => {
           <Link
             to="/login"
             state={{ phone: phoneNumber }}
-            className="inline-flex items-center gap-2 font-black text-sm text-[#FCF6BA] bg-[#BF953F]/15 hover:bg-[#BF953F]/25 border border-[#BF953F]/40 px-5 py-3 rounded-2xl shadow-sm transition-all"
+            className="inline-flex items-center gap-2 font-black text-sm text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/40 px-5 py-3 rounded-2xl shadow-sm transition-all"
           >
             <span>👉 लॉगिन करें (Sign In Here)</span>
           </Link>

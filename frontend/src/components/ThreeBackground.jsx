@@ -4,7 +4,8 @@ import styles from '../styles/auth.module.css';
 
 /**
  * ThreeBackground
- * Luxury Black & Gold 3D geometric wireframe globe and particle constellation
+ * Fresh, vibrant 3D geometric wireframe globe and colorful particle constellation
+ * Cyan, Sapphire Blue, and Emerald Green lighting & particles.
  * Responsive, 60fps non-blocking Three.js canvas.
  */
 const ThreeBackground = () => {
@@ -16,7 +17,7 @@ const ThreeBackground = () => {
 
     // --- 1. Scene Setup ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0b0b0b, 0.038);
+    scene.fog = new THREE.FogExp2(0x0b132b, 0.035);
 
     const width = currentMount.clientWidth || window.innerWidth;
     const height = currentMount.clientHeight || window.innerHeight;
@@ -33,33 +34,38 @@ const ThreeBackground = () => {
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0); // Transparent to show CSS rich black gradient
+    renderer.setClearColor(0x000000, 0); // Transparent to blend with vibrant CSS gradient
     currentMount.appendChild(renderer.domElement);
 
-    // --- 4. Gold Lighting ---
-    // Ambient light with deep antique gold
-    const ambientLight = new THREE.AmbientLight(0xaa771c, 1.2);
+    // --- 4. Fresh & Vibrant Colorful Lighting ---
+    // Ambient light with soft indigo-blue
+    const ambientLight = new THREE.AmbientLight(0x1e293b, 1.4);
     scene.add(ambientLight);
 
-    // Key light with bright champagne gold
-    const keyLight = new THREE.PointLight(0xfcf6ba, 2.8, 80);
+    // Key light with bright Electric Cyan / Sky Blue
+    const keyLight = new THREE.PointLight(0x38bdf8, 3.2, 85);
     keyLight.position.set(12, 16, 18);
     scene.add(keyLight);
 
-    // Fill light with warm burnished gold
-    const fillLight = new THREE.PointLight(0xbf953f, 1.8, 60);
+    // Fill light with warm Emerald Green (symbol of jobs & prosperity)
+    const fillLight = new THREE.PointLight(0x10b981, 2.5, 65);
     fillLight.position.set(-14, -10, 10);
     scene.add(fillLight);
+
+    // Secondary rim light with soft Violet/Indigo
+    const rimLight = new THREE.PointLight(0x6366f1, 2.0, 50);
+    rimLight.position.set(0, -15, -10);
+    scene.add(rimLight);
 
     // --- 5. 3D Geometric Wireframe Globe Group ---
     const rootGroup = new THREE.Group();
     scene.add(rootGroup);
 
-    // Main Outer Icosahedron Mesh (Gold Wireframe)
+    // Outer Geodesic Sphere (Sky Blue & Sapphire Wireframe)
     const globeGeometry = new THREE.IcosahedronGeometry(6.2, 2);
     const wireframeGeometry = new THREE.WireframeGeometry(globeGeometry);
     const wireframeMaterial = new THREE.LineBasicMaterial({
-      color: 0xb38728,
+      color: 0x38bdf8,
       transparent: true,
       opacity: 0.38,
       blending: THREE.AdditiveBlending,
@@ -67,19 +73,19 @@ const ThreeBackground = () => {
     const wireframeMesh = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
     rootGroup.add(wireframeMesh);
 
-    // Inner Counter-Rotating Geodesic Core
+    // Inner Counter-Rotating Core (Vibrant Emerald Green)
     const innerGeometry = new THREE.IcosahedronGeometry(3.6, 1);
     const innerWireframe = new THREE.WireframeGeometry(innerGeometry);
     const innerMaterial = new THREE.LineBasicMaterial({
-      color: 0xaa771c,
+      color: 0x10b981,
       transparent: true,
-      opacity: 0.25,
+      opacity: 0.3,
       blending: THREE.AdditiveBlending,
     });
     const innerCoreMesh = new THREE.LineSegments(innerWireframe, innerMaterial);
     rootGroup.add(innerCoreMesh);
 
-    // Gold Vertex Points on Outer Nodes
+    // Bright Sparkle Nodes on Outer Vertices
     const vertices = [];
     const posAttribute = globeGeometry.attributes.position;
     for (let i = 0; i < posAttribute.count; i++) {
@@ -89,19 +95,27 @@ const ThreeBackground = () => {
     pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
     const pointsMaterial = new THREE.PointsMaterial({
-      color: 0xfcf6ba,
-      size: 0.22,
+      color: 0xa5f3fc,
+      size: 0.24,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95,
       blending: THREE.AdditiveBlending,
     });
     const vertexPoints = new THREE.Points(pointsGeometry, pointsMaterial);
     rootGroup.add(vertexPoints);
 
-    // --- 6. Ambient Floating Gold Particle Dust Constellation ---
+    // --- 6. Multicolored Floating Particle Dust Constellation ---
     const particleCount = 450;
     const particlePositions = new Float32Array(particleCount * 3);
-    const particleScales = new Float32Array(particleCount);
+    const particleColors = new Float32Array(particleCount * 3);
+
+    const colorPalette = [
+      new THREE.Color(0x38bdf8), // Sky Blue
+      new THREE.Color(0x10b981), // Emerald Green
+      new THREE.Color(0x60a5fa), // Royal Blue
+      new THREE.Color(0xf59e0b), // Warm Amber
+      new THREE.Color(0x34d399), // Mint Green
+    ];
 
     for (let i = 0; i < particleCount; i++) {
       const radius = 9 + Math.random() * 16;
@@ -112,17 +126,21 @@ const ThreeBackground = () => {
       particlePositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       particlePositions[i * 3 + 2] = radius * Math.cos(phi);
 
-      particleScales[i] = Math.random();
+      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      particleColors[i * 3] = color.r;
+      particleColors[i * 3 + 1] = color.g;
+      particleColors[i * 3 + 2] = color.b;
     }
 
     const dustGeometry = new THREE.BufferGeometry();
     dustGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    dustGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
 
     const dustMaterial = new THREE.PointsMaterial({
-      color: 0xbf953f,
-      size: 0.12,
+      size: 0.14,
+      vertexColors: true,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.75,
       blending: THREE.AdditiveBlending,
     });
 
@@ -188,7 +206,7 @@ const ThreeBackground = () => {
       dustParticles.rotation.y = elapsedTime * 0.03 + targetX * 0.3;
       dustParticles.rotation.x = Math.sin(elapsedTime * 0.02) * 0.1;
 
-      // Floating gentle camera pulse
+      // Gentle Camera Pulse
       camera.position.x = Math.sin(elapsedTime * 0.15) * 0.35;
       camera.position.y = Math.cos(elapsedTime * 0.12) * 0.35;
       camera.lookAt(0, 0, 0);
@@ -208,7 +226,6 @@ const ThreeBackground = () => {
         currentMount.removeChild(renderer.domElement);
       }
 
-      // Dispose Geometries and Materials
       globeGeometry.dispose();
       wireframeGeometry.dispose();
       wireframeMaterial.dispose();

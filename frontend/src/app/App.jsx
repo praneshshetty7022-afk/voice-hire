@@ -55,10 +55,10 @@ function AppContent() {
     }
   }
 
-  // Pure Full-Bleed VeriProof Black & Gold Authentication Experience
+  // Full-Bleed Accessible & Vibrant Worker Authentication Experience
   if (isAuthRoute) {
     return (
-      <div className="min-h-screen bg-[#0b0b0b] text-white relative overflow-hidden font-sans selection:bg-[#bf953f]/30 selection:text-[#fcf6ba]">
+      <div className="min-h-screen bg-[#0b132b] text-slate-100 relative overflow-hidden font-sans selection:bg-blue-500/30 selection:text-cyan-200">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/login" element={<Login />} />
@@ -71,11 +71,11 @@ function AppContent() {
           toastOptions={{
             duration: 3500,
             style: {
-              background: '#121212',
+              background: '#0f172a',
               backdropFilter: 'blur(16px)',
-              color: '#fcf6ba',
-              border: '1px solid #bf953f',
-              boxShadow: '0 0 25px rgba(191, 149, 63, 0.4)',
+              color: '#f8fafc',
+              border: '1.5px solid #38bdf8',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.6), 0 0 25px rgba(56, 189, 248, 0.3)',
               borderRadius: '16px',
               fontWeight: 700,
             },
@@ -126,18 +126,18 @@ function AppContent() {
 
               <Link
                 to="/login"
-                className="text-xs sm:text-sm font-bold text-[#fcf6ba] hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/5 transition-colors border border-gold-400/25 flex items-center gap-1.5"
+                className="text-xs sm:text-sm font-bold text-cyan-300 hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/10 transition-colors border border-cyan-500/30 flex items-center gap-1.5"
               >
-                <LogIn className="w-3.5 h-3.5 text-[#d4af37]" />
-                <span className="hidden sm:inline">Sign In</span>
+                <LogIn className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">लॉगिन (Sign In)</span>
               </Link>
 
               <Link
                 to="/register"
-                className="bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#0c0c0e] font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm shadow-liquid-gold hover:shadow-gold-glow flex items-center gap-1.5 border border-white/40 active:scale-95 hover:scale-[1.02] transition-all duration-300"
+                className="bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm shadow-md hover:shadow-cyan-500/25 flex items-center gap-1.5 border border-white/20 active:scale-95 hover:scale-[1.02] transition-all duration-300"
               >
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
-                <span className="hidden sm:inline">Register</span>
+                <span className="hidden sm:inline">पंजीकरण (Register)</span>
               </Link>
             </div>
           </div>
