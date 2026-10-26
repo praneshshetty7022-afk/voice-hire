@@ -149,7 +149,7 @@ export default function JobListingPage() {
             </h1>
           </div>
           <p className="text-xs font-semibold text-slate-400 mt-1">
-            {jobs.length} {t.jobsAvailable} • <span className="text-[#f3e5ab]">{selectedCity === 'ALL' ? t.allCities : selectedCity}</span>
+            {jobs.length} {t.jobsAvailable} • <span className="text-cyan-300">{selectedCity === 'ALL' ? t.allCities : selectedCity}</span>
           </p>
         </div>
 
@@ -161,7 +161,7 @@ export default function JobListingPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search work..."
-            className="w-full pl-11 pr-9 py-3 bg-white/[0.04] border border-white/15 rounded-2xl outline-none focus:border-amber-400/50 font-bold text-sm text-white placeholder-slate-500 shadow-glass-edge transition-all"
+            className="w-full pl-11 pr-9 py-3 bg-white/[0.04] border border-white/15 rounded-2xl outline-none focus:border-cyan-400 font-bold text-sm text-white placeholder-slate-500 shadow-sm transition-all"
           />
           {searchQuery && (
             <button
@@ -176,8 +176,8 @@ export default function JobListingPage() {
 
       {/* City Chips Filter */}
       <div className="space-y-2">
-        <p className="text-[11px] font-black text-[#d4af37] uppercase tracking-widest px-1 flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-[#d4af37]" /> Select City / స్థలం
+        <p className="text-[11px] font-black text-cyan-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-cyan-400" /> Select City / స్థలం
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -185,7 +185,7 @@ export default function JobListingPage() {
             onClick={() => setSelectedCity('ALL')}
             className={`px-4 py-2 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
               selectedCity === 'ALL'
-                ? 'bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black border-amber-300/60 shadow-liquid-gold'
+                ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black border-cyan-300/40 shadow-md'
                 : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
             }`}
           >
@@ -198,7 +198,7 @@ export default function JobListingPage() {
               onClick={() => setSelectedCity(city.name)}
               className={`px-4 py-2 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
                 selectedCity === city.name
-                  ? 'bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black border-amber-300/60 shadow-liquid-gold'
+                  ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black border-cyan-300/40 shadow-md'
                   : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
@@ -210,8 +210,8 @@ export default function JobListingPage() {
 
       {/* Category Filter Chips */}
       <div className="space-y-2">
-        <p className="text-[11px] font-black text-[#d4af37] uppercase tracking-widest px-1 flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-[#d4af37]" /> Profession Category
+        <p className="text-[11px] font-black text-cyan-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+          <Filter className="w-3.5 h-3.5 text-cyan-400" /> Profession Category
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -222,7 +222,7 @@ export default function JobListingPage() {
             }}
             className={`px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 transition-all ${
               selectedCategory === 'ALL'
-                ? 'bg-gradient-to-r from-[#d4af37]/20 via-[#f3e5ab]/15 to-[#d4af37]/10 text-[#f3e5ab] border-amber-400/40 shadow-liquid-gold'
+                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-sm'
                 : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
             }`}
           >
@@ -238,7 +238,7 @@ export default function JobListingPage() {
               }}
               className={`px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm border shrink-0 flex items-center gap-2 transition-all ${
                 selectedCategory === key
-                  ? 'bg-gradient-to-r from-[#d4af37]/20 via-[#f3e5ab]/15 to-[#d4af37]/10 text-[#f3e5ab] border-amber-400/40 shadow-liquid-gold'
+                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-sm'
                   : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
@@ -251,8 +251,8 @@ export default function JobListingPage() {
 
       {/* Jobs Grid */}
       {loading ? (
-        <div className="p-12 text-center bg-white/[0.035] backdrop-blur-2xl rounded-3xl border border-white/10 shadow-glass-edge space-y-3">
-          <RefreshCw className="w-9 h-9 animate-spin text-[#d4af37] mx-auto" />
+        <div className="p-12 text-center bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/60 shadow-lg space-y-3">
+          <RefreshCw className="w-9 h-9 animate-spin text-cyan-400 mx-auto" />
           <p className="text-base font-black text-white">Loading Available Jobs...</p>
         </div>
       ) : safeJobs.length > 0 ? (
@@ -267,8 +267,8 @@ export default function JobListingPage() {
         </div>
       ) : (
         /* EMPTY STATE */
-        <div className="p-12 text-center bg-white/[0.035] backdrop-blur-2xl rounded-3xl border border-white/10 shadow-glass-edge space-y-4 text-white">
-          <div className="w-16 h-16 bg-white/[0.05] text-[#d4af37] border border-amber-400/30 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-glass-edge">
+        <div className="p-12 text-center bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/60 shadow-lg space-y-4 text-white">
+          <div className="w-16 h-16 bg-slate-800 text-cyan-400 border border-cyan-400/30 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-sm">
             🚗
           </div>
           <h3 className="text-2xl font-black text-white">No jobs available here right now</h3>
@@ -278,7 +278,7 @@ export default function JobListingPage() {
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
               onClick={() => setSelectedCity('ALL')}
-              className="px-6 py-3 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] font-black rounded-2xl shadow-liquid-gold hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
             >
               Search Nearby
             </button>

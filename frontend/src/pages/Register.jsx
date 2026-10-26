@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Phone, User, Volume2, Mic, MicOff, ArrowRight, Sparkles, CheckCircle, Shield } from 'lucide-react';
+import { Phone, User, Globe, Volume2, Mic, MicOff, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../api/axios';
 import ThreeBackground from '../components/ThreeBackground';
+import { useVoice } from '../context/VoiceContext';
 import styles from '../styles/auth.module.css';
 
 /**
  * Worker Register Component - Udyoga Mitra / VoiceHire
- * Streamlined: ONLY requires Name and Phone Number.
- * Completely removed Email and Password fields and validations.
+ * Required Form Fields:
+ * 1. Full Name
+ * 2. Phone Number
+ * 3. Language Selection Dropdown
+ * Completely removed: Email and Password.
  */
 export const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setSelectedLang } = useVoice();
 
   // Extract pre-filled phone from location state or search params (?phone=...)
   const queryParams = new URLSearchParams(location.search);
@@ -23,29 +28,26 @@ export const Register = () => {
 
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(initialPhone);
-  const [selectedWork, setSelectedWork] = useState('Driver');
+  const [selectedLanguage, setSelectedLanguage] = useState('hi-IN');
   const [isListeningName, setIsListeningName] = useState(false);
   const [isListeningPhone, setIsListeningPhone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Visual Work Types with Clear Emojis & Bilingual Names
-  const WORK_TYPES = [
-    { id: 'Driver', hindi: 'गाड़ी ड्राइवर', english: 'Driver', emoji: '🚗' },
-    { id: 'Cook', hindi: 'रसोइया / खाना', english: 'Cook', emoji: '🧑‍🍳' },
-    { id: 'Househelp', hindi: 'सफाई / घरेलू', english: 'Househelp', emoji: '🧹' },
-    { id: 'Delivery', hindi: 'डिलीवरी बॉय', english: 'Delivery', emoji: '📦' },
-    { id: 'Helper', hindi: 'मजदूर / मिस्त्री', english: 'Helper', emoji: '🏗️' },
-    { id: 'Security', hindi: 'सुरक्षा गार्ड', english: 'Security', emoji: '👮' },
-    { id: 'Electrician', hindi: 'बिजली मिस्त्री', english: 'Electrician', emoji: '⚡' },
-    { id: 'Carpenter', hindi: 'बढ़ई / कारपेंटर', english: 'Carpenter', emoji: '🪚' },
+  // Supported Indian Languages with Native Scripts & Speech Codes
+  const LANGUAGES = [
+    { code: 'hi-IN', langKey: 'hi', name: 'हिन्दी', englishName: 'Hindi', flag: '🇮🇳', greeting: 'नमस्ते' },
+    { code: 'kn-IN', langKey: 'kn', name: 'ಕನ್ನಡ', englishName: 'Kannada', flag: '🇮🇳', greeting: 'ನಮಸ್ಕಾರ' },
+    { code: 'te-IN', langKey: 'te', name: 'తెలుగు', englishName: 'Telugu', flag: '🇮🇳', greeting: 'నమస్కారం' },
+    { code: 'ta-IN', langKey: 'ta', name: 'தமிழ்', englishName: 'Tamil', flag: '🇮🇳', greeting: 'வணக்கம்' },
+    { code: 'en-IN', langKey: 'en', name: 'English', englishName: 'English', flag: '🇬🇧', greeting: 'Welcome' },
   ];
 
   // Speech Synthesis Audio Guidance
-  const speakInstruction = (text) => {
+  const speakInstruction = (text, langCode = selectedLanguage) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'hi-IN';
+      utterance.lang = langCode;
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
@@ -53,7 +55,7 @@ export const Register = () => {
 
   const handleAudioHelp = () => {
     speakInstruction(
-      'नमस्ते! अपना नाम बोलें या लिखें, 10 अंकों का मोबाइल नंबर भरें, और नीचे अपना काम चुनें। फिर रजिस्टर बटन दबाएं।'
+      'नमस्ते! अपना नाम बोलें या लिखें, 10 अंकों का मोबाइल नंबर भरें, और अपनी भाषा चुनें। फिर रजिस्टर बटन दबाएं।'
     );
     toast('🔊 निर्देश सुने जा रहे हैं (Playing audio instructions)...', {
       icon: '📢',
@@ -66,7 +68,7 @@ export const Register = () => {
       setPhoneNumber(location.state.phone);
     }
     if (isAutoRedirected) {
-      speakInstruction('आपका मोबाइल नंबर पहले से भरा हुआ है। बस अपना नाम और काम चुनें।');
+      speakInstruction('आपका मोबाइल नंबर पहले से भरा हुआ है। बस अपना नाम लिखें और भाषा चुनें।');
     }
   }, [location.state, phoneNumber, isAutoRedirected]);
 
@@ -80,7 +82,7 @@ export const Register = () => {
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = 'hi-IN';
+      recognition.lang = selectedLanguage;
       recognition.continuous = false;
 
       recognition.onstart = () => {
@@ -96,7 +98,7 @@ export const Register = () => {
         const cleanName = spoken.replace(/[0-9]/g, '').trim();
         if (cleanName) {
           setFullName(cleanName);
-          speakInstruction(`धन्यवाद ${cleanName}! अब नीचे अपना काम चुनें।`);
+          speakInstruction(`धन्यवाद ${cleanName}!`);
           toast.success(`नाम दर्ज हुआ: ${cleanName}`, {
             style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
           });
@@ -118,7 +120,7 @@ export const Register = () => {
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = 'hi-IN';
+      recognition.lang = selectedLanguage;
       recognition.continuous = false;
 
       recognition.onstart = () => {
@@ -145,13 +147,22 @@ export const Register = () => {
     }
   };
 
-  // Select Work Type
-  const handleSelectWork = (work) => {
-    setSelectedWork(work.id);
-    speakInstruction(`${work.hindi} चुना गया`);
-    toast.success(`काम चुना: ${work.hindi} (${work.english})`, {
-      style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
-    });
+  // Language Change Handler
+  const handleLanguageChange = (e) => {
+    const newLangCode = e.target.value;
+    setSelectedLanguage(newLangCode);
+
+    const langObj = LANGUAGES.find((l) => l.code === newLangCode);
+    if (langObj) {
+      if (setSelectedLang) {
+        setSelectedLang(langObj.langKey);
+      }
+      speakInstruction(`${langObj.greeting}! ${langObj.name} भाषा चुनी गई।`, newLangCode);
+      toast.success(`भाषा: ${langObj.name} (${langObj.englishName})`, {
+        icon: '🌐',
+        style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
+      });
+    }
   };
 
   // Framer Motion Animation Variants
@@ -174,9 +185,9 @@ export const Register = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
-    // Client-side validation ONLY for Name and Phone Number
-    if (!fullName.trim() || !phoneNumber.trim()) {
-      toast.error('कृपया अपना नाम और 10 अंकों का मोबाइल नंबर भरें (Please enter Name and Phone).', {
+    // Client-side validation ONLY for Name, Phone Number, and Language Selection
+    if (!fullName.trim() || !phoneNumber.trim() || !selectedLanguage) {
+      toast.error('कृपया अपना नाम, मोबाइल नंबर और भाषा भरें (Please fill Name, Phone & Language).', {
         style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
       });
       speakInstruction('कृपया अपना नाम और मोबाइल नंबर भरें।');
@@ -195,11 +206,12 @@ export const Register = () => {
     setLoading(true);
 
     try {
-      // API payload strictly contains ONLY Name, Phone, and Work Type (NO email, NO password)
+      // API payload strictly contains ONLY Name, Phone Number, and Language (NO email, NO password)
       const response = await axios.post('/auth/register', {
         fullName: fullName.trim(),
         phoneNumber: cleanPhone,
-        workType: selectedWork,
+        preferredLanguage: selectedLanguage,
+        language: selectedLanguage,
       });
 
       if (response.data.success) {
@@ -242,7 +254,7 @@ export const Register = () => {
           id: 'worker_' + Date.now(),
           fullName: fullName.trim(),
           phoneNumber: cleanPhone,
-          workType: selectedWork,
+          preferredLanguage: selectedLanguage,
           role: 'WORKER',
           verificationStatus: 'verified',
           trustScore: 95,
@@ -295,7 +307,7 @@ export const Register = () => {
           </h1>
 
           <p className="text-sm font-bold text-[#e2e8f0]">
-            नया खाता बनाएं • केवल नाम और मोबाइल नंबर (1 Minute Quick Setup)
+            नाम, मोबाइल नंबर और भाषा दर्ज करें (Quick 1-Minute Setup)
           </p>
 
           {/* Audio Instruction Speaker Pill */}
@@ -323,13 +335,13 @@ export const Register = () => {
             <div className="text-xs sm:text-sm">
               <span className="font-bold text-[#34d399]">यह नंबर नया है! </span>
               <span className="text-[#f8fafc]">
-                आपका मोबाइल नंबर (<strong className="text-[#38bdf8]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम लिखें और काम चुनें।
+                आपका मोबाइल नंबर (<strong className="text-[#38bdf8]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम लिखें और भाषा चुनें।
               </span>
             </div>
           </motion.div>
         )}
 
-        {/* Worker Registration Form - Strictly Name and Phone Number */}
+        {/* Registration Form - Required: Name, Phone Number, Language Dropdown ONLY */}
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
           {/* Field 1: Worker Full Name with Mic */}
           <div>
@@ -364,7 +376,7 @@ export const Register = () => {
             </div>
           </div>
 
-          {/* Field 2: Mobile Number (Pre-filled if redirected) */}
+          {/* Field 2: Mobile Number (Pre-filled if redirected from login) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
@@ -381,7 +393,7 @@ export const Register = () => {
                 <Phone className="w-5 h-5 text-[#38bdf8]" />
               </div>
               <input
-                id="register-email-input"
+                id="register-phone-input"
                 type="tel"
                 required
                 value={phoneNumber}
@@ -401,30 +413,34 @@ export const Register = () => {
             </div>
           </div>
 
-          {/* Field 3: Visual Work Type Emoji Grid */}
+          {/* Field 3: Language Selection Dropdown Menu */}
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                🛠️ अपना काम चुनें (Choose Your Work)
+                🌐 अपनी भाषा चुनें (Select Your Language) <span className="text-rose-400">*</span>
               </label>
-              <span className="text-[11px] text-[#94a3b8]">एक चुनें (Tap Icon)</span>
+              <span className="text-[11px] text-[#34d399]">आवाज़ इसी भाषा में आएगी</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {WORK_TYPES.map((work) => {
-                const isSelected = selectedWork === work.id;
-                return (
-                  <button
-                    key={work.id}
-                    type="button"
-                    onClick={() => handleSelectWork(work)}
-                    className={`${styles.workTypeCard} ${isSelected ? styles.workTypeCardSelected : ''}`}
-                  >
-                    <span className="text-3xl mb-1">{work.emoji}</span>
-                    <span className="text-xs font-black text-white">{work.hindi}</span>
-                    <span className="text-[10px] text-cyan-300">{work.english}</span>
-                  </button>
-                );
-              })}
+            <div className="relative">
+              <div className={styles.inputIconWrapper}>
+                <Globe className="w-5 h-5 text-[#38bdf8]" />
+              </div>
+              <select
+                id="register-language-select"
+                required
+                value={selectedLanguage}
+                onChange={handleLanguageChange}
+                className={`${styles.friendlyInput} appearance-none cursor-pointer pr-10`}
+              >
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="bg-slate-900 text-white py-2">
+                    {lang.flag} {lang.name} ({lang.englishName})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-cyan-400">
+                ▼
+              </div>
             </div>
           </div>
 
@@ -463,6 +479,18 @@ export const Register = () => {
           >
             <span>👉 लॉगिन करें (Sign In Here)</span>
           </Link>
+        </div>
+
+        {/* Bottom Trust Badge */}
+        <div className="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-center gap-5 text-xs text-[#94a3b8]">
+          <span className="flex items-center gap-1.5 font-bold text-emerald-400">
+            <CheckCircle2 className="w-4 h-4" />
+            सरल व सुरक्षित पंजीकरण
+          </span>
+          <span className="flex items-center gap-1.5 font-bold text-cyan-400">
+            <Sparkles className="w-4 h-4" />
+            1 मिनट में काम पाएं
+          </span>
         </div>
       </motion.div>
     </div>

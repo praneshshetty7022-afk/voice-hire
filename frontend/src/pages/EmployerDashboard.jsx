@@ -202,14 +202,14 @@ export const EmployerDashboard = () => {
       {/* Dashboard Title */}
       <div className="bg-white/[0.035] backdrop-blur-2xl text-white rounded-3xl p-6 sm:p-8 shadow-glass-edge mb-8 border border-white/10 relative overflow-hidden">
         {/* Ambient Top Glow */}
-        <div className="absolute -top-20 left-1/4 w-96 h-32 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-20 left-1/4 w-96 h-32 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-300 font-black px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 font-black px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2">
               <Building2 className="w-4 h-4" /> Employer Portal
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11]">
+            <h1 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300">
               Hire Skilled Local Workers
             </h1>
             <p className="text-slate-400 font-medium text-sm mt-1">
@@ -222,8 +222,8 @@ export const EmployerDashboard = () => {
               onClick={() => setActiveTab('POST_JOB')}
               className={`px-5 py-3 rounded-2xl font-black text-sm transition-all ${
                 activeTab === 'POST_JOB'
-                  ? 'btn-primary text-slate-950 shadow-liquid-gold'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                  ? 'btn-primary text-white shadow-md'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
               }`}
             >
               Post Job
@@ -232,8 +232,8 @@ export const EmployerDashboard = () => {
               onClick={() => setActiveTab('APPLICANTS')}
               className={`px-5 py-3 rounded-2xl font-black text-sm transition-all ${
                 activeTab === 'APPLICANTS'
-                  ? 'btn-primary text-slate-950 shadow-liquid-gold'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                  ? 'btn-primary text-white shadow-md'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
               }`}
             >
               Applicants ({safeApplications.length})
@@ -328,12 +328,12 @@ export const EmployerDashboard = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Specify duties, working hours, food/room availability..."
                 rows={4}
-                className="w-full bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                className="w-full bg-slate-900/80 border border-slate-700 focus:border-cyan-400 rounded-2xl px-4 py-3.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
                 required
               />
             </div>
 
-            <button type="submit" className="btn-primary w-full py-4 text-base font-black rounded-2xl shadow-liquid-gold transition-all">
+            <button type="submit" className="btn-primary w-full py-4 text-base font-black rounded-2xl shadow-cyan-500/20 transition-all text-white">
               Publish Job Listing
             </button>
           </form>
@@ -567,7 +567,7 @@ export const EmployerDashboard = () => {
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary flex-1 py-3 rounded-xl text-sm font-black text-slate-950 shadow-liquid-gold"
+                  className="btn-primary flex-1 py-3 rounded-xl text-sm font-black text-white shadow-cyan-500/20"
                 >
                   Confirm & Send Interview
                 </button>

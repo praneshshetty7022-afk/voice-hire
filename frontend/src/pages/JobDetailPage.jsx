@@ -215,50 +215,50 @@ export default function JobDetailPage() {
           <MapPin className="w-4 h-4 text-slate-400" /> {job?.location}
         </p>
 
-        <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] mt-1">
+        <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300 mt-1">
           ₹{job?.dailyWage || job?.minSalary || 1200} / Day
         </p>
 
         {/* Audio Speaker Listener Pill */}
         <button
           onClick={handleListenJob}
-          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white/[0.06] hover:bg-white/[0.12] text-[#f3e5ab] font-extrabold rounded-full text-sm border border-amber-400/30 shadow-glass-edge transition-all active:scale-95"
+          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 font-extrabold rounded-full text-sm border border-cyan-400/30 shadow-sm transition-all active:scale-95"
         >
-          <Volume2 className="w-4 h-4 text-[#d4af37]" />
+          <Volume2 className="w-4 h-4 text-cyan-400" />
           <span>{t.listenToJob}</span>
         </button>
       </div>
 
       {/* Information Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
+        <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <MapPin className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.location}</p>
           <p className="text-base font-black text-white mt-0.5">{job?.location}</p>
         </div>
 
-        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
+        <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <Clock className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.workTime}</p>
           <p className="text-base font-black text-white mt-0.5">{job?.workTime || '9 AM – 6 PM'}</p>
         </div>
 
-        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
-          <IndianRupee className="w-6 h-6 text-[#d4af37] mx-auto mb-1.5" />
+        <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
+          <IndianRupee className="w-6 h-6 text-cyan-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.salary}</p>
-          <p className="text-base font-black text-[#f3e5ab] mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} / Day</p>
+          <p className="text-base font-black text-cyan-300 mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} / Day</p>
         </div>
 
-        <div className="p-5 bg-white/[0.035] backdrop-blur-xl rounded-3xl border border-white/10 shadow-glass-edge text-center">
-          <Star className="w-6 h-6 text-[#d4af37] mx-auto mb-1.5" />
+        <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
+          <Star className="w-6 h-6 text-cyan-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.experience}</p>
           <p className="text-base font-black text-white mt-0.5">{job?.experience || '2+ Years'}</p>
         </div>
       </div>
 
       {/* Employer & Description Card */}
-      <div className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-glass-edge space-y-4 text-white">
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-slate-700/60 shadow-lg space-y-4 text-white">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.employer}</p>
             <p className="text-xl font-black text-white">{job?.employerName}</p>
@@ -278,11 +278,11 @@ export default function JobDetailPage() {
 
         {/* Requirements Bullet Points */}
         <div className="pt-2">
-          <h4 className="text-xs font-black text-[#d4af37] uppercase tracking-widest mb-2">Key Requirements:</h4>
+          <h4 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">Key Requirements:</h4>
           <ul className="space-y-2">
             {(prof?.props || []).map((prop, idx) => (
               <li key={idx} className="flex items-center gap-2 text-sm font-bold text-slate-200">
-                <CheckCircle2 className="w-4 h-4 text-[#d4af37] shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
                 <span>{prop}</span>
               </li>
             ))}
@@ -291,7 +291,7 @@ export default function JobDetailPage() {
       </div>
 
       {/* Sticky Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0c0c0e]/85 backdrop-blur-2xl border-t border-white/10 shadow-glass-edge z-40">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/95 backdrop-blur-2xl border-t border-slate-800 shadow-2xl z-40">
         <div className="max-w-xl mx-auto">
           {hasApplied ? (
             <button
@@ -308,7 +308,7 @@ export default function JobDetailPage() {
                 type="button"
                 onClick={handleNormalApply}
                 disabled={isApplying}
-                className="flex-1 py-3.5 bg-white/[0.06] hover:bg-white/[0.12] text-white font-extrabold rounded-2xl text-sm border border-white/10 disabled:opacity-50 transition-all"
+                className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold rounded-2xl text-sm border border-slate-700 disabled:opacity-50 transition-all"
               >
                 {isApplying ? 'Applying...' : t.applyNormally}
               </button>
@@ -316,7 +316,7 @@ export default function JobDetailPage() {
               <button
                 type="button"
                 onClick={handleVoiceApplyClick}
-                className="flex-2 py-3.5 px-6 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] hover:scale-[1.02] active:scale-[0.98] text-[#050505] font-black text-base rounded-2xl shadow-liquid-gold flex items-center justify-center gap-2 border border-amber-300/40 transition-transform"
+                className="flex-2 py-3.5 px-6 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 hover:scale-[1.02] active:scale-[0.98] text-white font-black text-base rounded-2xl shadow-md flex items-center justify-center gap-2 border border-white/20 transition-transform"
               >
                 <Mic className="w-5 h-5 stroke-[2.5]" />
                 <span>{t.applyByVoice}</span>

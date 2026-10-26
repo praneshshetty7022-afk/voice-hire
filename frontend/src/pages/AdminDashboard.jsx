@@ -225,10 +225,10 @@ export const AdminDashboard = () => {
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-300 font-black px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 font-black px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider mb-2">
               <ShieldCheck className="w-4 h-4" /> Admin Console
             </div>
-            <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11]">
+            <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300">
               Admin Management Portal
             </h1>
             <p className="text-slate-400 text-sm mt-1">Review pending worker registrations, manage categories, and monitor platform jobs.</p>
@@ -236,19 +236,19 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Dashboard Counter Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800 relative z-10">
           {/* Pending Workers Card */}
           <button
             onClick={() => setActiveTab('approvals')}
             className={`p-4 rounded-2xl border text-left transition-all ${
               activeTab === 'approvals'
-                ? 'bg-gradient-to-br from-[#d4af37] to-[#aa7c11] text-slate-950 border-amber-300 shadow-liquid-gold scale-[1.02]'
-                : 'bg-[#0c0c0e]/80 text-white border-white/10 hover:border-amber-400/30 shadow-glass-edge'
+                ? 'bg-gradient-to-br from-blue-600 to-cyan-500 text-white border-cyan-300 shadow-md scale-[1.02]'
+                : 'bg-slate-800/80 text-white border-slate-700/60 hover:border-cyan-400/40 shadow-sm'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider opacity-80">Pending Workers</span>
-              <Clock className="w-5 h-5 text-amber-400" />
+              <Clock className="w-5 h-5 text-cyan-400" />
             </div>
             <div className="text-3xl font-black mt-2">{safePendingWorkers.length}</div>
             <div className="text-xs font-bold mt-1 opacity-90">Awaiting Approval</div>
@@ -259,8 +259,8 @@ export const AdminDashboard = () => {
             onClick={() => setActiveTab('applications')}
             className={`p-4 rounded-2xl border text-left transition-all ${
               activeTab === 'applications'
-                ? 'bg-gradient-to-br from-[#d4af37] to-[#aa7c11] text-slate-950 border-amber-300 shadow-liquid-gold scale-[1.02]'
-                : 'bg-[#0c0c0e]/80 text-white border-white/10 hover:border-amber-400/30 shadow-glass-edge'
+                ? 'bg-gradient-to-br from-blue-600 to-cyan-500 text-white border-cyan-300 shadow-md scale-[1.02]'
+                : 'bg-slate-800/80 text-white border-slate-700/60 hover:border-cyan-400/40 shadow-sm'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -276,13 +276,13 @@ export const AdminDashboard = () => {
             onClick={() => setActiveTab('categories')}
             className={`p-4 rounded-2xl border text-left transition-all ${
               activeTab === 'categories'
-                ? 'bg-gradient-to-br from-[#d4af37] to-[#aa7c11] text-slate-950 border-amber-300 shadow-liquid-gold scale-[1.02]'
-                : 'bg-[#0c0c0e]/80 text-white border-white/10 hover:border-amber-400/30 shadow-glass-edge'
+                ? 'bg-gradient-to-br from-blue-600 to-cyan-500 text-white border-cyan-300 shadow-md scale-[1.02]'
+                : 'bg-slate-800/80 text-white border-slate-700/60 hover:border-cyan-400/40 shadow-sm'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider opacity-80">Categories</span>
-              <List className="w-5 h-5 text-blue-400" />
+              <List className="w-5 h-5 text-sky-400" />
             </div>
             <div className="text-3xl font-black mt-2">{safeCategories.length}</div>
             <div className="text-xs font-bold mt-1 opacity-90">Active Skill Types</div>
@@ -293,8 +293,8 @@ export const AdminDashboard = () => {
             onClick={() => setActiveTab('jobs')}
             className={`p-4 rounded-2xl border text-left transition-all ${
               activeTab === 'jobs'
-                ? 'bg-gradient-to-br from-[#d4af37] to-[#aa7c11] text-slate-950 border-amber-300 shadow-liquid-gold scale-[1.02]'
-                : 'bg-[#0c0c0e]/80 text-white border-white/10 hover:border-amber-400/30 shadow-glass-edge'
+                ? 'bg-gradient-to-br from-blue-600 to-cyan-500 text-white border-cyan-300 shadow-md scale-[1.02]'
+                : 'bg-slate-800/80 text-white border-slate-700/60 hover:border-cyan-400/40 shadow-sm'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -313,7 +313,7 @@ export const AdminDashboard = () => {
           onClick={() => setActiveTab('approvals')}
           className={`px-5 py-2.5 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${
             activeTab === 'approvals'
-              ? 'btn-primary text-slate-950 shadow-liquid-gold'
+              ? 'btn-primary text-white shadow-cyan-500/20'
               : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
           }`}
         >
@@ -325,7 +325,7 @@ export const AdminDashboard = () => {
           onClick={() => setActiveTab('applications')}
           className={`px-5 py-2.5 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${
             activeTab === 'applications'
-              ? 'btn-primary text-slate-950 shadow-liquid-gold'
+              ? 'btn-primary text-white shadow-cyan-500/20'
               : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
           }`}
         >
@@ -337,7 +337,7 @@ export const AdminDashboard = () => {
           onClick={() => setActiveTab('categories')}
           className={`px-5 py-2.5 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${
             activeTab === 'categories'
-              ? 'btn-primary text-slate-950 shadow-liquid-gold'
+              ? 'btn-primary text-white shadow-cyan-500/20'
               : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
           }`}
         >
@@ -349,7 +349,7 @@ export const AdminDashboard = () => {
           onClick={() => setActiveTab('jobs')}
           className={`px-5 py-2.5 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${
             activeTab === 'jobs'
-              ? 'btn-primary text-slate-950 shadow-liquid-gold'
+              ? 'btn-primary text-white shadow-cyan-500/20'
               : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
           }`}
         >
@@ -559,7 +559,7 @@ export const AdminDashboard = () => {
               className="bg-[#0c0c0e]/80 border border-white/10 focus:border-amber-400/50 rounded-2xl px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 flex-1"
               required
             />
-            <button type="submit" className="btn-primary py-2.5 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-liquid-gold text-slate-950">
+            <button type="submit" className="btn-primary py-2.5 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-cyan-500/20 text-white">
               <Plus className="w-4 h-4" /> Add Category
             </button>
           </form>
@@ -611,7 +611,7 @@ export const AdminDashboard = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-              <div className="w-12 h-12 bg-amber-400/10 border border-amber-400/30 text-amber-300 rounded-2xl flex items-center justify-center font-black text-xl shadow-liquid-gold">
+              <div className="w-12 h-12 bg-cyan-400/10 border border-cyan-400/30 text-cyan-300 rounded-2xl flex items-center justify-center font-black text-xl shadow-cyan-500/20">
                 👤
               </div>
               <div>
@@ -679,7 +679,7 @@ export const AdminDashboard = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleOpenApproveModal(selectedWorker)}
-                className="btn-primary flex-1 py-3 text-sm font-black flex items-center justify-center gap-2 rounded-2xl shadow-liquid-gold text-slate-950"
+                className="btn-primary flex-1 py-3 text-sm font-black flex items-center justify-center gap-2 rounded-2xl shadow-cyan-500/20 text-white"
               >
                 <UserCheck className="w-4 h-4" /> APPROVE WORKER
               </button>
@@ -717,7 +717,7 @@ export const AdminDashboard = () => {
               </button>
               <button
                 onClick={handleConfirmApprove}
-                className="btn-primary flex-1 py-3 rounded-2xl font-black text-sm text-slate-950 shadow-liquid-gold"
+                className="btn-primary flex-1 py-3 rounded-2xl font-black text-sm text-white shadow-cyan-500/20"
               >
                 Approve
               </button>
@@ -794,7 +794,7 @@ export const AdminDashboard = () => {
               </button>
               <button
                 onClick={handleConfirmAcceptApp}
-                className="btn-primary flex-1 py-3 rounded-2xl font-black text-sm text-slate-950 shadow-liquid-gold flex items-center justify-center gap-2"
+                className="btn-primary flex-1 py-3 rounded-2xl font-black text-sm text-white shadow-cyan-500/20 flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" /> ACCEPT
               </button>
@@ -858,7 +858,7 @@ export const AdminDashboard = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
-              <div className="w-12 h-12 bg-amber-400/10 border border-amber-400/30 text-amber-300 rounded-2xl flex items-center justify-center font-black text-xl shadow-liquid-gold">
+              <div className="w-12 h-12 bg-cyan-400/10 border border-cyan-400/30 text-cyan-300 rounded-2xl flex items-center justify-center font-black text-xl shadow-cyan-500/20">
                 📄
               </div>
               <div>
@@ -918,7 +918,7 @@ export const AdminDashboard = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleOpenAcceptAppModal(selectedApp)}
-                className="btn-primary flex-1 py-3 rounded-2xl font-black text-sm text-slate-950 flex items-center justify-center gap-2 shadow-liquid-gold"
+                className="btn-primary flex-1 py-3 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2 shadow-cyan-500/20"
               >
                 <Check className="w-4 h-4" /> ACCEPT APPLICATION
               </button>

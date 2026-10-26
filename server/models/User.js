@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema(
@@ -15,17 +14,6 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Phone number is required / फ़ोन नंबर आवश्यक है'],
       trim: true,
       index: true,
-    },
-    email: {
-      type: String,
-      lowercase: true,
-      trim: true,
-      sparse: true,
-    },
-    password: {
-      type: String,
-      required: false, // Password completely optional / not required
-      select: false,
     },
     workType: {
       type: String,
@@ -66,27 +54,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash password only if one was provided
-userSchema.pre('save', async function (next) {
-  if (!this.password || !this.isModified('password')) {
-    return next();
-  }
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
-
-// Compare password/PIN (if no password set on account, allow phone login)
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  if (!this.password) return true;
-  if (!candidatePassword) return true;
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
 // Generate JWT token
 userSchema.methods.generateAuthToken = function () {
   const secret = process.env.JWT_SECRET || 'udyoga_mitra_gold_worker_jwt_secret_2026';
@@ -107,7 +74,6 @@ userSchema.methods.generateAuthToken = function () {
 
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
-  delete obj.password;
   return obj;
 };
 

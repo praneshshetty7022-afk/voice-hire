@@ -16,7 +16,7 @@ export default function MobileNavbar({ lang = 'en', onMicTap }) {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0c0c0e]/85 backdrop-blur-2xl border-t border-white/10 shadow-glass-edge sm:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-2xl border-t border-slate-800 sm:hidden">
       <div className="flex items-center justify-around h-20 px-2 relative">
         {(Array.isArray(navItems) ? navItems : []).map((item, idx) => {
           if (item.isMic) {
@@ -25,7 +25,7 @@ export default function MobileNavbar({ lang = 'en', onMicTap }) {
                 <button
                   type="button"
                   onClick={onMicTap}
-                  className="w-16 h-16 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-[#050505] flex items-center justify-center shadow-liquid-gold border-2 border-amber-300/60 ring-4 ring-amber-400/20 active:scale-90 transition-transform animate-liquid-pulse"
+                  className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white flex items-center justify-center shadow-lg border-2 border-cyan-300/60 ring-4 ring-cyan-400/20 active:scale-90 transition-transform"
                 >
                   <Mic className="w-8 h-8 stroke-[2.5]" />
                 </button>
@@ -42,11 +42,11 @@ export default function MobileNavbar({ lang = 'en', onMicTap }) {
               to={item.path}
               className={`flex flex-col items-center justify-center flex-1 h-full font-bold text-xs transition-all duration-300 ${
                 isActive
-                  ? 'text-[#f3e5ab] scale-105 drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]'
+                  ? 'text-cyan-300 scale-105 drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Icon className={`w-6 h-6 mb-1 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              <Icon className={`w-6 h-6 mb-1 ${isActive ? 'stroke-[2.5] text-cyan-400' : 'stroke-2'}`} />
               <span>{item.label}</span>
             </Link>
           )

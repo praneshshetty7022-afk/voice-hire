@@ -258,10 +258,10 @@ export const login = async (req, res) => {
 
 /**
  * @desc    Check whether a phone number is registered
- * @route   POST /api/auth/check-email
+ * @route   POST /api/auth/check-phone (or /api/auth/check-email)
  * @access  Public
  */
-export const checkEmail = async (req, res) => {
+export const checkPhone = async (req, res) => {
   try {
     const { phoneNumber, identifier } = req.body;
     const rawInput = (phoneNumber || identifier || '').trim();
@@ -309,3 +309,5 @@ export const getProfile = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
+
+export const checkEmail = checkPhone;

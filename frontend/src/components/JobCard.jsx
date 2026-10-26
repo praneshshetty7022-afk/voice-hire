@@ -29,16 +29,16 @@ export default function JobCard({ job, onApplyVoice }) {
   return (
     <div
       onClick={() => navigate(`/jobs/${job.id || job._id || 1}`)}
-      className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 border border-white/10 hover:border-amber-400/40 shadow-glass-edge hover:shadow-[0_0_20px_rgba(212,175,55,0.18)] transition-all duration-300 group cursor-pointer relative overflow-hidden"
+      className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 border border-slate-700/60 hover:border-cyan-400/50 shadow-lg hover:shadow-[0_0_25px_rgba(56,189,248,0.25)] transition-all duration-300 group cursor-pointer relative overflow-hidden"
     >
       {/* 3D Glass Light Highlight Bar */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent pointer-events-none" />
 
       {/* Top Banner with Profession Illustrated Identity */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-glass-edge border border-white/15 shrink-0 group-hover:scale-105 transition-transform bg-white/[0.05] backdrop-blur-xl"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-white/15 shrink-0 group-hover:scale-105 transition-transform bg-white/[0.05] backdrop-blur-xl"
             style={{
               borderColor: `${prof.color}60`,
             }}
@@ -53,7 +53,7 @@ export default function JobCard({ job, onApplyVoice }) {
             >
               {prof.title}
             </span>
-            <h3 className="text-lg font-black text-white group-hover:text-[#f3e5ab] transition-colors line-clamp-1">
+            <h3 className="text-lg font-black text-white group-hover:text-cyan-300 transition-colors line-clamp-1">
               {title}
             </h3>
           </div>
@@ -63,23 +63,23 @@ export default function JobCard({ job, onApplyVoice }) {
         <button
           type="button"
           onClick={handleListenClick}
-          className="p-2.5 bg-white/[0.05] hover:bg-amber-400/20 text-[#f3e5ab] rounded-2xl transition-all shadow-glass-edge active:scale-95 border border-white/10 shrink-0"
+          className="p-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-2xl transition-all shadow-sm active:scale-95 border border-cyan-400/30 shrink-0"
           title="Listen to Job Details"
         >
-          <Volume2 className="w-5 h-5 text-[#f3e5ab]" />
+          <Volume2 className="w-5 h-5 text-cyan-400" />
         </button>
       </div>
 
       {/* Primary Key Attributes Grid */}
-      <div className="grid grid-cols-2 gap-3 my-4 py-3 px-4 bg-white/[0.025] rounded-2xl border border-white/5">
+      <div className="grid grid-cols-2 gap-3 my-4 py-3 px-4 bg-slate-800/60 rounded-2xl border border-slate-700/60">
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
           <span className="text-sm font-extrabold text-slate-200 truncate">{location}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <IndianRupee className="w-4 h-4 text-[#d4af37] shrink-0" />
-          <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] truncate">{salary}</span>
+          <IndianRupee className="w-4 h-4 text-cyan-400 shrink-0" />
+          <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300 truncate">{salary}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export default function JobCard({ job, onApplyVoice }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Star className="w-4 h-4 text-[#d4af37] shrink-0" />
+          <Star className="w-4 h-4 text-cyan-400 shrink-0" />
           <span className="text-xs font-bold text-slate-300 truncate">{experience}</span>
         </div>
       </div>
@@ -103,14 +103,14 @@ export default function JobCard({ job, onApplyVoice }) {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-white/10">
+      <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-slate-800">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation()
             navigate(`/jobs/${job.id || job._id || 1}`)
           }}
-          className="w-full py-3 bg-white/[0.05] hover:bg-white/[0.1] text-white font-extrabold rounded-2xl text-xs sm:text-sm transition-all border border-white/10"
+          className="w-full py-3 bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-extrabold rounded-2xl text-xs sm:text-sm transition-all border border-slate-700"
         >
           {t.viewJob}
         </button>
@@ -122,7 +122,7 @@ export default function JobCard({ job, onApplyVoice }) {
             if (onApplyVoice) onApplyVoice(job)
             else navigate(`/jobs/${job.id || job._id || 1}?action=voice-apply`)
           }}
-          className="w-full py-3 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] hover:scale-[1.02] active:scale-[0.98] text-[#050505] font-black rounded-2xl text-xs sm:text-sm transition-all shadow-liquid-gold flex items-center justify-center gap-1.5 border border-amber-300/40"
+          className="w-full py-3 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 hover:scale-[1.02] active:scale-[0.98] text-white font-black rounded-2xl text-xs sm:text-sm transition-all shadow-md hover:shadow-cyan-500/25 flex items-center justify-center gap-1.5 border border-white/20"
         >
           <span>🎤</span>
           <span>{t.applyByVoice}</span>

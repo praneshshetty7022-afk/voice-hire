@@ -28,7 +28,7 @@ function AppContent() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Full-bleed Black & Gold VeriProof view for Authentication
+  // Full-bleed Accessible & Vibrant Worker View for Authentication
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
 
   useEffect(() => {
@@ -86,35 +86,35 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-100 flex flex-col md:flex-row font-sans relative overflow-x-hidden selection:bg-gold-400/30 selection:text-gold-200">
-      {/* Dynamic Ambient Light Field Gradients */}
+    <div className="min-h-screen bg-[#0b132b] text-slate-100 flex flex-col md:flex-row font-sans relative overflow-x-hidden selection:bg-blue-500/30 selection:text-cyan-200">
+      {/* Dynamic Ambient Light Field Gradients (Same Palette as Registration Page) */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-gold-400/10 via-amber-500/5 to-transparent rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-24 w-[500px] h-[500px] bg-gradient-to-bl from-silver-400/10 via-slate-500/5 to-transparent rounded-full blur-[130px]" />
-        <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-gradient-to-tr from-gold-400/5 to-transparent rounded-full blur-[120px]" />
+        <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-600/20 via-sky-500/10 to-transparent rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -right-24 w-[500px] h-[500px] bg-gradient-to-bl from-emerald-500/15 via-teal-500/10 to-transparent rounded-full blur-[130px]" />
+        <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/15 to-transparent rounded-full blur-[120px]" />
       </div>
 
-      {/* Desktop Floating Liquid Glass Sidebar */}
+      {/* Desktop Floating Sidebar */}
       <DesktopSidebar lang={selectedLang} onMicTap={handleGlobalMicTap} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        {/* Floating Liquid Glass Header */}
-        <header className="bg-obsidian-surface/60 backdrop-blur-2xl text-white px-4 sm:px-6 py-3.5 shadow-liquid-glass sticky top-0 z-40 border-b border-white/10">
+        {/* Floating Header */}
+        <header className="bg-slate-900/80 backdrop-blur-2xl text-white px-4 sm:px-6 py-3.5 shadow-lg sticky top-0 z-40 border-b border-slate-800">
           <div className="container mx-auto max-w-5xl flex items-center justify-between gap-3">
             {/* Logo Brand */}
             <Link to="/jobs" className="flex items-center gap-3 group">
-              <div className="w-11 h-11 bg-gradient-to-br from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] text-obsidian rounded-2xl font-black text-xl flex items-center justify-center shadow-liquid-gold border border-white/40 group-hover:scale-105 transition-transform duration-300">
-                <Mic className="w-5 h-5 text-[#0c0c0e] stroke-[2.5]" />
+              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white rounded-2xl font-black text-xl flex items-center justify-center shadow-md border border-cyan-300/40 group-hover:scale-105 transition-transform duration-300">
+                <Mic className="w-5 h-5 text-white stroke-[2.5]" />
               </div>
               <div>
                 <span className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
-                  <span>{t.brandName}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest bg-gold-400/15 text-gold-300 border border-gold-400/30 px-2 py-0.5 rounded-full hidden sm:inline-block">
-                    LUXURY EDITION
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-white">{t.brandName}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 px-2 py-0.5 rounded-full hidden sm:inline-block">
+                    VOICE FIRST
                   </span>
                 </span>
-                <span className="text-xs text-silver-400 font-extrabold block -mt-0.5 uppercase tracking-wider hidden sm:block">
+                <span className="text-xs text-cyan-400/80 font-extrabold block -mt-0.5 uppercase tracking-wider hidden sm:block">
                   {t.tagline}
                 </span>
               </div>
@@ -174,11 +174,11 @@ function AppContent() {
         toastOptions={{
           duration: 3500,
           style: {
-            background: 'rgba(18, 18, 22, 0.9)',
+            background: '#0f172a',
             backdropFilter: 'blur(20px)',
             color: '#f8fafc',
-            border: '1px solid rgba(212, 175, 55, 0.35)',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+            border: '1.5px solid #38bdf8',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.6), 0 0 25px rgba(56, 189, 248, 0.3)',
             borderRadius: '16px',
             fontWeight: 700,
           },

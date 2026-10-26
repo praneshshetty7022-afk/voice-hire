@@ -321,7 +321,7 @@ export const Login = () => {
                 <Phone className="w-5 h-5 text-[#38bdf8]" />
               </div>
               <input
-                id="login-email-input"
+                id="login-phone-input"
                 type="tel"
                 required
                 value={phoneNumber}

@@ -43,29 +43,29 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 pb-12 max-w-3xl mx-auto">
       {/* Profile Header Hero Card */}
-      <div className="bg-white/[0.035] backdrop-blur-2xl text-white rounded-3xl p-8 shadow-glass-edge border border-white/10 text-center relative overflow-hidden">
+      <div className="bg-slate-900/80 backdrop-blur-2xl text-white rounded-3xl p-8 border border-slate-700/60 text-center relative overflow-hidden shadow-lg">
         {/* Ambient Top Glow */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-32 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-32 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Large Avatar Badge */}
         <div className="relative inline-block mb-4">
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-amber-400/20 via-white/[0.05] to-amber-600/20 border-2 border-amber-400/40 shadow-liquid-gold flex items-center justify-center text-6xl mx-auto backdrop-blur-xl">
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-600/20 via-sky-500/10 to-cyan-500/20 border-2 border-cyan-400/40 shadow-md flex items-center justify-center text-6xl mx-auto backdrop-blur-xl">
             {prof?.icon || '👤'}
           </div>
           {displayName && (
-            <span className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-amber-300 to-amber-500 border-2 border-[#0c0c0e] rounded-full flex items-center justify-center text-xs font-black text-slate-950 shadow-md">
+            <span className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-sky-400 to-cyan-500 border-2 border-[#0b132b] rounded-full flex items-center justify-center text-xs font-black text-white shadow-md">
               ✓
             </span>
           )}
         </div>
 
-        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11]">
+        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300">
           {displayName || 'Guest User'}
         </h1>
         
         {/* Profession Badge Pill or Guest Tag */}
         {displayName ? (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/30 font-extrabold text-base mt-2 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 font-extrabold text-base mt-2 shadow-sm">
             <span>{prof.icon}</span>
             <span>{user?.skill || prof.title}</span>
           </div>
@@ -77,24 +77,24 @@ export default function ProfilePage() {
 
         {/* Profile Completion or Guest Prompt */}
         {displayName ? (
-          <div className="mt-6 max-w-sm mx-auto bg-[#0c0c0e]/80 p-4 rounded-2xl border border-white/10 shadow-glass-edge">
+          <div className="mt-6 max-w-sm mx-auto bg-slate-800/80 p-4 rounded-2xl border border-slate-700/60 shadow-sm">
             <div className="flex items-center justify-between text-xs font-black mb-1.5">
               <span className="text-slate-400 uppercase tracking-wider">{t.profileCompletion}</span>
-              <span className="text-amber-400 font-extrabold text-sm">{user?.profileCompletion || '85%'}</span>
+              <span className="text-cyan-400 font-extrabold text-sm">{user?.profileCompletion || '85%'}</span>
             </div>
-            <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
-              <div className="h-full bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#aa7c11] rounded-full w-[85%] shadow-liquid-gold" />
+            <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-700">
+              <div className="h-full bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 rounded-full w-[85%] shadow-md" />
             </div>
           </div>
         ) : (
-          <div className="mt-6 max-w-md mx-auto bg-[#0c0c0e]/80 p-5 rounded-2xl border border-amber-400/20 shadow-glass-edge">
+          <div className="mt-6 max-w-md mx-auto bg-slate-800/80 p-5 rounded-2xl border border-cyan-400/20 shadow-sm">
             <p className="text-sm text-slate-300 font-medium mb-4 leading-relaxed">
               You are currently using VoiceHire without a registered session. Create a profile to save applications and get contacted by employers.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link
                 to="/register"
-                className="btn-primary px-5 py-2.5 rounded-xl text-slate-950 font-black text-sm shadow-liquid-gold inline-flex items-center gap-1.5"
+                className="btn-primary px-5 py-2.5 rounded-xl text-white font-black text-sm shadow-md inline-flex items-center gap-1.5"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Register Now</span>
@@ -113,17 +113,17 @@ export default function ProfilePage() {
 
       {/* Profile Information List (If logged in) */}
       {displayName && (
-        <div className="bg-white/[0.035] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-glass-edge space-y-5">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-slate-700/60 shadow-lg space-y-5">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <h3 className="text-xl font-black text-white">{t.profileTitle}</h3>
-            <span className="text-xs font-black bg-amber-400/10 text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full uppercase tracking-wider">
+            <span className="text-xs font-black bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 px-3 py-1 rounded-full uppercase tracking-wider">
               {user?.accountStatus || 'ACTIVE'}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
+            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
                 <User className="w-5 h-5" />
               </div>
               <div>
@@ -132,8 +132,8 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-xl shrink-0">
+            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-xl shrink-0">
                 {prof.icon}
               </div>
               <div>
@@ -143,7 +143,7 @@ export default function ProfilePage() {
             </div>
 
             {user?.phoneNumber && (
-              <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
+              <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
                 <div className="w-10 h-10 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400 shrink-0">
                   <Phone className="w-5 h-5" />
                 </div>
@@ -154,8 +154,8 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
+            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
                 <Star className="w-5 h-5" />
               </div>
               <div>
@@ -164,8 +164,8 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 shrink-0">
+            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-sky-400/10 border border-sky-400/20 flex items-center justify-center text-sky-400 shrink-0">
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
@@ -174,7 +174,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 bg-white/[0.025] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all col-span-1 sm:col-span-2">
+            <div className="flex items-center gap-3 p-4 bg-slate-800/50 hover:bg-slate-800/80 rounded-2xl border border-slate-700/50 transition-all col-span-1 sm:col-span-2">
               <div className="w-10 h-10 rounded-xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center text-purple-400 shrink-0">
                 <Globe className="w-5 h-5" />
               </div>
@@ -190,7 +190,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={handleUpdateProfileVoice}
-              className="btn-primary flex-1 py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-liquid-gold active:scale-95 transition-all"
+              className="btn-primary flex-1 py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all text-white"
             >
               <Mic className="w-5 h-5 animate-pulse" />
               <span>{t.updateProfileVoice}</span>

@@ -9,7 +9,7 @@ export default function ProfessionCard({ professionKey, lang = 'en', onClick }) 
     <button
       type="button"
       onClick={() => onClick && onClick(professionKey)}
-      className="group relative flex flex-col items-center text-center p-6 bg-white/[0.035] backdrop-blur-2xl rounded-3xl border border-white/10 hover:border-amber-400/40 shadow-glass-edge hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-1.5 transition-all duration-300 w-full overflow-hidden"
+      className="group relative flex flex-col items-center text-center p-6 bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-700/60 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(56,189,248,0.2)] hover:-translate-y-1.5 transition-all duration-300 w-full overflow-hidden"
     >
       {/* Background Decorative Gradient Radial */}
       <div
@@ -18,11 +18,11 @@ export default function ProfessionCard({ professionKey, lang = 'en', onClick }) 
       />
 
       {/* 3D Glass Light Highlight Bar */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
 
       {/* Profession Badge Icon */}
       <div
-        className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-glass-edge border border-white/15 mb-3.5 transform group-hover:scale-105 transition-transform duration-300 z-10 bg-white/[0.05] backdrop-blur-xl"
+        className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl border border-white/10 mb-3.5 transform group-hover:scale-105 transition-transform duration-300 z-10 bg-slate-800/80 backdrop-blur-xl"
         style={{
           boxShadow: `0 8px 24px -6px ${prof.color}40`,
         }}
@@ -31,7 +31,7 @@ export default function ProfessionCard({ professionKey, lang = 'en', onClick }) 
       </div>
 
       {/* Profession Title */}
-      <h3 className="text-lg font-black text-white group-hover:text-[#f3e5ab] transition-colors z-10 line-clamp-1">
+      <h3 className="text-lg font-black text-white group-hover:text-cyan-300 transition-colors z-10 line-clamp-1">
         {titleText}
       </h3>
 
@@ -41,7 +41,7 @@ export default function ProfessionCard({ professionKey, lang = 'en', onClick }) 
       </p>
 
       {/* Action Prompt Pill */}
-      <div className="mt-4 px-3.5 py-1 rounded-full text-xs font-extrabold bg-white/[0.06] text-slate-300 border border-white/10 group-hover:bg-gradient-to-r group-hover:from-[#d4af37] group-hover:via-[#f3e5ab] group-hover:to-[#aa7c11] group-hover:text-[#050505] group-hover:border-amber-300 transition-all duration-300 z-10 shadow-sm">
+      <div className="mt-4 px-3.5 py-1 rounded-full text-xs font-extrabold bg-slate-800 text-slate-300 border border-slate-700 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-sky-500 group-hover:to-cyan-400 group-hover:text-white group-hover:border-transparent transition-all duration-300 z-10 shadow-sm">
         Choose Work →
       </div>
     </button>
