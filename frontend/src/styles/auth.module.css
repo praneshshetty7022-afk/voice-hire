@@ -1,0 +1,241 @@
+/* ==========================================================================
+   VeriProof Executive Authentication Suite - Black & Gold Luxury Theme
+   Strict Palette: #0B0B0B, #121212, #000000, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C
+   ========================================================================== */
+
+/* Main Auth Layout Wrapper */
+.authContainer {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0b0b0b;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(191, 149, 63, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 85% 60%, rgba(179, 135, 40, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 15% 80%, rgba(170, 119, 28, 0.08) 0%, transparent 45%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+/* Glassmorphism Acrylic Card */
+.glassCard {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: rgba(20, 20, 20, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(191, 149, 63, 0.28);
+  border-radius: 24px;
+  padding: 2.5rem 2.25rem;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(191, 149, 63, 0.12),
+    inset 0 1px 1px rgba(252, 246, 186, 0.2);
+  z-index: 10;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glassCard:hover {
+  border-color: rgba(191, 149, 63, 0.45);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(191, 149, 63, 0.22),
+    inset 0 1px 1px rgba(252, 246, 186, 0.3);
+}
+
+/* Wide Glass Card for Registration */
+.glassCardWide {
+  max-width: 580px;
+}
+
+/* Metallic Gold Gradient Text */
+.goldGradientText {
+  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Subtle Secondary Gold Subtitles */
+.goldMutedText {
+  color: #c5a880;
+  font-size: 0.875rem;
+  letter-spacing: 0.03em;
+}
+
+.goldAccentText {
+  color: #fcf6ba;
+}
+
+/* High-Status Corporate Badge */
+.corporateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(191, 149, 63, 0.1);
+  border: 1px solid rgba(191, 149, 63, 0.3);
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fcf6ba;
+  box-shadow: 0 0 15px rgba(191, 149, 63, 0.15);
+}
+
+/* Form Input Field */
+.goldInput {
+  width: 100%;
+  background: rgba(11, 11, 11, 0.65);
+  border: 1px solid rgba(191, 149, 63, 0.22);
+  border-radius: 14px;
+  padding: 0.85rem 1.15rem 0.85rem 2.85rem;
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.goldInput::placeholder {
+  color: #a39171;
+  opacity: 0.7;
+}
+
+.goldInput:focus {
+  background: rgba(18, 18, 18, 0.85);
+  border-color: #bf953f;
+  box-shadow: 0 0 15px rgba(191, 149, 63, 0.35), inset 0 1px 1px rgba(252, 246, 186, 0.15);
+}
+
+/* Input Icon Container */
+.inputIconWrapper {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bf953f;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* Primary Luxury Gold Button */
+.goldButton {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 30%, #b38728 65%, #aa771c 100%);
+  color: #0b0b0b;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 0.95rem 1.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(191, 149, 63, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.goldButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(191, 149, 63, 0.55);
+}
+
+.goldButton:active {
+  transform: translateY(0);
+}
+
+.goldButton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-25deg);
+  transition: left 0.75s ease;
+}
+
+.goldButton:hover::after {
+  left: 160%;
+}
+
+.goldButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Redirection Banner Notification */
+.redirectNoticeBanner {
+  background: rgba(191, 149, 63, 0.12);
+  border: 1px solid rgba(191, 149, 63, 0.4);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 15px rgba(191, 149, 63, 0.15);
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(191, 149, 63, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(191, 149, 63, 0.35);
+  }
+}
+
+/* Three.js Canvas Container */
+.canvasContainer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Subtle Divider with Gold Diamond */
+.goldDivider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #a39171;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.goldDivider::before,
+.goldDivider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(191, 149, 63, 0.2);
+}
+
+.goldDivider span {
+  padding: 0 0.85rem;
+}

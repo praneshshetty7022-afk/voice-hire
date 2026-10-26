@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import { Toaster } from 'react-hot-toast'
 import '../styles/index.css'
 import WorkerDashboardPage from '../pages/WorkerDashboardPage'
@@ -7,6 +8,8 @@ import JobListingPage from '../pages/JobListingPage'
 import JobDetailPage from '../pages/JobDetailPage'
 import MyApplicationsPage from '../pages/MyApplicationsPage'
 import ProfilePage from '../pages/ProfilePage'
+import Login from '../pages/Login'
+import Register from '../pages/Register'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import EmployerDashboard from '../pages/EmployerDashboard'
@@ -17,12 +20,16 @@ import MobileNavbar from '../components/MobileNavbar'
 import LanguageSelector from '../components/LanguageSelector'
 import { VoiceProvider, useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
-import { Mic, UserCheck } from 'lucide-react'
+import { Mic, UserCheck, LogIn } from 'lucide-react'
 
 function AppContent() {
   const { selectedLang, setSelectedLang, voiceState, startListening, stopListening } = useVoice()
   const t = getTranslation(selectedLang)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Full-bleed Black & Gold VeriProof view for Authentication
+  const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
 
   useEffect(() => {
     // If the legacy mock dummy user was previously seeded, clear it so genuine guest/registered user state is respected
@@ -46,6 +53,36 @@ function AppContent() {
     } else {
       startListening(navigate)
     }
+  }
+
+  // Pure Full-Bleed VeriProof Black & Gold Authentication Experience
+  if (isAuthRoute) {
+    return (
+      <div className="min-h-screen bg-[#0b0b0b] text-white relative overflow-hidden font-sans selection:bg-[#bf953f]/30 selection:text-[#fcf6ba]">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
+        </AnimatePresence>
+
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3500,
+            style: {
+              background: '#121212',
+              backdropFilter: 'blur(16px)',
+              color: '#fcf6ba',
+              border: '1px solid #bf953f',
+              boxShadow: '0 0 25px rgba(191, 149, 63, 0.4)',
+              borderRadius: '16px',
+              fontWeight: 700,
+            },
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -83,9 +120,17 @@ function AppContent() {
               </div>
             </Link>
 
-            {/* Language Selector & Register Capsule */}
+            {/* Language Selector & Auth Capsules */}
             <div className="flex items-center gap-2.5 sm:gap-3.5">
               <LanguageSelector selectedLang={selectedLang} onSelectLang={setSelectedLang} />
+
+              <Link
+                to="/login"
+                className="text-xs sm:text-sm font-bold text-[#fcf6ba] hover:text-white px-3.5 py-2 rounded-xl hover:bg-white/5 transition-colors border border-gold-400/25 flex items-center gap-1.5"
+              >
+                <LogIn className="w-3.5 h-3.5 text-[#d4af37]" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Link>
 
               <Link
                 to="/register"
