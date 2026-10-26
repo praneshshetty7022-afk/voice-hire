@@ -383,6 +383,22 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
     return () => clearInterval(interval)
   }, [isOpen, isPlaying])
 
+  // Automatically advance to Sign Up page once the cinematic story concludes
+  useEffect(() => {
+    if (currentTime >= 46) {
+      const autoTimer = setTimeout(() => {
+        soundEngine.cleanup()
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+        if (onClose) {
+          onClose()
+        } else {
+          navigate('/register')
+        }
+      }, 3500)
+      return () => clearTimeout(autoTimer)
+    }
+  }, [currentTime, onClose, navigate])
+
   // User unlocks sound via initial tap/click
   const handleUserInteraction = () => {
     if (!audioUnlocked) {
@@ -555,19 +571,24 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
-          {/* Close / Skip to App */}
+          {/* Close / Skip to Sign Up */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation()
               soundEngine.cleanup()
               if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-              onClose?.()
+              if (onClose) {
+                onClose()
+              } else {
+                navigate('/register')
+              }
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.12] hover:bg-rose-500/80 text-white font-black text-xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2563EB]/80 hover:bg-[#2563EB] text-white font-black text-xs transition-all cursor-pointer shadow-md shadow-blue-500/20"
+            title="Skip to Sign Up"
           >
-            <span>Skip</span>
-            <X className="w-4 h-4" />
+            <span>Skip to Sign Up</span>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -1004,12 +1025,16 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                     e.stopPropagation()
                     soundEngine.cleanup()
                     if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-                    onClose?.()
-                    navigate('/jobs')
+                    if (onClose) {
+                      onClose()
+                    } else {
+                      navigate('/register')
+                    }
                   }}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-sm shadow-xl shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-sm sm:text-base shadow-xl shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Explore Real Jobs</span>
+                  <Sparkles className="w-5 h-5 text-amber-300" />
+                  <span>Continue to Sign Up</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
@@ -1019,13 +1044,11 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                     e.stopPropagation()
                     soundEngine.cleanup()
                     if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-                    onClose?.()
-                    navigate('/register')
+                    navigate('/login')
                   }}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-white/[0.1] hover:bg-white/[0.18] border border-white/20 text-white font-extrabold text-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white/[0.1] hover:bg-white/[0.18] border border-white/20 text-white font-extrabold text-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
-                  <span>Create Profile in 1 Min</span>
+                  <span>Already registered? Sign In</span>
                 </button>
 
                 <button

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { Toaster } from 'react-hot-toast'
@@ -44,30 +44,26 @@ function AppContent() {
     return () => window.removeEventListener('open-cinematic-intro', handleOpen)
   }, [])
 
-  // Full-bleed Worker Authentication Experience
+  const isIntroRoute = location.pathname === '/' || location.pathname === '/intro'
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('user')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed?.id === 'worker_1' && parsed?.name === 'Pranesh' && !localStorage.getItem('user_explicit_login')) {
-          localStorage.removeItem('user')
-          localStorage.removeItem('token')
-        }
-      }
-    } catch (e) {}
-  }, [])
-
-  const handleGlobalMicTap = () => {
-    if (voiceState === 'LISTENING') {
-      stopListening()
-    } else {
-      startListening(navigate)
-    }
+  const handleIntroClose = () => {
+    navigate('/register')
   }
 
+  // 1. First Page: Cinematic Intro Experience
+  if (isIntroRoute) {
+    return (
+      <div className="min-h-screen bg-[#0B0F19] text-white relative overflow-hidden font-sans">
+        <CinematicIntro
+          isOpen={true}
+          onClose={handleIntroClose}
+        />
+      </div>
+    )
+  }
+
+  // 2. Second Page: Quick Worker Authentication / Signup
   if (isAuthRoute) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] relative overflow-hidden font-sans transition-colors duration-300">
@@ -93,6 +89,14 @@ function AppContent() {
         />
       </div>
     )
+  }
+
+  const handleGlobalMicTap = () => {
+    if (voiceState === 'LISTENING') {
+      stopListening()
+    } else {
+      startListening(navigate)
+    }
   }
 
   return (
@@ -209,7 +213,7 @@ function AppContent() {
         {/* Main Route Content */}
         <main className="container-custom py-6 flex-1 relative z-10">
           <Routes>
-            <Route path="/" element={<Navigate to="/register" replace />} />
+            <Route path="/" element={<Navigate to="/intro" replace />} />
             <Route path="/jobs" element={<WorkerDashboardPage />} />
             <Route path="/jobs-list" element={<JobListingPage />} />
             <Route path="/jobs/:id" element={<JobDetailPage />} />
