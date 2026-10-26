@@ -2,10 +2,26 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
-import HeroVoiceMic from '../components/HeroVoiceMic'
-import ProfessionCard from '../components/ProfessionCard'
-import { PROFESSIONS } from '../styles/theme'
-import { Sparkles, ArrowRight, Clock, CheckCircle2, XCircle, RotateCcw } from 'lucide-react'
+import VoiceWaveform from '../components/VoiceWaveform'
+import {
+  Mic,
+  MicOff,
+  Search,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  Users,
+  Zap,
+  TrendingUp,
+  Lock,
+  Briefcase,
+  MapPin,
+  Clock,
+  RotateCcw,
+  Check,
+  Star
+} from 'lucide-react'
 import axios from '../api/axios'
 import toast from 'react-hot-toast'
 
@@ -13,6 +29,8 @@ export default function WorkerDashboardPage() {
   const navigate = useNavigate()
   const { selectedLang, voiceState, debugLog, startListening, stopListening } = useVoice()
   const t = getTranslation(selectedLang)
+
+  const [searchQuery, setSearchQuery] = useState('')
   const [userState, setUserState] = useState(() => {
     try {
       const u = localStorage.getItem('user') || sessionStorage.getItem('user')
@@ -80,10 +98,6 @@ export default function WorkerDashboardPage() {
   const displayName = currentUser?.name || currentUser?.fullName ? (currentUser.name || currentUser.fullName).trim() : null
   const accountStatus = currentUser?.role === 'WORKER' ? (currentUser.accountStatus || 'APPROVED') : 'APPROVED'
 
-  const handleProfessionSelect = (profKey) => {
-    navigate(`/jobs-list?category=${profKey}`)
-  }
-
   const handleMicTap = () => {
     if (voiceState === 'LISTENING') {
       stopListening()
@@ -92,263 +106,498 @@ export default function WorkerDashboardPage() {
     }
   }
 
-  const handleSuggestionClick = (phraseText) => {
-    navigate(`/jobs-list?search=${encodeURIComponent(phraseText)}`)
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/jobs-list?search=${encodeURIComponent(searchQuery.trim())}`)
+    } else {
+      navigate('/jobs-list')
+    }
   }
 
-  const professionKeys = Object.keys(PROFESSIONS)
+  const handleChipClick = (category) => {
+    if (category === 'ALL') {
+      navigate('/jobs-list')
+    } else {
+      navigate(`/jobs-list?category=${category}`)
+    }
+  }
+
+  const isListening = voiceState === 'LISTENING'
+
+  // Popular Category Items
+  const CATEGORIES = [
+    {
+      id: 'DRIVER',
+      title: 'Drivers',
+      hindiTitle: 'ड्राइवर',
+      count: '1,420+ Jobs',
+      wage: '₹800 – ₹1,500/day',
+      icon: '🚗',
+      color: 'from-blue-500/10 to-blue-600/10',
+      borderColor: 'hover:border-blue-400',
+    },
+    {
+      id: 'CARPENTER',
+      title: 'Carpenters',
+      hindiTitle: 'बढ़ई / कारपेंटर',
+      count: '890+ Jobs',
+      wage: '₹900 – ₹1,600/day',
+      icon: '🪚',
+      color: 'from-amber-500/10 to-orange-500/10',
+      borderColor: 'hover:border-amber-400',
+    },
+    {
+      id: 'HELPER',
+      title: 'General Workers',
+      hindiTitle: 'श्रमिक / कामगार',
+      count: '2,150+ Jobs',
+      wage: '₹700 – ₹1,200/day',
+      icon: '🛠️',
+      color: 'from-emerald-500/10 to-teal-500/10',
+      borderColor: 'hover:border-emerald-400',
+    },
+    {
+      id: 'HOUSEHELP',
+      title: 'Helpers & Cooks',
+      hindiTitle: 'हेल्पर और रसोइया',
+      count: '1,870+ Jobs',
+      wage: '₹600 – ₹1,100/day',
+      icon: '🍳',
+      color: 'from-purple-500/10 to-indigo-500/10',
+      borderColor: 'hover:border-purple-400',
+    },
+  ]
+
+  // 5 Feature Highlights
+  const FEATURES = [
+    {
+      title: 'Voice Search',
+      desc: 'Speak in your language to find nearby jobs instantly.',
+      icon: Mic,
+      color: 'text-[#2563EB] bg-blue-50',
+    },
+    {
+      title: 'Verified Workers',
+      desc: 'Pre-verified employer profiles and direct contact details.',
+      icon: ShieldCheck,
+      color: 'text-emerald-600 bg-emerald-50',
+    },
+    {
+      title: 'Secure Platform',
+      desc: 'Zero spam, daily wage guarantees, and direct payouts.',
+      icon: Lock,
+      color: 'text-indigo-600 bg-indigo-50',
+    },
+    {
+      title: 'Fast Hiring',
+      desc: 'Apply in 1-tap with voice; no resumes or passwords.',
+      icon: Zap,
+      color: 'text-amber-600 bg-amber-50',
+    },
+    {
+      title: 'Grow Together',
+      desc: 'Build your verified work record and increase earnings.',
+      icon: TrendingUp,
+      color: 'text-sky-600 bg-sky-50',
+    },
+  ]
 
   return (
-    <div className="space-y-8 pb-12 relative z-10">
+    <div className="space-y-12 pb-16 relative z-10">
       {/* Account Approval Status Banner if PENDING */}
       {accountStatus === 'PENDING' && (
-        <div className="bg-blue-50/90 backdrop-blur-xl text-slate-800 p-5 rounded-3xl border border-blue-200/90 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+        <div className="bg-blue-50 text-slate-800 p-5 rounded-3xl border border-blue-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-center gap-4">
-            <Clock className="w-8 h-8 shrink-0 text-blue-600 animate-pulse" />
+            <Clock className="w-8 h-8 shrink-0 text-[#2563EB] animate-pulse" />
             <div>
               <h3 className="font-black text-lg sm:text-xl text-blue-900">Registration Status: PENDING APPROVAL</h3>
               <p className="font-bold text-sm text-slate-600 mt-0.5">
                 Your worker registration is waiting for admin approval.
               </p>
               <p className="text-xs font-semibold text-slate-500 mt-1">
-                You can browse platform jobs. Once approved by Admin, job application capabilities will be fully enabled.
+                You can browse jobs. Once approved by Admin, applications will be enabled.
               </p>
             </div>
           </div>
 
           <button
             onClick={handleManualRefreshStatus}
-            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white rounded-2xl font-black text-xs shrink-0 flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+            className="px-4 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-black text-xs shrink-0 flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Check Approval Status
+            <RotateCcw className="w-3.5 h-3.5" /> Check Status
           </button>
         </div>
       )}
 
-      {accountStatus === 'REJECTED' && (
-        <div className="bg-rose-50/90 backdrop-blur-xl text-slate-800 p-5 rounded-3xl border border-rose-200 shadow-md flex items-center gap-4 animate-fade-in">
-          <XCircle className="w-8 h-8 shrink-0 text-rose-500" />
-          <div>
-            <h3 className="font-black text-lg sm:text-xl text-rose-900">Registration Status: NOT APPROVED</h3>
-            <p className="font-bold text-sm text-slate-600 mt-0.5">
-              Your worker registration was not approved.
-            </p>
-            {currentUser?.rejectionReason && (
-              <p className="text-xs font-bold bg-rose-100 border border-rose-200 px-3 py-1 rounded-xl mt-1 text-rose-800 inline-block">
-                Reason: {currentUser.rejectionReason}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* =====================================================================
+          SECTION 1: HERO SECTION (2-Column Desktop Grid)
+          ===================================================================== */}
+      <section className="bg-white/90 backdrop-blur-xl rounded-3xl border border-blue-100 p-6 sm:p-10 shadow-[0_15px_45px_rgba(37,99,235,0.06)] relative overflow-hidden">
+        {/* Soft Ambient Light Halo */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Greeting & Hero Welcome Banner */}
-      <div className="bg-white/85 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-blue-100/90 shadow-[0_10px_35px_rgba(37,99,235,0.06)]">
-        {/* Top Glass Light Highlight Bar */}
-        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-300/50 to-transparent pointer-events-none" />
-
-        <div className="relative z-10 max-w-2xl">
-          {/* Fluid Pill Capsule */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/90 backdrop-blur-xl border border-blue-200/80 text-xs sm:text-sm font-extrabold mb-4 text-blue-700 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600">
-              Voice-First Employment Platform • उद्योग मित्र
-            </span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
-            {displayName ? (
-              <>
-                {t.greetingMorning}{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600">
-                  {displayName} 👋
-                </span>
-              </>
-            ) : (
-              <>
-                {t.greetingGeneric || 'Welcome,'}{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600">
-                  Guest 👋
-                </span>
-              </>
-            )}
-          </h1>
-
-          {!displayName && (
-            <div className="mt-3.5 flex items-center gap-2.5 flex-wrap animate-fade-in">
-              <span className="text-xs font-bold text-slate-600">Looking for employment?</span>
-              <Link
-                to="/register"
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black text-xs rounded-xl shadow-md hover:shadow-blue-500/25 transition-all active:scale-95 inline-flex items-center gap-1.5"
-              >
-                <span>Register Profile</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <span className="text-xs text-slate-400 font-bold">or</span>
-              <Link
-                to="/login"
-                className="px-3.5 py-2 bg-white hover:bg-blue-50 text-blue-700 font-extrabold text-xs rounded-xl border border-blue-200 transition-all shadow-sm"
-              >
-                Log In
-              </Link>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+          {/* Left Column: Headlines & Voice Search Bar */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-black text-[#2563EB]">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Voice-Powered Job Search for Skilled Workers</span>
             </div>
-          )}
 
-          <p className="text-base sm:text-lg font-bold text-slate-600 mt-3">
-            {t.heroQuestion}
-          </p>
+            {/* Main Catchy Headline */}
+            <h1 className="text-3xl sm:text-5xl font-black text-[#0F172A] tracking-tight leading-[1.15]">
+              Your Voice.{' '}
+              <span className="text-[#2563EB] inline-block">
+                Your Next Opportunity.
+              </span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-base sm:text-lg font-medium text-slate-600 max-w-xl leading-relaxed">
+              Skip the complicated forms. Just speak in your native language to discover and apply for verified local jobs for drivers, carpenters, helpers, and trades in seconds.
+            </p>
+
+            {/* Prominent Voice Search Bar */}
+            <div className="pt-2">
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <div className="relative flex items-center bg-[#F8FAFC] border-2 border-blue-200 focus-within:border-[#2563EB] focus-within:ring-4 focus-within:ring-blue-500/15 rounded-3xl p-2 sm:p-2.5 transition-all shadow-md">
+                  <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" />
+                  
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Type or click the microphone to speak..."
+                    className="flex-1 px-3 py-2 bg-transparent text-slate-900 font-semibold placeholder-slate-400 text-sm sm:text-base outline-none"
+                  />
+
+                  {/* Integrated Audio Waveform (Visible beside mic) */}
+                  <VoiceWaveform voiceState={voiceState} side="left" className="!h-10" />
+
+                  {/* Prominent Microphone CTA Button */}
+                  <button
+                    type="button"
+                    onClick={handleMicTap}
+                    aria-label={isListening ? 'Stop voice recording' : 'Speak to find jobs'}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 transform active:scale-95 shadow-md ${
+                      isListening
+                        ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-400/30'
+                        : 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white hover:scale-105 shadow-blue-500/30'
+                    }`}
+                  >
+                    {isListening ? (
+                      <MicOff className="w-6 h-6 stroke-[2.5]" />
+                    ) : (
+                      <Mic className="w-6 h-6 stroke-[2.5]" />
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* Sample Prompt Chip */}
+              <div className="mt-3 flex items-center gap-2 flex-wrap text-xs font-semibold text-slate-500">
+                <span className="text-slate-400">Sample prompt:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('Find driver jobs near me')
+                    navigate('/jobs-list?search=driver')
+                  }}
+                  className="px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-[#2563EB] border border-blue-200 transition-all cursor-pointer font-bold inline-flex items-center gap-1"
+                >
+                  <span>🎤 "Find driver jobs near me"</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('Carpenter work in Bangalore')
+                    navigate('/jobs-list?search=carpenter')
+                  }}
+                  className="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer hidden sm:inline-flex"
+                >
+                  "Carpenter work in Bangalore"
+                </button>
+              </div>
+
+              {/* Live Spoken Transcript Feedback */}
+              {debugLog?.rawSpeech && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-2xl text-xs sm:text-sm font-bold text-[#1D4ED8] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#2563EB] shrink-0" />
+                  <span>Heard: "{debugLog.rawSpeech}"</span>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Category Chips */}
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                Popular Categories:
+              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleChipClick('DRIVER')}
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border border-slate-200 hover:border-blue-300 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <span>🚗</span>
+                  <span>Driver</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChipClick('CARPENTER')}
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border border-slate-200 hover:border-blue-300 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <span>🪚</span>
+                  <span>Carpenter</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChipClick('HELPER')}
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border border-slate-200 hover:border-blue-300 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <span>🛠️</span>
+                  <span>General Worker</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChipClick('HOUSEHELP')}
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] border border-slate-200 hover:border-blue-300 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <span>🍳</span>
+                  <span>Helper</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChipClick('ALL')}
+                  className="px-3.5 py-1.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs transition-all shadow-sm"
+                >
+                  All Jobs →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Hero Photo Cutout with Floating Badge Tags */}
+          <div className="lg:col-span-5 flex justify-center relative">
+            <div className="relative w-72 h-72 sm:w-96 sm:h-96">
+              {/* Soft Circular Backdrop */}
+              <div className="absolute inset-2 sm:inset-4 rounded-full bg-gradient-to-tr from-blue-100 via-sky-100 to-indigo-100 border-4 border-white shadow-2xl overflow-hidden">
+                <img
+                  src="/worker_hero.jpg"
+                  alt="Smiling verified worker in hardhat and safety vest"
+                  className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+
+              {/* Floating Badge Tag 1: Real Jobs */}
+              <div className="absolute -top-2 left-2 sm:left-4 bg-white/95 backdrop-blur-md border border-emerald-200 text-emerald-800 px-3.5 py-2 rounded-2xl shadow-lg flex items-center gap-2 text-xs sm:text-sm font-black animate-float-slow">
+                <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">
+                  ✓
+                </span>
+                <span>Real Jobs</span>
+              </div>
+
+              {/* Floating Badge Tag 2: Real People */}
+              <div className="absolute top-14 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md border border-blue-200 text-[#1D4ED8] px-3.5 py-2 rounded-2xl shadow-lg flex items-center gap-2 text-xs sm:text-sm font-black animate-float-slow" style={{ animationDelay: '1.5s' }}>
+                <Users className="w-4 h-4 text-[#2563EB]" />
+                <span>Real People</span>
+              </div>
+
+              {/* Floating Badge Tag 3: Better Future */}
+              <div className="absolute -bottom-2 left-6 sm:left-8 bg-white/95 backdrop-blur-md border border-amber-200 text-amber-900 px-3.5 py-2 rounded-2xl shadow-lg flex items-center gap-2 text-xs sm:text-sm font-black animate-float-slow" style={{ animationDelay: '3s' }}>
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Better Future</span>
+              </div>
+
+              {/* Floating Badge Tag 4: 100% Voice Enabled */}
+              <div className="absolute bottom-16 -right-3 sm:-right-6 bg-[#0F172A] text-white px-3 py-1.5 rounded-full shadow-xl flex items-center gap-1.5 text-xs font-bold border border-slate-700">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>100% Voice Enabled</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================================
+          SECTION 2: 5-COLUMN FEATURE HIGHLIGHTS BAR
+          ===================================================================== */}
+      <section className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-blue-100 shadow-[0_10px_35px_rgba(37,99,235,0.05)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {FEATURES.map((feat, idx) => {
+            const Icon = feat.icon
+            return (
+              <div
+                key={idx}
+                className="p-4 rounded-2xl bg-[#F8FAFC] border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all duration-300 group"
+              >
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 shadow-sm ${feat.color} group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <h3 className="font-black text-slate-900 text-base mb-1">
+                  {feat.title}
+                </h3>
+                <p className="text-xs font-medium text-slate-500 leading-relaxed">
+                  {feat.desc}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* =====================================================================
+          SECTION 3: POPULAR JOB CATEGORIES (4-Column Grid)
+          ===================================================================== */}
+      <section className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 px-1">
+          <div>
+            <span className="text-xs font-black uppercase tracking-widest text-[#2563EB] block mb-1">
+              Explore Openings
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
+              Popular Job Categories
+            </h2>
+            <p className="text-sm font-semibold text-slate-500 mt-1">
+              Thousands of verified local employers ready to hire today
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate('/jobs-list')}
+            className="inline-flex items-center gap-1.5 text-sm font-black text-[#2563EB] hover:text-[#1D4ED8] group"
+          >
+            <span>View All Categories</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
 
-        {/* Ambient Radial Background Gradient */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-blue-200/30 via-indigo-100/20 to-transparent rounded-full blur-3xl pointer-events-none" />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => handleChipClick(cat.id)}
+              className={`bg-white rounded-3xl p-6 border border-slate-200 ${cat.borderColor} shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_35px_rgba(37,99,235,0.12)] hover:-translate-y-1.5 transition-all duration-300 text-left group relative overflow-hidden`}
+            >
+              {/* Top Accent Icon & Count Badge */}
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-3xl shadow-sm border border-slate-100 group-hover:scale-105 transition-transform`}>
+                  <span>{cat.icon}</span>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-[#2563EB] border border-blue-200">
+                  {cat.count}
+                </span>
+              </div>
 
-      {/* Track Job Applications Action Card */}
-      <div className="bg-white/85 backdrop-blur-2xl text-slate-900 rounded-3xl p-6 border border-blue-100/90 hover:border-blue-300 shadow-[0_10px_35px_rgba(37,99,235,0.06)] hover:shadow-[0_16px_45px_rgba(37,99,235,0.12)] transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              {/* Title & Hindi Title */}
+              <h3 className="text-lg font-black text-[#0F172A] group-hover:text-[#2563EB] transition-colors">
+                {cat.title}
+              </h3>
+              <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                {cat.hindiTitle}
+              </p>
+
+              {/* Typical Daily Wage Info */}
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+                <span>Avg: <strong className="text-emerald-700">{cat.wage}</strong></span>
+                <span className="text-[#2563EB] group-hover:translate-x-1 transition-transform flex items-center">
+                  Apply →
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Track Applied Jobs Action Card (if worker has profile) */}
+      <section className="bg-white rounded-3xl p-6 sm:p-8 border border-blue-100 shadow-[0_8px_30px_rgba(37,99,235,0.06)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100/80 to-indigo-100/60 border border-blue-200/80 text-blue-700 flex items-center justify-center text-2xl shadow-sm shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#2563EB] border border-blue-200 flex items-center justify-center text-2xl shrink-0 shadow-sm">
             📋
           </div>
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 uppercase tracking-widest mb-1 border border-emerald-200">
-              Live Job Status
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-widest mb-1">
+              Application Tracker
             </div>
-            <h3 className="text-xl font-black text-slate-900">Track Applied Jobs (नौकरी का स्टेटस ट्रैक करें)</h3>
-            <p className="text-xs font-semibold text-slate-500 mt-0.5">
-              View submitted job applications and admin approval status
+            <h3 className="text-xl font-black text-[#0F172A]">
+              Track Your Applications (आवेदन ट्रैक करें)
+            </h3>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">
+              Check the status of your voice job submissions and interview approvals
             </p>
           </div>
         </div>
 
         <button
           onClick={() => navigate('/applications/my')}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:scale-[1.02] active:scale-[0.98] text-white font-black text-sm rounded-2xl shadow-md hover:shadow-blue-500/30 flex items-center justify-center gap-2 border border-blue-400/30 shrink-0 transition-all"
+          className="px-6 py-3.5 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-95 text-white font-black text-sm rounded-2xl shadow-md shadow-blue-500/25 flex items-center gap-2 shrink-0 transition-all"
         >
-          <span>Track Applications</span>
+          <span>View My Applications</span>
           <ArrowRight className="w-4 h-4" />
         </button>
-      </div>
+      </section>
 
-      {/* Accepted Job Applications Banner on Home Page */}
+      {/* Accepted Applications Banner if Any */}
       {Array.isArray(acceptedApps) && acceptedApps.length > 0 && (
-        <div className="bg-emerald-50/90 backdrop-blur-2xl text-slate-800 rounded-3xl p-6 sm:p-7 border border-emerald-200 animate-fade-in space-y-4 shadow-sm">
+        <section className="bg-emerald-50 rounded-3xl p-6 border border-emerald-200 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl border border-emerald-200">
-                🎉
-              </div>
+              <span className="text-2xl">🎉</span>
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider mb-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Admin Approved
-                </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900">Accepted Job Applications (स्वीकृत आवेदन)</h3>
-                <p className="text-xs font-semibold text-emerald-700 mt-0.5">
-                  Congratulations! Your application has been reviewed & accepted by Admin based on accepted documents.
-                </p>
+                <h3 className="font-black text-lg text-emerald-950">Accepted Job Applications</h3>
+                <p className="text-xs text-emerald-800 font-medium">Your application has been accepted by verified employers.</p>
               </div>
             </div>
-            <span className="bg-emerald-600 text-white font-black px-3.5 py-1 rounded-full text-xs shadow-sm">
-              {(Array.isArray(acceptedApps) ? acceptedApps.length : 0)} Accepted
+            <span className="bg-emerald-600 text-white font-black px-3.5 py-1 rounded-full text-xs">
+              {acceptedApps.length} Accepted
             </span>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            {(Array.isArray(acceptedApps) ? acceptedApps : []).map((app) => (
-              <div key={app.id || app.applicationId} className="bg-white/90 p-4 rounded-2xl border border-emerald-200/80 flex flex-col justify-between space-y-3 shadow-sm">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-black text-emerald-800 text-base">{app.jobTitle || app.title}</span>
-                    <span className="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                      ✓ ACCEPTED
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-700">
-                    🏢 {app.company || app.employerName || 'Verified Employer'}
-                  </div>
-                  <div className="text-xs font-semibold text-slate-500 flex flex-wrap gap-x-3 gap-y-1 pt-1">
-                    <span>📍 {app.location || app.jobLocation || 'Bengaluru'}</span>
-                    <span>💰 {app.salary || (app.minSalary ? `₹${app.minSalary} - ₹${app.maxSalary}` : '₹15,000/mo')}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                  <span className="text-emerald-700 font-bold">Approved by Udyoga Mitra Admin</span>
-                  <button
-                    onClick={() => navigate('/applications/my')}
-                    className="text-blue-600 font-black hover:underline flex items-center gap-1"
-                  >
-                    View Status <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </section>
       )}
 
-      {/* Central HERO VOICE BUTTON Component Container */}
-      <div className="bg-white/85 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-blue-100/90 shadow-[0_15px_45px_rgba(37,99,235,0.08)] relative overflow-hidden">
-        {/* Soft background light splash */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-gradient-to-tr from-blue-100/40 via-sky-50/30 to-indigo-50/40 rounded-full blur-3xl pointer-events-none" />
+      {/* =====================================================================
+          SECTION 4: FOOTER CTA BANNER (Dark Navy #0F172A)
+          ===================================================================== */}
+      <section id="about" className="bg-[#0F172A] text-white rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+        {/* Ambient Gradient Glow */}
+        <div className="absolute -top-24 -right-24 w-80 h-80 bg-blue-600/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        <HeroVoiceMic
-          voiceState={voiceState}
-          onMicClick={handleMicTap}
-          lang={selectedLang}
-          transcript={debugLog?.rawSpeech}
-        />
+        <div className="max-w-2xl relative z-10 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-bold text-blue-300 border border-white/10">
+            <span>✨ Join VoiceHire Today</span>
+          </div>
 
-        {/* Voice Command Suggestions */}
-        <div className="mt-8 pt-6 border-t border-blue-100/80 relative z-10">
-          <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>{t.trySaying}</span>
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+            Ready to Find Your Next Opportunity?
+          </h2>
+
+          <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-medium">
+            Join thousands of skilled workers and verified employers connecting through the power of voice. Zero fees, transparent wages, and direct connections.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {(Array.isArray(t?.voiceCommands) ? t.voiceCommands : []).map((cmd, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSuggestionClick(cmd.replace(/🎤|"/g, '').trim())}
-                className="px-4 py-2 bg-blue-50/80 hover:bg-blue-100/90 text-blue-900 font-extrabold text-xs sm:text-sm rounded-full border border-blue-200/80 hover:border-blue-400/60 shadow-sm transition-all hover:scale-105 active:scale-95 text-center"
-              >
-                {cmd}
-              </button>
-            ))}
+
+          <div className="pt-2 flex flex-wrap items-center gap-3">
+            <Link
+              to="/register"
+              className="px-6 py-3.5 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-95 text-white font-black text-sm rounded-2xl shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-all"
+            >
+              <span>Get Started Free (पंजीकरण करें)</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <Link
+              to="/jobs-list"
+              className="px-6 py-3.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-sm rounded-2xl border border-white/15 transition-all"
+            >
+              <span>Browse All Openings</span>
+            </Link>
           </div>
         </div>
-      </div>
-
-      {/* Popular Professions Section */}
-      <div className="space-y-4 relative z-10">
-        <div className="flex items-center justify-between px-1">
-          <div>
-            <h2 className="text-2xl font-black text-slate-900">{t.chooseWork}</h2>
-            <p className="text-xs font-semibold text-slate-500">{t.popularProfessions}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigate('/jobs-list')}
-            className="flex items-center gap-1 text-blue-600 font-extrabold hover:text-blue-800 text-sm sm:text-base group transition-colors"
-          >
-            <span>{t.viewAllJobs}</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-
-        {/* 2-Column Mobile / 4-Column Desktop Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {(Array.isArray(professionKeys) ? professionKeys : []).map((profKey) => (
-            <ProfessionCard
-              key={profKey}
-              professionKey={profKey}
-              lang={selectedLang}
-              onClick={handleProfessionSelect}
-            />
-          ))}
-        </div>
-      </div>
+      </section>
     </div>
   )
 }

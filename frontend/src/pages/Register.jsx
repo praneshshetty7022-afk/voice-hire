@@ -1,48 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Phone, User, Globe, Volume2, Mic, MicOff, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Phone, User, Globe, Volume2, Mic, MicOff, ArrowRight, Sparkles, CheckCircle2, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../api/axios';
-import ThreeBackground from '../components/ThreeBackground';
 import { useVoice } from '../context/VoiceContext';
-import styles from '../styles/auth.module.css';
 
 /**
- * Worker Register Component - Udyoga Mitra / VoiceHire
- * Required Form Fields:
- * 1. Full Name
- * 2. Phone Number
- * 3. Language Selection Dropdown
- * Completely removed: Email and Password.
+ * Worker Register Component - VoiceHire
+ * 
+ * Design & Theme Guidelines:
+ * - Color Palette: Primary Blue (#2563EB / #1D4ED8), Dark Navy (#0F172A), Light Sky Blue (#EFF6FF), Background White (#FFFFFF)
+ * - Required Form Fields (Strictly 3 fields):
+ *   1. Full Name (Text input with voice mic)
+ *   2. Phone Number (Tel input with country code picker e.g. +91)
+ *   3. Language Selection (Dropdown/Select with choices like English, Hindi, Kannada, etc.)
+ * - Exclusions: Completely removed Email and Password fields.
+ * - Action: Primary "Register / Continue" button with voice input option.
  */
 export const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { setSelectedLang } = useVoice();
 
-  // Extract pre-filled phone from location state or search params (?phone=...)
+  // Extract pre-filled phone from location state or search params
   const queryParams = new URLSearchParams(location.search);
   const initialPhone = location.state?.phone || queryParams.get('phone') || '';
   const isAutoRedirected = Boolean(location.state?.autoFilled || queryParams.get('phone'));
 
+  const [countryCode, setCountryCode] = useState('+91');
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(initialPhone);
-  const [selectedLanguage, setSelectedLanguage] = useState('hi-IN');
+  const [selectedLanguage, setSelectedLanguage] = useState('en-IN');
   const [isListeningName, setIsListeningName] = useState(false);
   const [isListeningPhone, setIsListeningPhone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Supported Indian Languages with Native Scripts & Speech Codes
+  // Supported Country Codes
+  const COUNTRY_CODES = [
+    { code: '+91', country: 'IN', flag: '🇮🇳', label: 'India (+91)' },
+    { code: '+1', country: 'US', flag: '🇺🇸', label: 'USA (+1)' },
+    { code: '+44', country: 'GB', flag: '🇬🇧', label: 'UK (+44)' },
+    { code: '+971', country: 'AE', flag: '🇦🇪', label: 'UAE (+971)' },
+    { code: '+65', country: 'SG', flag: '🇸🇬', label: 'Singapore (+65)' },
+  ];
+
+  // Supported Languages
   const LANGUAGES = [
+    { code: 'en-IN', langKey: 'en', name: 'English', englishName: 'English', flag: '🇬🇧', greeting: 'Welcome' },
     { code: 'hi-IN', langKey: 'hi', name: 'हिन्दी', englishName: 'Hindi', flag: '🇮🇳', greeting: 'नमस्ते' },
     { code: 'kn-IN', langKey: 'kn', name: 'ಕನ್ನಡ', englishName: 'Kannada', flag: '🇮🇳', greeting: 'ನಮಸ್ಕಾರ' },
     { code: 'te-IN', langKey: 'te', name: 'తెలుగు', englishName: 'Telugu', flag: '🇮🇳', greeting: 'నమస్కారం' },
     { code: 'ta-IN', langKey: 'ta', name: 'தமிழ்', englishName: 'Tamil', flag: '🇮🇳', greeting: 'வணக்கம்' },
-    { code: 'en-IN', langKey: 'en', name: 'English', englishName: 'English', flag: '🇬🇧', greeting: 'Welcome' },
+    { code: 'es-ES', langKey: 'es', name: 'Español', englishName: 'Spanish', flag: '🇪🇸', greeting: 'Bienvenido' },
   ];
 
-  // Speech Synthesis Audio Guidance
+  // Speech Synthesis Guidance
   const speakInstruction = (text, langCode = selectedLanguage) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -55,11 +68,11 @@ export const Register = () => {
 
   const handleAudioHelp = () => {
     speakInstruction(
-      'नमस्ते! अपना नाम बोलें या लिखें, 10 अंकों का मोबाइल नंबर भरें, और अपनी भाषा चुनें। फिर रजिस्टर बटन दबाएं।'
+      'Welcome to VoiceHire! Please enter your name, 10-digit mobile number, and choose your preferred language. Then press Register.'
     );
-    toast('🔊 निर्देश सुने जा रहे हैं (Playing audio instructions)...', {
+    toast('🔊 Playing audio instructions...', {
       icon: '📢',
-      style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
+      style: { background: '#0F172A', color: '#60A5FA' },
     });
   };
 
@@ -68,7 +81,7 @@ export const Register = () => {
       setPhoneNumber(location.state.phone);
     }
     if (isAutoRedirected) {
-      speakInstruction('आपका मोबाइल नंबर पहले से भरा हुआ है। बस अपना नाम लिखें और भाषा चुनें।');
+      speakInstruction('Your phone number is pre-filled. Please type your name and select your language.');
     }
   }, [location.state, phoneNumber, isAutoRedirected]);
 
@@ -76,7 +89,7 @@ export const Register = () => {
   const startNameVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error('Voice input not supported in browser.');
+      toast.error('Voice input is not supported in this browser.');
       return;
     }
 
@@ -87,9 +100,9 @@ export const Register = () => {
 
       recognition.onstart = () => {
         setIsListeningName(true);
-        speakInstruction('बोलिए अपना पूरा नाम');
-        toast('🎤 बोलिए अपना नाम...', {
-          style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+        speakInstruction('Please speak your full name');
+        toast('🎤 Listening for your name...', {
+          style: { background: '#0F172A', color: '#38BDF8' },
         });
       };
 
@@ -98,9 +111,9 @@ export const Register = () => {
         const cleanName = spoken.replace(/[0-9]/g, '').trim();
         if (cleanName) {
           setFullName(cleanName);
-          speakInstruction(`धन्यवाद ${cleanName}!`);
-          toast.success(`नाम दर्ज हुआ: ${cleanName}`, {
-            style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+          speakInstruction(`Thank you, ${cleanName}!`);
+          toast.success(`Name entered: ${cleanName}`, {
+            style: { background: '#0F172A', color: '#34D399' },
           });
         }
       };
@@ -125,7 +138,7 @@ export const Register = () => {
 
       recognition.onstart = () => {
         setIsListeningPhone(true);
-        speakInstruction('बोलिए अपना 10 अंकों का मोबाइल नंबर');
+        speakInstruction('Please speak your 10 digit mobile number');
       };
 
       recognition.onresult = (event) => {
@@ -133,8 +146,8 @@ export const Register = () => {
         const numbers = spoken.replace(/\D/g, '');
         if (numbers.length >= 10) {
           setPhoneNumber(numbers.slice(-10));
-          toast.success(`नंबर: ${numbers.slice(-10)}`, {
-            style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+          toast.success(`Phone: ${numbers.slice(-10)}`, {
+            style: { background: '#0F172A', color: '#34D399' },
           });
         }
       };
@@ -157,56 +170,39 @@ export const Register = () => {
       if (setSelectedLang) {
         setSelectedLang(langObj.langKey);
       }
-      speakInstruction(`${langObj.greeting}! ${langObj.name} भाषा चुनी गई।`, newLangCode);
-      toast.success(`भाषा: ${langObj.name} (${langObj.englishName})`, {
+      speakInstruction(`${langObj.greeting}! Language set to ${langObj.name}.`, newLangCode);
+      toast.success(`Language: ${langObj.name} (${langObj.englishName})`, {
         icon: '🌐',
-        style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
+        style: { background: '#0F172A', color: '#60A5FA' },
       });
     }
-  };
-
-  // Framer Motion Animation Variants
-  const cardVariants = {
-    hidden: { opacity: 0, y: 25, scale: 0.98 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
-    },
-    exit: {
-      opacity: 0,
-      y: -20,
-      scale: 0.98,
-      transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-    },
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
-    // Client-side validation ONLY for Name, Phone Number, and Language Selection
+    // Validation strictly for the 3 required fields
     if (!fullName.trim() || !phoneNumber.trim() || !selectedLanguage) {
-      toast.error('कृपया अपना नाम, मोबाइल नंबर और भाषा भरें (Please fill Name, Phone & Language).', {
-        style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
+      toast.error('Please enter Name, Phone Number, and select a Language.', {
+        style: { background: '#0F172A', color: '#F87171' },
       });
-      speakInstruction('कृपया अपना नाम और मोबाइल नंबर भरें।');
+      speakInstruction('Please enter your name, mobile number, and choose your language.');
       return;
     }
 
     const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-10);
     if (cleanPhone.length < 10) {
-      toast.error('मोबाइल नंबर 10 अंकों का होना चाहिए (Phone must be 10 digits).', {
-        style: { background: '#0f172a', color: '#f87171', border: '1px solid #ef4444' },
+      toast.error('Please enter a valid 10-digit mobile number.', {
+        style: { background: '#0F172A', color: '#F87171' },
       });
-      speakInstruction('कृपया पूरा 10 अंकों का मोबाइल नंबर डालें।');
+      speakInstruction('Please enter a complete 10 digit mobile number.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // API payload strictly contains ONLY Name, Phone Number, and Language (NO email, NO password)
+      // API payload strictly contains ONLY Name, Phone, and Language
       const response = await axios.post('/auth/register', {
         fullName: fullName.trim(),
         phoneNumber: cleanPhone,
@@ -219,15 +215,14 @@ export const Register = () => {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('user_explicit_login', 'true');
 
-        speakInstruction(`बधाई हो ${fullName}! आपका पंजीकरण सफल रहा।`);
+        speakInstruction(`Welcome to VoiceHire, ${fullName}! Your registration is complete.`);
 
-        toast.success(`खाता सफलतापूर्वक बना! स्वागत है, ${fullName}`, {
+        toast.success(`Welcome to VoiceHire, ${fullName}!`, {
           icon: '🎉',
           style: {
-            background: '#0f172a',
-            color: '#34d399',
-            border: '1.5px solid #10b981',
-            boxShadow: '0 0 25px rgba(16, 185, 129, 0.4)',
+            background: '#0F172A',
+            color: '#34D399',
+            border: '1px solid #10B981',
           },
         });
 
@@ -238,9 +233,9 @@ export const Register = () => {
       const code = error.response?.data?.code;
 
       if (status === 409 || code === 'USER_ALREADY_EXISTS') {
-        speakInstruction('यह नंबर पहले से पंजीकृत है। आइए लॉगिन करें।');
-        toast.error('यह नंबर पहले से पंजीकृत है। लॉगिन करें (Already registered).', {
-          style: { background: '#0f172a', color: '#38bdf8', border: '1px solid #38bdf8' },
+        speakInstruction('This number is already registered. Redirecting to login.');
+        toast.error('This number is already registered. Please sign in.', {
+          style: { background: '#0F172A', color: '#38BDF8' },
         });
         setTimeout(() => {
           navigate('/login', { state: { phone: cleanPhone } });
@@ -260,100 +255,87 @@ export const Register = () => {
           trustScore: 95,
         };
 
-        const existingUsers = JSON.parse(localStorage.getItem('veriproof_users') || '[]');
-        existingUsers.push(fallbackUser);
-        localStorage.setItem('veriproof_users', JSON.stringify(existingUsers));
-
         localStorage.setItem('token', 'jwt_demo_token_' + Date.now());
         localStorage.setItem('user', JSON.stringify(fallbackUser));
         localStorage.setItem('user_explicit_login', 'true');
 
-        speakInstruction(`बधाई हो ${fullName}! आपका खाता बन गया है।`);
-        toast.success(`खाता बन गया! स्वागत है, ${fullName}`, {
-          style: { background: '#0f172a', color: '#34d399', border: '1px solid #10b981' },
+        speakInstruction(`Welcome, ${fullName}! Your account has been created.`);
+        toast.success(`Account created! Welcome, ${fullName}`, {
+          style: { background: '#0F172A', color: '#34D399' },
         });
         navigate('/jobs');
         return;
       }
 
-      toast.error(error.response?.data?.message || 'पंजीकरण विफल (Registration failed).');
+      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={styles.authContainer}>
-      {/* Three.js Interactive 3D Vibrant Constellation Background */}
-      <ThreeBackground />
+    <div className="min-h-screen bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE] text-slate-800 flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden">
+      {/* Soft Ambient Light Halo Orbs */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none" />
 
+      {/* Main Registration Card */}
       <motion.div
-        className={`${styles.glassCard} ${styles.glassCardWide}`}
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(37,99,235,0.12)] border border-blue-100/90 relative z-10"
       >
-        {/* Header */}
-        <div className="flex flex-col items-center text-center mb-5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-500 p-[2px] shadow-[0_0_25px_rgba(52,211,153,0.35)] mb-2">
-            <div className="w-full h-full bg-[#0f172a] rounded-[14px] flex items-center justify-center">
-              <span className="text-3xl">📝</span>
-            </div>
+        {/* Brand Header */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white shadow-lg shadow-blue-500/25 mb-3">
+            <Mic className="w-7 h-7 stroke-[2.5]" />
           </div>
 
-          <h1 className={`${styles.colorfulGradientText} text-2xl sm:text-3xl font-black tracking-tight mb-1`}>
-            श्रमिक पंजीकरण • NEW WORKER
+          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
+            Create Worker Profile
           </h1>
-
-          <p className="text-sm font-bold text-[#e2e8f0]">
-            नाम, मोबाइल नंबर और भाषा दर्ज करें (Quick 1-Minute Setup)
+          <p className="text-sm font-semibold text-slate-500 mt-1">
+            Quick 1-minute setup • Strictly no password required
           </p>
 
-          {/* Audio Instruction Speaker Pill */}
-          <div className="mt-2.5">
+          {/* Audio Instruction Button */}
+          <div className="mt-3">
             <button
               type="button"
               onClick={handleAudioHelp}
-              className={styles.audioHelpBtn}
-              aria-label="Listen to audio instructions"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100/80 text-[#2563EB] font-bold text-xs border border-blue-200 transition-all active:scale-95 shadow-sm"
             >
-              <Volume2 className="w-4 h-4 text-[#38bdf8]" />
-              <span>🔊 आवाज से निर्देश सुनें (Listen Audio)</span>
+              <Volume2 className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span>🔊 Listen Audio Instructions (निर्देश सुनें)</span>
             </button>
           </div>
         </div>
 
-        {/* Smart Redirection Notice Banner (Triggered when redirected from Login) */}
+        {/* Smart Redirection Notice */}
         {isAutoRedirected && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={styles.redirectNoticeBanner}
-          >
-            <Sparkles className="w-6 h-6 text-[#34d399] shrink-0" />
-            <div className="text-xs sm:text-sm">
-              <span className="font-bold text-[#34d399]">यह नंबर नया है! </span>
-              <span className="text-[#f8fafc]">
-                आपका मोबाइल नंबर (<strong className="text-[#38bdf8]">{phoneNumber}</strong>) पहले से भर दिया गया है। बस अपना नाम लिखें और भाषा चुनें।
-              </span>
+          <div className="mb-5 p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-center gap-3 text-xs sm:text-sm text-blue-900">
+            <Sparkles className="w-5 h-5 text-[#2563EB] shrink-0" />
+            <div>
+              <span className="font-bold text-[#1D4ED8]">New phone number! </span>
+              Your number (<strong className="font-black">{phoneNumber}</strong>) is auto-filled. Just enter your name to finish setup.
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* Registration Form - Required: Name, Phone Number, Language Dropdown ONLY */}
+        {/* Registration Form - Required: Name, Phone, Language ONLY */}
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
-          {/* Field 1: Worker Full Name with Mic */}
+          {/* Field 1: Full Name */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                👤 आपका पूरा नाम (Your Full Name) <span className="text-rose-400">*</span>
+              <label htmlFor="register-name-input" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                👤 Full Name (पूरा नाम) <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[11px] text-[#94a3b8]">बोलकर भर सकते हैं</span>
+              <span className="text-[11px] font-semibold text-[#2563EB]">Voice mic available</span>
             </div>
             <div className="relative">
-              <div className={styles.inputIconWrapper}>
-                <User className="w-5 h-5 text-[#38bdf8]" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <User className="w-5 h-5" />
               </div>
               <input
                 id="register-name-input"
@@ -361,136 +343,146 @@ export const Register = () => {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="उदा. रमेश कुमार (Ramesh Kumar)"
-                className={styles.friendlyInput}
+                placeholder="e.g. Ramesh Kumar"
+                className="w-full pl-12 pr-12 py-3.5 bg-[#F8FAFC] border border-slate-200 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 rounded-2xl text-slate-900 font-semibold placeholder-slate-400 text-sm sm:text-base outline-none transition-all"
                 autoComplete="name"
               />
               <button
                 type="button"
                 onClick={startNameVoiceInput}
-                className={`${styles.micActionBtn} ${isListeningName ? styles.micActionBtnActive : ''}`}
-                title="बोलकर नाम भरें"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
+                  isListeningName
+                    ? 'bg-rose-500 text-white animate-pulse'
+                    : 'bg-blue-50 hover:bg-blue-100 text-[#2563EB]'
+                }`}
+                title="Speak your name"
               >
                 {isListeningName ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Field 2: Mobile Number (Pre-filled if redirected from login) */}
+          {/* Field 2: Phone Number with Country Code Picker */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                📱 मोबाइल नंबर (Mobile Number) <span className="text-rose-400">*</span>
+              <label htmlFor="register-phone-input" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                📱 Phone Number (मोबाइल नंबर) <span className="text-rose-500">*</span>
               </label>
-              {isAutoRedirected && (
-                <span className="text-[10px] font-bold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 px-2.5 py-0.5 rounded-full shadow-sm">
-                  पहले से भरा हुआ (Pre-filled)
-                </span>
-              )}
+              <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" /> No Password Needed
+              </span>
             </div>
-            <div className="relative">
-              <div className={styles.inputIconWrapper}>
-                <Phone className="w-5 h-5 text-[#38bdf8]" />
+            <div className="flex gap-2">
+              {/* Country Code Picker */}
+              <div className="relative shrink-0 w-28">
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="w-full h-full py-3.5 px-3 bg-[#F8FAFC] border border-slate-200 focus:border-[#2563EB] rounded-2xl text-slate-800 font-bold text-xs sm:text-sm outline-none appearance-none cursor-pointer"
+                >
+                  {COUNTRY_CODES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.code}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
+                  ▼
+                </div>
               </div>
-              <input
-                id="register-phone-input"
-                type="tel"
-                required
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="उदा. 9876543210"
-                className={`${styles.friendlyInput} ${isAutoRedirected ? '!border-[#34d399] !bg-slate-900/90' : ''}`}
-                autoComplete="tel"
-              />
-              <button
-                type="button"
-                onClick={startPhoneVoiceInput}
-                className={`${styles.micActionBtn} ${isListeningPhone ? styles.micActionBtnActive : ''}`}
-                title="बोलकर नंबर भरें"
-              >
-                {isListeningPhone ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
+
+              {/* Phone Input with Mic Button */}
+              <div className="relative flex-1">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <input
+                  id="register-phone-input"
+                  type="tel"
+                  required
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="9876543210"
+                  className="w-full pl-12 pr-12 py-3.5 bg-[#F8FAFC] border border-slate-200 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 rounded-2xl text-slate-900 font-semibold placeholder-slate-400 text-sm sm:text-base outline-none transition-all"
+                  autoComplete="tel"
+                />
+                <button
+                  type="button"
+                  onClick={startPhoneVoiceInput}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
+                    isListeningPhone
+                      ? 'bg-rose-500 text-white animate-pulse'
+                      : 'bg-blue-50 hover:bg-blue-100 text-[#2563EB]'
+                  }`}
+                  title="Speak phone number"
+                >
+                  {isListeningPhone ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Field 3: Language Selection Dropdown Menu */}
+          {/* Field 3: Language Selection Dropdown */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-[#38bdf8]">
-                🌐 अपनी भाषा चुनें (Select Your Language) <span className="text-rose-400">*</span>
+              <label htmlFor="register-language-select" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                🌐 Preferred Language (भाषा चुनें) <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[11px] text-[#34d399]">आवाज़ इसी भाषा में आएगी</span>
+              <span className="text-[11px] font-semibold text-[#2563EB]">Voice speaks in this language</span>
             </div>
             <div className="relative">
-              <div className={styles.inputIconWrapper}>
-                <Globe className="w-5 h-5 text-[#38bdf8]" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <Globe className="w-5 h-5" />
               </div>
               <select
                 id="register-language-select"
                 required
                 value={selectedLanguage}
                 onChange={handleLanguageChange}
-                className={`${styles.friendlyInput} appearance-none cursor-pointer pr-10`}
+                className="w-full pl-12 pr-10 py-3.5 bg-[#F8FAFC] border border-slate-200 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 rounded-2xl text-slate-900 font-bold text-sm sm:text-base outline-none appearance-none cursor-pointer transition-all"
               >
                 {LANGUAGES.map((lang) => (
-                  <option key={lang.code} value={lang.code} className="bg-slate-900 text-white py-2">
+                  <option key={lang.code} value={lang.code}>
                     {lang.flag} {lang.name} ({lang.englishName})
                   </option>
                 ))}
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-cyan-400">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs">
                 ▼
               </div>
             </div>
           </div>
 
-          {/* Submit Registration Button */}
+          {/* Action: Primary "Register / Continue" Button with Voice Option */}
           <button
             id="register-submit-button"
             type="submit"
             disabled={loading}
-            className={`${styles.primaryButton} mt-3`}
+            className="w-full mt-4 py-4 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.98] text-white font-black text-base rounded-2xl shadow-[0_8px_25px_rgba(37,99,235,0.3)] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 cursor-pointer"
           >
             {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>खाता बन रहा है...</span>
-              </div>
+              <span>Creating Profile...</span>
             ) : (
               <>
-                <span>✨ खाता बनाएं और काम पाएं (REGISTER NOW)</span>
-                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                <Mic className="w-5 h-5" />
+                <span>Register / Continue (पंजीकरण करें)</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
               </>
             )}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className={styles.cleanDivider}>
-          <span>पहले से खाता है? (Already Registered)</span>
-        </div>
-
-        {/* Link to Login */}
-        <div className="text-center">
-          <Link
-            to="/login"
-            state={{ phone: phoneNumber }}
-            className="inline-flex items-center gap-2 font-black text-sm text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/40 px-5 py-3 rounded-2xl shadow-sm transition-all"
-          >
-            <span>👉 लॉगिन करें (Sign In Here)</span>
-          </Link>
-        </div>
-
-        {/* Bottom Trust Badge */}
-        <div className="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-center gap-5 text-xs text-[#94a3b8]">
-          <span className="flex items-center gap-1.5 font-bold text-emerald-400">
-            <CheckCircle2 className="w-4 h-4" />
-            सरल व सुरक्षित पंजीकरण
-          </span>
-          <span className="flex items-center gap-1.5 font-bold text-cyan-400">
-            <Sparkles className="w-4 h-4" />
-            1 मिनट में काम पाएं
-          </span>
+        {/* Footer / Login Link */}
+        <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+          <p className="text-xs sm:text-sm font-semibold text-slate-500">
+            Already registered on VoiceHire?{' '}
+            <Link
+              to="/login"
+              className="text-[#2563EB] hover:text-[#1D4ED8] font-black underline underline-offset-4"
+            >
+              Sign In (लॉगिन करें)
+            </Link>
+          </p>
         </div>
       </motion.div>
     </div>

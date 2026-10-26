@@ -97,44 +97,57 @@ function AppContent() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {/* Floating Clean White Header */}
-        <header className="bg-white/80 backdrop-blur-xl text-slate-800 px-4 sm:px-6 py-3.5 shadow-[0_4px_20px_rgba(37,99,235,0.05)] sticky top-0 z-40 border-b border-blue-100/80">
-          <div className="container mx-auto max-w-5xl flex items-center justify-between gap-3">
+        <header className="bg-white/90 backdrop-blur-xl text-slate-800 px-4 sm:px-6 py-3.5 shadow-[0_4px_20px_rgba(37,99,235,0.05)] sticky top-0 z-40 border-b border-blue-100/80">
+          <div className="container mx-auto max-w-6xl flex items-center justify-between gap-4">
             {/* Logo Brand */}
-            <Link to="/jobs" className="flex items-center gap-3 group">
-              <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white rounded-2xl font-black text-xl flex items-center justify-center shadow-md border border-blue-300/40 group-hover:scale-105 transition-transform duration-300">
+            <Link to="/jobs" className="flex items-center gap-2.5 group shrink-0">
+              <div className="w-10 h-10 bg-[#2563EB] text-white rounded-xl font-black text-xl flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
                 <Mic className="w-5 h-5 text-white stroke-[2.5]" />
               </div>
               <div>
-                <span className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-1.5">
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600">{t.brandName}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full hidden sm:inline-block">
-                    VOICE FIRST
-                  </span>
-                </span>
-                <span className="text-xs text-blue-600 font-extrabold block -mt-0.5 uppercase tracking-wider hidden sm:block">
-                  {t.tagline}
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-[#0F172A] flex items-center gap-1.5">
+                  Voice<span className="text-[#2563EB]">Hire</span>
                 </span>
               </div>
             </Link>
 
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-600">
+              <Link to="/jobs" className="hover:text-[#2563EB] transition-colors">
+                Home
+              </Link>
+              <Link to="/jobs-list" className="hover:text-[#2563EB] transition-colors">
+                Browse Jobs
+              </Link>
+              <Link to="/jobs" className="hover:text-[#2563EB] transition-colors">
+                For Workers
+              </Link>
+              <Link to="/employer/dashboard" className="hover:text-[#2563EB] transition-colors">
+                For Employers
+              </Link>
+              <a href="#about" className="hover:text-[#2563EB] transition-colors">
+                About
+              </a>
+            </nav>
+
             {/* Language Selector & Auth Capsules */}
-            <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <LanguageSelector selectedLang={selectedLang} onSelectLang={setSelectedLang} />
 
               <Link
                 to="/login"
-                className="text-xs sm:text-sm font-bold text-blue-700 hover:text-blue-900 px-3.5 py-2 rounded-xl hover:bg-blue-50 transition-colors border border-blue-200/80 flex items-center gap-1.5 bg-white/80 shadow-sm"
+                className="text-xs sm:text-sm font-bold text-slate-700 hover:text-[#2563EB] px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors border border-slate-200 flex items-center gap-1.5 bg-white shadow-sm"
               >
-                <LogIn className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden sm:inline">लॉगिन (Sign In)</span>
+                <LogIn className="w-3.5 h-3.5 text-slate-500" />
+                <span>Login</span>
               </Link>
 
               <Link
                 to="/register"
-                className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-xs sm:text-sm shadow-md hover:shadow-blue-500/25 flex items-center gap-1.5 border border-blue-300/40 active:scale-95 hover:scale-[1.02] transition-all duration-300"
+                className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-blue-500/25 flex items-center gap-1.5 active:scale-95 hover:scale-[1.02] transition-all duration-300"
               >
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
-                <span className="hidden sm:inline">पंजीकरण (Register)</span>
+                <span>Sign Up</span>
               </Link>
             </div>
           </div>
