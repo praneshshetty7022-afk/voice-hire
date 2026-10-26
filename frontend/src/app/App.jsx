@@ -59,7 +59,7 @@ function AppContent() {
   // Full-Bleed Accessible & Vibrant Worker Authentication Experience
   if (isAuthRoute) {
     return (
-      <div className="min-h-screen bg-[#0b132b] text-slate-100 relative overflow-hidden font-sans selection:bg-blue-500/30 selection:text-cyan-200">
+      <div className="min-h-screen bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE] text-slate-800 relative overflow-hidden font-sans selection:bg-blue-500/20 selection:text-blue-900">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/login" element={<Login />} />

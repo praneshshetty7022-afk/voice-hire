@@ -168,8 +168,11 @@ export const Register = () => {
     const langObj = LANGUAGES.find((l) => l.code === newLangCode);
     if (langObj) {
       if (setSelectedLang) {
-        setSelectedLang(langObj.langKey);
+        setSelectedLang(langObj.code);
       }
+      try {
+        localStorage.setItem('voicehire_lang', langObj.code);
+      } catch (err) {}
       speakInstruction(`${langObj.greeting}! Language set to ${langObj.name}.`, newLangCode);
       toast.success(`Language: ${langObj.name} (${langObj.englishName})`, {
         icon: '🌐',
@@ -214,6 +217,8 @@ export const Register = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('user_explicit_login', 'true');
+        localStorage.setItem('voicehire_lang', selectedLanguage);
+        if (setSelectedLang) setSelectedLang(selectedLanguage);
 
         speakInstruction(`Welcome to VoiceHire, ${fullName}! Your registration is complete.`);
 

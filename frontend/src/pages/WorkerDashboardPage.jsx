@@ -42,6 +42,13 @@ export default function WorkerDashboardPage() {
 
   const [acceptedApps, setAcceptedApps] = useState([])
 
+  // Live real-time sync of spoken transcript into search query
+  useEffect(() => {
+    if (debugLog?.rawSpeech) {
+      setSearchQuery(debugLog.rawSpeech)
+    }
+  }, [debugLog?.rawSpeech])
+
   useEffect(() => {
     syncWorkerProfile()
     fetchAcceptedApps()

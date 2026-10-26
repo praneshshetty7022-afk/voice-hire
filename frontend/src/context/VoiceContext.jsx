@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react'
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
 import { parseFullVoiceCommand, SUPPORTED_LANGUAGES } from '../services/voiceNLP'
 import VoiceCommandModal from '../components/VoiceCommandModal'
 import axios from '../api/axios'
@@ -7,10 +7,46 @@ import toast from 'react-hot-toast'
 const VoiceContext = createContext(null)
 
 export const VoiceProvider = ({ children }) => {
-  const [selectedLang, setSelectedLang] = useState('kn-IN')
+  // 1. Language Initialization with Persistence and Fallbacks
+  const [selectedLang, setSelectedLangState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('voicehire_lang')
+      if (saved) return saved
+      const u = localStorage.getItem('user') || sessionStorage.getItem('user')
+      if (u) {
+        const parsed = JSON.parse(u)
+        if (parsed.preferredLanguage) return parsed.preferredLanguage
+        if (parsed.language) return parsed.language
+      }
+      return 'en-IN'
+    } catch (e) {
+      return 'en-IN'
+    }
+  })
+
+  // Normalize language codes (e.g. 'en' -> 'en-IN', 'hi' -> 'hi-IN')
+  const setSelectedLang = useCallback((langCode) => {
+    if (!langCode) return
+    const langMap = {
+      en: 'en-IN',
+      hi: 'hi-IN',
+      kn: 'kn-IN',
+      te: 'te-IN',
+      ta: 'ta-IN',
+      ml: 'ml-IN',
+      es: 'es-ES',
+    }
+    const normalized = langMap[langCode] || langCode
+    setSelectedLangState(normalized)
+    try {
+      localStorage.setItem('voicehire_lang', normalized)
+    } catch (e) {}
+  }, [])
+
   const [voiceState, setVoiceState] = useState('IDLE') // IDLE, LISTENING, PROCESSING, CONFIRMATION, SUCCESS, ERROR
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
   const activeNavigateRef = useRef(null)
+  const recognitionRef = useRef(null)
 
   // Context Memory across commands
   const [contextMemory, setContextMemory] = useState({
@@ -31,76 +67,188 @@ export const VoiceProvider = ({ children }) => {
     action: 'NONE',
     apiCall: 'NONE',
     resultCount: 0,
+    isSupported: true,
+    micPermission: 'UNKNOWN',
+    lang: selectedLang,
+    recordingStatus: 'IDLE',
+    recognitionError: 'none',
   })
 
+  // Keep debugLog.lang in sync with selectedLang
+  useEffect(() => {
+    setDebugLog(prev => ({ ...prev, lang: selectedLang }))
+  }, [selectedLang])
+
+  // Text to Speech
   const speakAudio = useCallback((text, langCode = selectedLang) => {
     if (!('speechSynthesis' in window)) return
     try {
       window.speechSynthesis.cancel()
       const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = langCode
-      utterance.rate = 0.92
+      utterance.rate = 0.95
       window.speechSynthesis.speak(utterance)
     } catch (e) {
-      console.error(e)
+      console.error('[SPEECH SYNTHESIS ERROR]:', e)
     }
   }, [selectedLang])
 
+  // Stop any active speech recognition
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort()
+      } catch (e) {
+        console.warn('[VOICE ABORT]:', e)
+      }
+      recognitionRef.current = null
+    }
+    setVoiceState('IDLE')
+    setDebugLog(prev => ({ ...prev, recordingStatus: 'IDLE' }))
+  }, [])
+
+  // Process Speech Input and Route accordingly
   const processVoiceInput = useCallback(async (rawSpeech, navigateFunc) => {
     const navigate = navigateFunc || activeNavigateRef.current
-    console.log('[VOICE] 1. Processing Speech Input:', rawSpeech)
+    console.log('[VOICE] Processing input:', rawSpeech)
 
     setVoiceState('PROCESSING')
 
     // Parse Intent & Entities
     const parsed = parseFullVoiceCommand(rawSpeech, contextMemory)
 
-    setDebugLog({
+    setDebugLog(prev => ({
+      ...prev,
       rawSpeech,
       norm: parsed.norm,
       intent: parsed.intent,
       entities: parsed.entities,
       action: parsed.action,
-      apiCall: 'Processing...',
+      apiCall: 'Routing...',
       resultCount: 0,
-    })
+      recordingStatus: 'PROCESSED',
+    }))
 
-    // 1. Category Search
-    if (parsed.entities?.category) {
-      const cat = parsed.entities.category
+    // 1. Navigation Commands
+    if (parsed.intent === 'NAVIGATE_HOME') {
       setVoiceState('SUCCESS')
-      toast.success(`Found jobs for ${cat}!`)
-      speakAudio(`Showing ${cat} jobs`)
-      if (navigate) {
-        navigate(`/jobs-list?category=${cat}`)
-      }
-      setTimeout(() => setVoiceState('IDLE'), 3500)
+      toast.success('Navigating to Home')
+      speakAudio('Going to Home page')
+      if (navigate) navigate('/jobs')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
       return
     }
 
-    // 2. Pending Action Confirmation
+    if (parsed.intent === 'CHECK_APPLICATION_STATUS') {
+      setVoiceState('SUCCESS')
+      toast.success('Opening your applications status')
+      speakAudio('Opening your application status')
+      if (navigate) navigate('/applications/my')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
+      return
+    }
+
+    if (parsed.intent === 'NAVIGATE_PROFILE') {
+      setVoiceState('SUCCESS')
+      toast.success('Opening your profile')
+      speakAudio('Opening your profile')
+      if (navigate) navigate('/profile')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
+      return
+    }
+
+    if (parsed.intent === 'NAVIGATE_REGISTER') {
+      setVoiceState('SUCCESS')
+      toast.success('Opening registration page')
+      speakAudio('Opening registration page')
+      if (navigate) navigate('/register')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
+      return
+    }
+
+    if (parsed.intent === 'NAVIGATE_LOGIN') {
+      setVoiceState('SUCCESS')
+      toast.success('Opening login page')
+      speakAudio('Opening login page')
+      if (navigate) navigate('/login')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
+      return
+    }
+
+    if (parsed.intent === 'NAVIGATE_EMPLOYER') {
+      setVoiceState('SUCCESS')
+      toast.success('Opening employer portal')
+      speakAudio('Opening employer portal')
+      if (navigate) navigate('/employer/dashboard')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
+      return
+    }
+
+    if (parsed.intent === 'NAVIGATE_JOBS' && !parsed.entities?.category) {
+      setVoiceState('SUCCESS')
+      toast.success('Showing all available jobs')
+      speakAudio('Showing all jobs')
+      if (navigate) navigate('/jobs-list')
+      setTimeout(() => setVoiceState('IDLE'), 2500)
+      return
+    }
+
+    // 2. Category Search (with optional location)
+    if (parsed.entities?.category) {
+      const cat = parsed.entities.category
+      const loc = parsed.entities.location
+      const locText = loc ? ` in ${loc}` : ''
+
+      setVoiceState('SUCCESS')
+      toast.success(`Found jobs for ${cat}${locText}!`)
+      speakAudio(`Showing ${cat} jobs${locText}`)
+
+      if (navigate) {
+        let targetUrl = `/jobs-list?category=${encodeURIComponent(cat)}`
+        if (loc) targetUrl += `&location=${encodeURIComponent(loc)}`
+        navigate(targetUrl)
+      }
+      setTimeout(() => setVoiceState('IDLE'), 3000)
+      return
+    }
+
+    // 3. Location-Only Search
+    if (parsed.entities?.location) {
+      const loc = parsed.entities.location
+      setVoiceState('SUCCESS')
+      toast.success(`Showing jobs in ${loc}!`)
+      speakAudio(`Showing jobs in ${loc}`)
+
+      if (navigate) {
+        navigate(`/jobs-list?location=${encodeURIComponent(loc)}`)
+      }
+      setTimeout(() => setVoiceState('IDLE'), 3000)
+      return
+    }
+
+    // 4. Pending Action Confirmation / Cancellation
     if (contextMemory.pendingAction) {
       if (parsed.intent === 'CONFIRM') {
         const action = contextMemory.pendingAction
         setVoiceState('SUCCESS')
-        
+
         if (action.type === 'APPLY_JOB') {
           try {
             const userStr = localStorage.getItem('user') || sessionStorage.getItem('user')
             const user = userStr ? JSON.parse(userStr) : null
-            
+
             const res = await axios.post('/applications', {
               jobId: action.job.id,
               workerId: user?.id || user?.phoneNumber || 'guest_applicant',
-              workerName: user?.name || 'Applicant',
+              workerName: user?.name || user?.fullName || 'Applicant',
               applicationSource: 'VOICE',
             })
 
             if (res.data) {
-              setDebugLog(prev => ({ 
-                ...prev, 
-                apiCall: `POST /api/applications (SUCCESS, Source=VOICE)`,
-                resultCount: 1 
+              setDebugLog(prev => ({
+                ...prev,
+                apiCall: 'POST /api/applications (SUCCESS, Source=VOICE)',
+                resultCount: 1,
               }))
               toast.success('🎉 Application submitted successfully by voice!')
               speakAudio('Application submitted successfully!')
@@ -121,22 +269,35 @@ export const VoiceProvider = ({ children }) => {
       }
     }
 
-    // 3. Fallback search
+    // 5. Fallback Keyword Search
+    const searchWord = parsed.cleanKeyword || rawSpeech
     setVoiceState('SUCCESS')
-    toast.success(`Searching: "${rawSpeech}"`)
-    speakAudio(`Searching jobs for ${rawSpeech}`)
+    toast.success(`Searching: "${searchWord}"`)
+    speakAudio(`Searching jobs for ${searchWord}`)
     if (navigate) {
-      navigate(`/jobs-list?search=${encodeURIComponent(rawSpeech)}`)
+      navigate(`/jobs-list?search=${encodeURIComponent(searchWord)}`)
     }
-    setTimeout(() => setVoiceState('IDLE'), 3500)
+    setTimeout(() => setVoiceState('IDLE'), 3000)
   }, [contextMemory, selectedLang, speakAudio])
 
+  // Start Speech Recognition
   const startListening = useCallback((navigateFunc) => {
     if (navigateFunc) activeNavigateRef.current = navigateFunc
-    setVoiceState('LISTENING')
+
+    // Cancel any previous running recognition to prevent DOMException
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort()
+      } catch (e) {
+        console.warn(e)
+      }
+      recognitionRef.current = null
+    }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
+      setDebugLog(prev => ({ ...prev, isSupported: false, recognitionError: 'Not supported' }))
+      toast.error('Voice input is not supported in this browser. Please use Chrome or Edge.', { id: 'voice-not-supported' })
       setIsVoiceModalOpen(true)
       return
     }
@@ -144,54 +305,116 @@ export const VoiceProvider = ({ children }) => {
     try {
       const recognition = new SpeechRecognition()
       recognition.continuous = false
-      recognition.interimResults = false
+      recognition.interimResults = true
       recognition.lang = selectedLang
+      recognition.maxAlternatives = 1
 
       recognition.onstart = () => {
         setVoiceState('LISTENING')
+        setDebugLog(prev => ({
+          ...prev,
+          recordingStatus: 'LISTENING',
+          micPermission: 'GRANTED',
+          lang: selectedLang,
+          isSupported: true,
+          recognitionError: 'none',
+        }))
       }
 
       recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript
-        console.log('[VOICE RECOGNITION] Captured Speech:', text)
-        processVoiceInput(text, navigateFunc || activeNavigateRef.current)
+        let interimTranscript = ''
+        let finalTranscript = ''
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const item = event.results[i]
+          if (item.isFinal) {
+            finalTranscript += item[0].transcript
+          } else {
+            interimTranscript += item[0].transcript
+          }
+        }
+
+        const liveText = (finalTranscript || interimTranscript).trim()
+        if (liveText) {
+          setDebugLog(prev => ({
+            ...prev,
+            rawSpeech: liveText,
+            recordingStatus: 'TRANSCRIBING',
+          }))
+        }
+
+        if (finalTranscript.trim()) {
+          recognitionRef.current = null
+          processVoiceInput(finalTranscript.trim(), navigateFunc || activeNavigateRef.current)
+        }
       }
 
       recognition.onerror = (err) => {
+        recognitionRef.current = null
+        const errCode = err?.error
+
+        if (errCode === 'no-speech') {
+          console.log('[VOICE] No speech detected, resetting to idle')
+          setVoiceState('IDLE')
+          setDebugLog(prev => ({ ...prev, recordingStatus: 'IDLE', recognitionError: 'no-speech' }))
+          return
+        }
+
+        if (errCode === 'aborted') {
+          setVoiceState('IDLE')
+          setDebugLog(prev => ({ ...prev, recordingStatus: 'IDLE', recognitionError: 'aborted' }))
+          return
+        }
+
+        if (errCode === 'not-allowed') {
+          console.warn('[VOICE] Microphone permission not allowed')
+          setVoiceState('ERROR')
+          setDebugLog(prev => ({ ...prev, micPermission: 'DENIED', recordingStatus: 'ERROR', recognitionError: 'not-allowed' }))
+          toast.error('Microphone access blocked. Please enable mic permissions in your browser.', { id: 'mic-perm-err' })
+          setIsVoiceModalOpen(true)
+          return
+        }
+
         console.error('[VOICE RECOGNITION ERROR]:', err)
         setVoiceState('ERROR')
-        setIsVoiceModalOpen(true)
+        setDebugLog(prev => ({ ...prev, recordingStatus: 'ERROR', recognitionError: errCode || 'unknown' }))
+        setTimeout(() => setVoiceState('IDLE'), 2000)
       }
 
       recognition.onend = () => {
+        recognitionRef.current = null
         setVoiceState(prev => (prev === 'LISTENING' ? 'IDLE' : prev))
+        setDebugLog(prev => ({ ...prev, recordingStatus: 'IDLE' }))
       }
 
+      recognitionRef.current = recognition
       recognition.start()
     } catch (e) {
-      console.error(e)
-      setIsVoiceModalOpen(true)
+      if (e.name === 'InvalidStateError') {
+        console.log('[VOICE] Recognition was already active')
+      } else {
+        console.error('[VOICE START ERROR]:', e)
+        setVoiceState('IDLE')
+      }
     }
   }, [selectedLang, processVoiceInput])
 
-  const stopListening = useCallback(() => {
-    setVoiceState('IDLE')
-  }, [])
-
   return (
-    <VoiceContext.Provider value={{
-      selectedLang,
-      setSelectedLang,
-      voiceState,
-      setVoiceState,
-      contextMemory,
-      setContextMemory,
-      debugLog,
-      processVoiceInput,
-      startListening,
-      stopListening,
-      speakAudio,
-    }}>
+    <VoiceContext.Provider
+      value={{
+        selectedLang,
+        setSelectedLang,
+        voiceState,
+        setVoiceState,
+        contextMemory,
+        setContextMemory,
+        debugLog,
+        processVoiceInput,
+        startListening,
+        stopListening,
+        speakAudio,
+      }}
+    >
       {children}
 
       {/* Fallback Interactive Voice Command Modal */}
