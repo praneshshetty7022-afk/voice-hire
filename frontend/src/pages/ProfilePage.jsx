@@ -37,7 +37,7 @@ export default function ProfilePage() {
     sessionStorage.removeItem('token')
     setUser(null)
     toast.success('Logged out successfully.')
-    navigate('/jobs')
+    navigate('/register')
   }
 
   return (

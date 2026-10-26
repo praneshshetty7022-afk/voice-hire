@@ -146,7 +146,7 @@ function AppContent() {
         {/* Main Route Content */}
         <main className="container-custom py-6 flex-1 relative z-10">
           <Routes>
-            <Route path="/" element={<Navigate to="/jobs" replace />} />
+            <Route path="/" element={<Navigate to="/register" replace />} />
             <Route path="/jobs" element={<WorkerDashboardPage />} />
             <Route path="/jobs-list" element={<JobListingPage />} />
             <Route path="/jobs/:id" element={<JobDetailPage />} />
