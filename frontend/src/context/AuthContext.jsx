@@ -5,23 +5,16 @@ import toast from 'react-hot-toast'
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('user')
-      return stored ? JSON.parse(stored) : null
-    } catch (e) {
-      return null
-    }
-  })
-
   const [token, setToken] = useState(() => localStorage.getItem('token') || null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Fetch current user from MongoDB via GET /api/auth/me
+  // Verify and restore session on mount/refresh via GET /api/auth/me
   const refreshUser = useCallback(async () => {
     const currentToken = localStorage.getItem('token')
     if (!currentToken) {
       setUser(null)
+      setToken(null)
       setLoading(false)
       return null
     }
@@ -34,29 +27,28 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(liveUser))
         return liveUser
       }
+      throw new Error('Authentication check failed')
     } catch (err) {
-      // If server is unreachable, retain cached user
-      const cached = localStorage.getItem('user')
-      if (cached) {
-        try {
-          setUser(JSON.parse(cached))
-        } catch (e) {}
-      }
+      // Invalid/expired token or user deleted: purge session
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      setToken(null)
+      setUser(null)
+      return null
     } finally {
       setLoading(false)
     }
-    return null
   }, [])
 
   useEffect(() => {
     refreshUser()
   }, [refreshUser])
 
-  // Login handler
-  const login = async ({ phone, role = 'employee' }) => {
+  // Login handler with email & password
+  const login = async ({ email, password }) => {
     try {
       setLoading(true)
-      const res = await api.post('/auth/login', { phone, role })
+      const res = await api.post('/auth/login', { email, password })
 
       if (res.data?.token && res.data?.user) {
         const { token: receivedToken, user: receivedUser } = res.data
@@ -64,24 +56,20 @@ export const AuthProvider = ({ children }) => {
         setUser(receivedUser)
         localStorage.setItem('token', receivedToken)
         localStorage.setItem('user', JSON.stringify(receivedUser))
-        localStorage.setItem('user_explicit_login', 'true')
-        toast.success(res.data.message || `Welcome, ${receivedUser.fullName}!`)
+        toast.success(res.data.message || `Welcome back, ${receivedUser.name || 'User'}!`)
         return { success: true, user: receivedUser }
       }
       throw new Error(res.data?.message || 'Login failed')
     } catch (error) {
-      let msg = error.response?.data?.message || error.message || 'Login failed. Please check phone number.'
-      if (error.response?.status === 405) {
-        msg = 'Connection Error 405: Vercel rejected the request. Please connect your Render Backend URL.'
-      }
-      toast.error(msg, { duration: 6000 })
+      const msg = error.response?.data?.message || error.message || 'Invalid email or password.'
+      toast.error(msg)
       return { success: false, message: msg, status: error.response?.status }
     } finally {
       setLoading(false)
     }
   }
 
-  // Register handler
+  // Register handler with name, email, password, role
   const register = async (formData) => {
     try {
       setLoading(true)
@@ -93,17 +81,13 @@ export const AuthProvider = ({ children }) => {
         setUser(receivedUser)
         localStorage.setItem('token', receivedToken)
         localStorage.setItem('user', JSON.stringify(receivedUser))
-        localStorage.setItem('user_explicit_login', 'true')
-        toast.success(res.data.message || 'Profile created successfully!')
+        toast.success(res.data.message || 'Account created successfully!')
         return { success: true, user: receivedUser }
       }
       throw new Error(res.data?.message || 'Registration failed')
     } catch (error) {
-      let msg = error.response?.data?.message || error.message || 'Registration failed.'
-      if (error.response?.status === 405) {
-        msg = 'Connection Error 405: Vercel rejected the request. Please connect your Render Backend URL.'
-      }
-      toast.error(msg, { duration: 6000 })
+      const msg = error.response?.data?.message || error.message || 'Registration failed.'
+      toast.error(msg)
       return { success: false, message: msg, status: error.response?.status }
     } finally {
       setLoading(false)
@@ -118,7 +102,7 @@ export const AuthProvider = ({ children }) => {
         const updated = res.data.user
         setUser(updated)
         localStorage.setItem('user', JSON.stringify(updated))
-        toast.success(res.data.message || 'Profile saved!')
+        toast.success(res.data.message || 'Profile updated successfully!')
         return { success: true, user: updated }
       }
       return { success: true }
@@ -133,7 +117,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    localStorage.removeItem('user_explicit_login')
     setToken(null)
     setUser(null)
     toast.success('Logged out successfully.')

@@ -41,21 +41,14 @@ import ManageApplicantsPage from '../pages/ManageApplicantsPage'
 
 function AppContent() {
   const { isDark } = useTheme()
-  const { user, isEmployer } = useAuth()
+  const { user, isEmployer, isAuthenticated, loading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [showCinematicIntro, setShowCinematicIntro] = useState(() => {
-    try {
-      const params = new URLSearchParams(window.location.search)
-      return params.get('intro') === 'true'
-    } catch (e) {
-      return false
-    }
-  })
+  const [showStoryModal, setShowStoryModal] = useState(false)
 
   useEffect(() => {
-    const handleOpen = () => setShowCinematicIntro(true)
+    const handleOpen = () => setShowStoryModal(true)
     window.addEventListener('open-cinematic-intro', handleOpen)
     return () => window.removeEventListener('open-cinematic-intro', handleOpen)
   }, [])
@@ -63,21 +56,17 @@ function AppContent() {
   const isIntroRoute = location.pathname === '/' || location.pathname === '/intro'
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
 
-  const handleIntroClose = () => {
-    navigate('/register')
-  }
-
-  // 1. First Page: Cinematic Intro Experience (< 30s)
+  // 1. Landing Page (Public Hero)
   if (isIntroRoute) {
-    return (
-      <div className="min-h-screen bg-[#0B0F19] text-white relative overflow-hidden font-sans">
-        <CinematicIntro isOpen={true} onClose={handleIntroClose} />
-      </div>
-    )
+    return <CinematicIntro isOpen={true} />
   }
 
-  // 2. Second Page: Quick Worker / Employer Sign Up or Login
+  // 2. Authentication Pages (Login & Register) - Redirect away if already authenticated
   if (isAuthRoute) {
+    if (!loading && isAuthenticated) {
+      return <Navigate to={isEmployer ? '/employer/dashboard' : '/jobs'} replace />
+    }
+
     return (
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] relative overflow-hidden font-sans transition-colors duration-300">
         <AnimatePresence mode="wait">
@@ -104,7 +93,7 @@ function AppContent() {
     )
   }
 
-  // 3. Third Page: Main Authenticated App with Sticky Top Navbar (No Left Sidebar!)
+  // 3. Authenticated App Pages with Sticky Top Navbar
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-sans relative overflow-x-hidden transition-colors duration-300">
       {/* Dual Theme Ambient Background */}
@@ -119,10 +108,31 @@ function AppContent() {
       {/* Route Views */}
       <main className="flex-1 relative z-10">
         <Routes>
-          {/* Employee Routes */}
-          <Route path="/jobs" element={<WorkerDashboardPage />} />
-          <Route path="/jobs-list" element={<JobListingPage />} />
-          <Route path="/jobs/:id" element={<JobDetailPage />} />
+          {/* Employee & Shared Protected Routes */}
+          <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute allowedRoles={['employee', 'employer']}>
+                <WorkerDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs-list"
+            element={
+              <ProtectedRoute allowedRoles={['employee', 'employer']}>
+                <JobListingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs/:id"
+            element={
+              <ProtectedRoute allowedRoles={['employee', 'employer']}>
+                <JobDetailPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/applications/my"
             element={
@@ -142,7 +152,7 @@ function AppContent() {
             }
           />
 
-          {/* Employer Routes */}
+          {/* Employer Protected Routes */}
           <Route
             path="/employer/dashboard"
             element={
@@ -175,12 +185,6 @@ function AppContent() {
           />
         </Routes>
       </main>
-
-      {/* Modal Cinematic Story Re-watch Experience */}
-      <CinematicIntro
-        isOpen={showCinematicIntro}
-        onClose={() => setShowCinematicIntro(false)}
-      />
 
       <Toaster
         position="top-center"

@@ -1,20 +1,32 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    name: {
       type: String,
-      required: [true, 'Full name is required'],
+      required: [true, 'Name is required'],
       trim: true,
       maxlength: [100, 'Name cannot exceed 100 characters'],
     },
-    phone: {
+    email: {
       type: String,
-      required: [true, 'Phone number is required'],
-      trim: true,
+      required: [true, 'Email is required'],
       unique: true,
+      lowercase: true,
+      trim: true,
       index: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/,
+        'Please provide a valid email address',
+      ],
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      minlength: [6, 'Password must be at least 6 characters'],
+      select: false, // Do not return password by default in queries
     },
     role: {
       type: String,
@@ -22,6 +34,11 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Role must be employee or employer'],
       default: 'employee',
       lowercase: true,
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: '',
     },
     preferredLanguage: {
       type: String,
@@ -96,33 +113,55 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Virtual alias to support both phone and phoneNumber
-userSchema.virtual('phoneNumber').get(function () {
-  return this.phone;
+// Virtual alias: fullName maps to name
+userSchema.virtual('fullName').get(function () {
+  return this.name;
 });
-userSchema.virtual('phoneNumber').set(function (val) {
-  this.phone = val;
+userSchema.virtual('fullName').set(function (val) {
+  this.name = val;
 });
 
-// Generate JWT token
+// Pre-save hook: Hash password with bcrypt before saving if modified
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Instance method: Compare password
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Instance method: Generate JWT auth token
 userSchema.methods.generateAuthToken = function () {
-  const secret = process.env.JWT_SECRET || 'voicehire_secure_corporate_platform_jwt_key_2026';
-  const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
+  const secret = process.env.JWT_SECRET || 'voicehire_secure_jwt_secret_2026_fallback_key';
+  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
 
   return jwt.sign(
     {
       id: this._id,
-      phone: this.phone,
+      email: this.email,
       role: this.role,
-      fullName: this.fullName,
+      name: this.name,
     },
     secret,
     { expiresIn }
   );
 };
 
+// toJSON transform: Never leak password hash or __v
 userSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
+  delete obj.password;
   delete obj.__v;
   return obj;
 };

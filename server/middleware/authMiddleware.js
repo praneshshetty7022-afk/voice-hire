@@ -11,40 +11,44 @@ export const protect = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: 'Not authorized to access this resource. Please log in.',
+      message: 'Access denied. No authentication token provided. Please log in.',
     });
   }
 
   try {
-    const secret = process.env.JWT_SECRET || 'voicehire_secure_corporate_platform_jwt_key_2026';
+    const secret = process.env.JWT_SECRET || 'voicehire_secure_jwt_secret_2026_fallback_key';
     const decoded = jwt.verify(token, secret);
 
-    let user = null;
-    try {
-      user = await User.findById(decoded.id);
-    } catch (dbErr) {
-      // In-memory or offline fallback
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token payload. Access denied.',
+      });
     }
+
+    // Load active user from database
+    const user = await User.findById(decoded.id);
 
     if (!user) {
-      // Fallback user object from decoded token payload
-      user = {
-        _id: decoded.id,
-        id: decoded.id,
-        phone: decoded.phone || decoded.phoneNumber || '9876543210',
-        fullName: decoded.fullName || (decoded.role === 'employer' ? 'Lead Employer' : 'Verified Worker'),
-        role: decoded.role || 'employee',
-        preferredLanguage: 'en',
-        location: 'Bengaluru',
-      };
+      return res.status(401).json({
+        success: false,
+        message: 'The user belonging to this token no longer exists. Please log in again.',
+      });
     }
 
+    // Attach active user to request object
     req.user = user;
     next();
   } catch (error) {
+    let msg = 'Authentication failed. Please log in again.';
+    if (error.name === 'TokenExpiredError') {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (error.name === 'JsonWebTokenError') {
+      msg = 'Invalid authentication token. Access denied.';
+    }
     return res.status(401).json({
       success: false,
-      message: 'Token verification failed or token expired. Please log in again.',
+      message: msg,
     });
   }
 };
@@ -54,7 +58,7 @@ export const authorize = (...roles) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Forbidden: User role '${req.user?.role}' is not authorized to access this route. Required: [${roles.join(', ')}]`,
+        message: `Forbidden: User role '${req.user?.role}' is not authorized to access this resource.`,
       });
     }
     next();

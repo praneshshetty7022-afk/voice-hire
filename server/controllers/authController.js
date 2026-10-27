@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 
-// Clean and normalize 10-digit Indian phone number
-const normalizePhone = (p) => {
-  if (!p) return '';
-  return String(p).replace(/\D/g, '').slice(-10);
+// Normalize email helper
+const normalizeEmail = (email) => {
+  if (!email) return '';
+  return String(email).trim().toLowerCase();
 };
 
 /**
@@ -15,10 +15,12 @@ const normalizePhone = (p) => {
 export const register = async (req, res) => {
   try {
     const {
+      name,
       fullName,
-      phone,
-      phoneNumber,
+      email,
+      password,
       role = 'employee',
+      phone = '',
       preferredLanguage = 'en',
       location = 'Bengaluru',
       tradeCategory = 'DRIVER',
@@ -32,94 +34,66 @@ export const register = async (req, res) => {
       businessDescription = '',
     } = req.body;
 
-    const rawPhone = phone || phoneNumber;
-    if (!fullName || !rawPhone) {
+    const resolvedName = (name || fullName || '').trim();
+    const cleanEmail = normalizeEmail(email);
+
+    // 1. Input Validation
+    if (!resolvedName) {
       return res.status(400).json({
         success: false,
-        message: 'Full Name and Phone Number are required.',
+        message: 'Name is required.',
       });
     }
 
-    const cleanPhone = normalizePhone(rawPhone);
-    if (cleanPhone.length < 10) {
+    if (!cleanEmail) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid 10-digit mobile number.',
+        message: 'Email address is required.',
+      });
+    }
+
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.',
+      });
+    }
+
+    if (!password || String(password).length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long.',
       });
     }
 
     const validRole = role.toLowerCase() === 'employer' ? 'employer' : 'employee';
 
+    // 2. Database Connectivity Check
     const isDbConnected = mongoose.connection.readyState === 1;
-
-    if (isDbConnected) {
-      let existing = await User.findOne({ phone: cleanPhone });
-
-      if (existing) {
-        existing.fullName = fullName.trim();
-        existing.role = validRole;
-        existing.preferredLanguage = preferredLanguage;
-        existing.location = location;
-        if (validRole === 'employee') {
-          existing.tradeCategory = tradeCategory.toUpperCase();
-          if (skills.length) existing.skills = skills;
-          if (experience) existing.experience = experience;
-          if (expectedWage) existing.expectedWage = Number(expectedWage);
-          if (wageType) existing.wageType = wageType;
-          if (bio) existing.bio = bio;
-        } else {
-          existing.companyName = companyName.trim() || `${fullName}'s Enterprise`;
-          existing.businessType = businessType;
-          if (businessDescription) existing.businessDescription = businessDescription;
-        }
-        existing.lastLogin = new Date();
-        await existing.save();
-
-        const token = existing.generateAuthToken();
-        return res.status(200).json({
-          success: true,
-          message: `Welcome back, ${existing.fullName}!`,
-          token,
-          user: existing.toJSON(),
-        });
-      }
-
-      const newUser = new User({
-        fullName: fullName.trim(),
-        phone: cleanPhone,
-        role: validRole,
-        preferredLanguage,
-        location,
-        tradeCategory: tradeCategory.toUpperCase(),
-        skills: Array.isArray(skills) ? skills : [],
-        experience,
-        expectedWage: Number(expectedWage) || 1000,
-        wageType,
-        bio,
-        companyName: validRole === 'employer' ? (companyName.trim() || `${fullName}'s Enterprise`) : '',
-        businessType: validRole === 'employer' ? businessType : '',
-        businessDescription: validRole === 'employer' ? businessDescription : '',
-      });
-
-      await newUser.save();
-      const token = newUser.generateAuthToken();
-
-      return res.status(201).json({
-        success: true,
-        message: 'Profile created successfully.',
-        token,
-        user: newUser.toJSON(),
+    if (!isDbConnected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database service is currently unavailable. Please verify MONGO_URI in server configuration.',
       });
     }
 
-    // In-memory resilient response if MongoDB is offline in dev
-    const fallbackUser = {
-      _id: 'usr_' + Date.now(),
-      id: 'usr_' + Date.now(),
-      fullName: fullName.trim(),
-      phone: cleanPhone,
-      phoneNumber: cleanPhone,
+    // 3. Duplicate Email Check -> 409 Conflict
+    const existingUser = await User.findOne({ email: cleanEmail });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'An account with this email address already exists. Please log in.',
+      });
+    }
+
+    // 4. Create and Save New User (password hashed via pre-save hook)
+    const newUser = new User({
+      name: resolvedName,
+      email: cleanEmail,
+      password,
       role: validRole,
+      phone: String(phone || '').trim(),
       preferredLanguage,
       location,
       tradeCategory: tradeCategory.toUpperCase(),
@@ -128,22 +102,30 @@ export const register = async (req, res) => {
       expectedWage: Number(expectedWage) || 1000,
       wageType,
       bio,
-      companyName: validRole === 'employer' ? (companyName.trim() || `${fullName}'s Enterprise`) : '',
-      businessType,
-      verificationStatus: 'verified',
-      trustScore: 98,
-    };
+      companyName: validRole === 'employer' ? (companyName.trim() || `${resolvedName}'s Enterprise`) : '',
+      businessType: validRole === 'employer' ? businessType : '',
+      businessDescription: validRole === 'employer' ? businessDescription : '',
+    });
 
-    const token = new User(fallbackUser).generateAuthToken();
+    await newUser.save();
+
+    // 5. Generate JWT Token
+    const token = newUser.generateAuthToken();
 
     return res.status(201).json({
       success: true,
-      message: 'Profile initialized successfully.',
+      message: 'Registration successful! Welcome to VoiceHire.',
       token,
-      user: fallbackUser,
+      user: newUser.toJSON(),
     });
   } catch (error) {
     console.error('[Register Error]:', error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'An account with this email address already exists.',
+      });
+    }
     return res.status(500).json({
       success: false,
       message: error.message || 'Server error during registration.',
@@ -152,95 +134,62 @@ export const register = async (req, res) => {
 };
 
 /**
- * @desc    Login with phone number and role selection
+ * @desc    Login with email and password
  * @route   POST /api/auth/login
  * @access  Public
  */
 export const login = async (req, res) => {
   try {
-    const { phone, phoneNumber, role = 'employee' } = req.body;
-    const rawPhone = phone || phoneNumber;
+    const { email, password } = req.body;
+    const cleanEmail = normalizeEmail(email);
 
-    if (!rawPhone) {
+    // 1. Basic validation
+    if (!cleanEmail || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please enter your 10-digit mobile number.',
+        message: 'Please provide both email and password.',
       });
     }
 
-    const cleanPhone = normalizePhone(rawPhone);
-    if (cleanPhone.length < 10) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid 10-digit mobile number.',
-      });
-    }
-
-    const requestedRole = role.toLowerCase() === 'employer' ? 'employer' : 'employee';
+    // 2. Database Connectivity Check
     const isDbConnected = mongoose.connection.readyState === 1;
-
-    if (isDbConnected) {
-      let user = await User.findOne({ phone: cleanPhone });
-
-      if (user) {
-        // Update role if explicitly selected or keep existing
-        if (user.role !== requestedRole) {
-          user.role = requestedRole;
-        }
-        user.lastLogin = new Date();
-        await user.save({ validateBeforeSave: false });
-
-        const token = user.generateAuthToken();
-        return res.status(200).json({
-          success: true,
-          message: `Welcome back, ${user.fullName}!`,
-          token,
-          user: user.toJSON(),
-        });
-      }
-
-      // If phone is new, automatically register frictionless worker/employer account
-      const defaultName = requestedRole === 'employer' ? 'Hiring Manager' : 'Verified Worker';
-      const autoUser = new User({
-        fullName: defaultName,
-        phone: cleanPhone,
-        role: requestedRole,
-        companyName: requestedRole === 'employer' ? 'VoiceHire Partner' : '',
-      });
-
-      await autoUser.save();
-      const token = autoUser.generateAuthToken();
-
-      return res.status(200).json({
-        success: true,
-        message: `Welcome to VoiceHire! Profile created.`,
-        token,
-        user: autoUser.toJSON(),
+    if (!isDbConnected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database service is currently unavailable. Please verify MONGO_URI in server configuration.',
       });
     }
 
-    // Resilient fallback
-    const fallbackUser = {
-      _id: 'usr_' + cleanPhone,
-      id: 'usr_' + cleanPhone,
-      fullName: requestedRole === 'employer' ? 'Nandi Logistics' : 'Ramesh Kumar',
-      phone: cleanPhone,
-      phoneNumber: cleanPhone,
-      role: requestedRole,
-      companyName: requestedRole === 'employer' ? 'Nandi Logistics & Motors' : '',
-      tradeCategory: 'DRIVER',
-      location: 'Bengaluru',
-      verificationStatus: 'verified',
-      trustScore: 98,
-    };
+    // 3. Look up user by email, explicitly including password field
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
 
-    const token = new User(fallbackUser).generateAuthToken();
+    // 4. Generic 401 if user does not exist or password does not match
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
+    }
+
+    // 5. Update lastLogin and generate JWT
+    user.lastLogin = new Date();
+    await user.save({ validateBeforeSave: false });
+
+    const token = user.generateAuthToken();
 
     return res.status(200).json({
       success: true,
-      message: 'Login successful.',
+      message: `Welcome back, ${user.name}!`,
       token,
-      user: fallbackUser,
+      user: user.toJSON(),
     });
   } catch (error) {
     console.error('[Login Error]:', error);
@@ -254,25 +203,28 @@ export const login = async (req, res) => {
 /**
  * @desc    Get current authenticated user profile
  * @route   GET /api/auth/me
- * @access  Private
+ * @access  Private (Protected by authMiddleware)
  */
 export const getProfile = async (req, res) => {
   try {
-    const isDbConnected = mongoose.connection.readyState === 1;
+    if (!req.user?._id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized. Please log in.',
+      });
+    }
 
-    if (isDbConnected && req.user?._id) {
-      const user = await User.findById(req.user._id);
-      if (user) {
-        return res.status(200).json({
-          success: true,
-          user: user.toJSON(),
-        });
-      }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User account no longer exists.',
+      });
     }
 
     return res.status(200).json({
       success: true,
-      user: req.user,
+      user: user.toJSON(),
     });
   } catch (error) {
     console.error('[Get Profile Error]:', error);
@@ -286,56 +238,60 @@ export const getProfile = async (req, res) => {
 /**
  * @desc    Update authenticated user profile
  * @route   PUT /api/auth/profile
- * @access  Private
+ * @access  Private (Protected by authMiddleware)
  */
 export const updateProfile = async (req, res) => {
   try {
-    const isDbConnected = mongoose.connection.readyState === 1;
-    const updates = req.body;
-
-    if (isDbConnected && req.user?._id) {
-      const user = await User.findById(req.user._id);
-      if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found in database.' });
-      }
-
-      // Update allowed fields based on role
-      const allowedCommon = ['fullName', 'preferredLanguage', 'location'];
-      const allowedEmployee = ['tradeCategory', 'skills', 'experience', 'expectedWage', 'wageType', 'bio'];
-      const allowedEmployer = ['companyName', 'businessType', 'businessDescription'];
-
-      allowedCommon.forEach((field) => {
-        if (updates[field] !== undefined) user[field] = updates[field];
-      });
-
-      if (user.role === 'employee') {
-        allowedEmployee.forEach((field) => {
-          if (updates[field] !== undefined) user[field] = updates[field];
-        });
-      } else if (user.role === 'employer') {
-        allowedEmployer.forEach((field) => {
-          if (updates[field] !== undefined) user[field] = updates[field];
-        });
-      }
-
-      await user.save();
-      return res.status(200).json({
-        success: true,
-        message: 'Profile updated successfully in MongoDB.',
-        user: user.toJSON(),
+    if (!req.user?._id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized. Please log in.',
       });
     }
 
-    // In-memory fallback response
-    const updated = {
-      ...req.user,
-      ...updates,
-    };
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found in database.',
+      });
+    }
+
+    const updates = req.body;
+
+    // Update common allowed fields
+    const allowedCommon = ['name', 'fullName', 'phone', 'preferredLanguage', 'location'];
+    const allowedEmployee = ['tradeCategory', 'skills', 'experience', 'expectedWage', 'wageType', 'bio'];
+    const allowedEmployer = ['companyName', 'businessType', 'businessDescription'];
+
+    allowedCommon.forEach((field) => {
+      if (updates[field] !== undefined) {
+        if (field === 'fullName') {
+          user.name = updates[field].trim();
+        } else if (field === 'name') {
+          user.name = updates[field].trim();
+        } else {
+          user[field] = updates[field];
+        }
+      }
+    });
+
+    if (user.role === 'employee') {
+      allowedEmployee.forEach((field) => {
+        if (updates[field] !== undefined) user[field] = updates[field];
+      });
+    } else if (user.role === 'employer') {
+      allowedEmployer.forEach((field) => {
+        if (updates[field] !== undefined) user[field] = updates[field];
+      });
+    }
+
+    await user.save();
 
     return res.status(200).json({
       success: true,
       message: 'Profile updated successfully.',
-      user: updated,
+      user: user.toJSON(),
     });
   } catch (error) {
     console.error('[Update Profile Error]:', error);
