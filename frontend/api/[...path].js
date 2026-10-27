@@ -15,8 +15,7 @@ export default async function handler(req, res) {
       error: 'BACKEND_NOT_CONFIGURED',
       message:
         'Vercel Frontend is not connected to a backend. ' +
-        'Please add VITE_API_BASE_URL in Vercel Settings -> Environment Variables (e.g. https://<your-service>.onrender.com/api) and Redeploy, ' +
-        'or use the "Configure Backend URL" option on the Login screen.',
+        'Please add VITE_API_BASE_URL in Vercel Settings -> Environment Variables (e.g. https://<your-service>.onrender.com/api) and Redeploy.',
     });
   }
 
@@ -33,9 +32,10 @@ export default async function handler(req, res) {
   const destinationUrl = `${targetBase}${subpath}`;
 
   try {
-    const fetchHeaders = { ...req.headers };
-    delete fetchHeaders.host;
-    delete fetchHeaders.connection;
+    const fetchHeaders = {};
+    if (req.headers['authorization']) fetchHeaders['authorization'] = req.headers['authorization'];
+    if (req.headers['content-type']) fetchHeaders['content-type'] = req.headers['content-type'];
+    if (req.headers['accept']) fetchHeaders['accept'] = req.headers['accept'];
 
     const fetchOptions = {
       method: req.method,
@@ -48,13 +48,12 @@ export default async function handler(req, res) {
     }
 
     const response = await fetch(destinationUrl, fetchOptions);
-    const data = await response.text();
+    const contentType = response.headers.get('content-type') || 'application/json';
 
     res.status(response.status);
-    response.headers.forEach((val, key) => {
-      res.setHeader(key, val);
-    });
+    res.setHeader('content-type', contentType);
 
+    const data = await response.text();
     return res.send(data);
   } catch (err) {
     return res.status(502).json({
