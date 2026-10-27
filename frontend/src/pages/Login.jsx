@@ -64,8 +64,13 @@ export default function Login() {
   }, [location.search])
 
   // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(isEmployer ? '/employer/dashboard' : '/jobs', { replace: true })
+    }
+  }, [isAuthenticated, isEmployer, navigate])
+
   if (isAuthenticated) {
-    navigate(isEmployer ? '/employer/dashboard' : '/jobs', { replace: true })
     return null
   }
 

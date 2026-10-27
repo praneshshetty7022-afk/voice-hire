@@ -143,7 +143,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 
 // Instance method: Generate JWT auth token
 userSchema.methods.generateAuthToken = function () {
-  const secret = process.env.JWT_SECRET || 'voicehire_secure_jwt_secret_2026_fallback_key';
+  const secret = process.env.JWT_SECRET || 'voicehire_super_secret_jwt_key_2026_udyoga_mitra_platform_secure_token';
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
 
   return jwt.sign(

@@ -90,7 +90,7 @@ export const wrapFallbackUser = (rawUser) => {
   };
 
   user.generateAuthToken = function () {
-    const secret = process.env.JWT_SECRET || 'voicehire_gold_standard_corporate_jwt_secret_key_2026';
+    const secret = process.env.JWT_SECRET || 'voicehire_super_secret_jwt_key_2026_udyoga_mitra_platform_secure_token';
     const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
 
     return jwt.sign(

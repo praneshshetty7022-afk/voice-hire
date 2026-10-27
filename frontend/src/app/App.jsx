@@ -56,8 +56,11 @@ function AppContent() {
   const isIntroRoute = location.pathname === '/' || location.pathname === '/intro'
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register'
 
-  // 1. Landing Page (Public Hero)
+  // 1. Landing Page (Public Hero) - redirect to dashboard if already authenticated
   if (isIntroRoute) {
+    if (!loading && isAuthenticated) {
+      return <Navigate to={isEmployer ? '/employer/dashboard' : '/jobs'} replace />
+    }
     return <CinematicIntro isOpen={true} />
   }
 

@@ -6,8 +6,18 @@ const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('token') || null)
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user')
+      return saved ? JSON.parse(saved) : null
+    } catch (e) {
+      return null
+    }
+  })
+  const [loading, setLoading] = useState(() => {
+    // If we have token and user cached, we are immediately ready
+    return Boolean(localStorage.getItem('token') && !localStorage.getItem('user'))
+  })
 
   // Verify and restore session on mount/refresh via GET /api/auth/me
   const refreshUser = useCallback(async () => {
@@ -27,13 +37,14 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(liveUser))
         return liveUser
       }
-      throw new Error('Authentication check failed')
     } catch (err) {
-      // Invalid/expired token or user deleted: purge session
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      setToken(null)
-      setUser(null)
+      // ONLY purge session if server explicitly returns 401 Unauthorized or 403 Forbidden
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        setToken(null)
+        setUser(null)
+      }
       return null
     } finally {
       setLoading(false)

@@ -18,7 +18,7 @@ export const protect = async (req, res, next) => {
   }
 
   try {
-    const secret = process.env.JWT_SECRET || 'voicehire_secure_jwt_secret_2026_fallback_key';
+    const secret = process.env.JWT_SECRET || 'voicehire_super_secret_jwt_key_2026_udyoga_mitra_platform_secure_token';
     const decoded = jwt.verify(token, secret);
 
     if (!decoded || !decoded.id) {
