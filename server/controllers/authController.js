@@ -1,5 +1,11 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
+import {
+  findFallbackUserByEmail,
+  findFallbackUserById,
+  createFallbackUser,
+  updateFallbackUser,
+} from '../utils/fallbackStore.js';
 
 // Normalize email helper
 const normalizeEmail = (email) => {
@@ -68,18 +74,16 @@ export const register = async (req, res) => {
     }
 
     const validRole = role.toLowerCase() === 'employer' ? 'employer' : 'employee';
-
-    // 2. Database Connectivity Check
     const isDbConnected = mongoose.connection.readyState === 1;
-    if (!isDbConnected) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database service is currently unavailable. Please verify MONGO_URI in server configuration.',
-      });
+
+    // 2. Duplicate Email Check -> 409 Conflict
+    let existingUser = null;
+    if (isDbConnected) {
+      existingUser = await User.findOne({ email: cleanEmail });
+    } else {
+      existingUser = findFallbackUserByEmail(cleanEmail);
     }
 
-    // 3. Duplicate Email Check -> 409 Conflict
-    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -87,36 +91,59 @@ export const register = async (req, res) => {
       });
     }
 
-    // 4. Create and Save New User (password hashed via pre-save hook)
-    const newUser = new User({
-      name: resolvedName,
-      email: cleanEmail,
-      password,
-      role: validRole,
-      phone: String(phone || '').trim(),
-      preferredLanguage,
-      location,
-      tradeCategory: tradeCategory.toUpperCase(),
-      skills: Array.isArray(skills) ? skills : [],
-      experience,
-      expectedWage: Number(expectedWage) || 1000,
-      wageType,
-      bio,
-      companyName: validRole === 'employer' ? (companyName.trim() || `${resolvedName}'s Enterprise`) : '',
-      businessType: validRole === 'employer' ? businessType : '',
-      businessDescription: validRole === 'employer' ? businessDescription : '',
-    });
+    // 3. Create and Save New User (password hashed via pre-save hook or bcrypt)
+    let savedUser = null;
+    if (isDbConnected) {
+      const newUser = new User({
+        name: resolvedName,
+        email: cleanEmail,
+        password,
+        role: validRole,
+        phone: String(phone || '').trim(),
+        preferredLanguage,
+        location,
+        tradeCategory: tradeCategory.toUpperCase(),
+        skills: Array.isArray(skills) ? skills : [],
+        experience,
+        expectedWage: Number(expectedWage) || 1000,
+        wageType,
+        bio,
+        companyName: validRole === 'employer' ? (companyName.trim() || `${resolvedName}'s Enterprise`) : '',
+        businessType: validRole === 'employer' ? businessType : '',
+        businessDescription: validRole === 'employer' ? businessDescription : '',
+      });
 
-    await newUser.save();
+      await newUser.save();
+      savedUser = newUser;
+    } else {
+      savedUser = await createFallbackUser({
+        name: resolvedName,
+        email: cleanEmail,
+        password,
+        role: validRole,
+        phone,
+        preferredLanguage,
+        location,
+        tradeCategory,
+        skills,
+        experience,
+        expectedWage,
+        wageType,
+        bio,
+        companyName,
+        businessType,
+        businessDescription,
+      });
+    }
 
-    // 5. Generate JWT Token
-    const token = newUser.generateAuthToken();
+    // 4. Generate JWT Token
+    const token = savedUser.generateAuthToken();
 
     return res.status(201).json({
       success: true,
       message: 'Registration successful! Welcome to VoiceHire.',
       token,
-      user: newUser.toJSON(),
+      user: savedUser.toJSON(),
     });
   } catch (error) {
     console.error('[Register Error]:', error);
@@ -140,7 +167,7 @@ export const register = async (req, res) => {
  */
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     const cleanEmail = normalizeEmail(email);
 
     // 1. Basic validation
@@ -151,19 +178,17 @@ export const login = async (req, res) => {
       });
     }
 
-    // 2. Database Connectivity Check
     const isDbConnected = mongoose.connection.readyState === 1;
-    if (!isDbConnected) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database service is currently unavailable. Please verify MONGO_URI in server configuration.',
-      });
+
+    // 2. Look up user by email
+    let user = null;
+    if (isDbConnected) {
+      user = await User.findOne({ email: cleanEmail }).select('+password');
+    } else {
+      user = findFallbackUserByEmail(cleanEmail);
     }
 
-    // 3. Look up user by email, explicitly including password field
-    const user = await User.findOne({ email: cleanEmail }).select('+password');
-
-    // 4. Generic 401 if user does not exist or password does not match
+    // 3. Generic 401 if user does not exist
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -171,6 +196,7 @@ export const login = async (req, res) => {
       });
     }
 
+    // 4. Validate password using bcrypt
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -230,7 +256,14 @@ export const getProfile = async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.user._id);
+    const isDbConnected = mongoose.connection.readyState === 1;
+    let user = null;
+    if (isDbConnected) {
+      user = await User.findById(req.user._id);
+    } else {
+      user = findFallbackUserById(req.user._id);
+    }
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -265,49 +298,66 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
+    const isDbConnected = mongoose.connection.readyState === 1;
+
+    if (isDbConnected) {
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found in database.',
+        });
+      }
+
+      const updates = req.body;
+
+      // Update common allowed fields
+      const allowedCommon = ['name', 'fullName', 'phone', 'preferredLanguage', 'location'];
+      const allowedEmployee = ['tradeCategory', 'skills', 'experience', 'expectedWage', 'wageType', 'bio'];
+      const allowedEmployer = ['companyName', 'businessType', 'businessDescription'];
+
+      allowedCommon.forEach((field) => {
+        if (updates[field] !== undefined) {
+          if (field === 'fullName' || field === 'name') {
+            user.name = updates[field].trim();
+          } else {
+            user[field] = updates[field];
+          }
+        }
+      });
+
+      if (user.role === 'employee') {
+        allowedEmployee.forEach((field) => {
+          if (updates[field] !== undefined) user[field] = updates[field];
+        });
+      } else if (user.role === 'employer') {
+        allowedEmployer.forEach((field) => {
+          if (updates[field] !== undefined) user[field] = updates[field];
+        });
+      }
+
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully.',
+        user: user.toJSON(),
+      });
+    }
+
+    // Fallback store update
+    const updated = updateFallbackUser(req.user._id, req.body);
+    if (!updated) {
       return res.status(404).json({
         success: false,
-        message: 'User not found in database.',
+        message: 'User not found.',
       });
     }
-
-    const updates = req.body;
-
-    // Update common allowed fields
-    const allowedCommon = ['name', 'fullName', 'phone', 'preferredLanguage', 'location'];
-    const allowedEmployee = ['tradeCategory', 'skills', 'experience', 'expectedWage', 'wageType', 'bio'];
-    const allowedEmployer = ['companyName', 'businessType', 'businessDescription'];
-
-    allowedCommon.forEach((field) => {
-      if (updates[field] !== undefined) {
-        if (field === 'fullName') {
-          user.name = updates[field].trim();
-        } else if (field === 'name') {
-          user.name = updates[field].trim();
-        } else {
-          user[field] = updates[field];
-        }
-      }
-    });
-
-    if (user.role === 'employee') {
-      allowedEmployee.forEach((field) => {
-        if (updates[field] !== undefined) user[field] = updates[field];
-      });
-    } else if (user.role === 'employer') {
-      allowedEmployer.forEach((field) => {
-        if (updates[field] !== undefined) user[field] = updates[field];
-      });
-    }
-
-    await user.save();
 
     return res.status(200).json({
       success: true,
       message: 'Profile updated successfully.',
-      user: user.toJSON(),
+      user: updated.toJSON(),
     });
   } catch (error) {
     console.error('[Update Profile Error]:', error);

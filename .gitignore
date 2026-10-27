@@ -54,6 +54,7 @@ out/
 # Database
 *.db
 *.sqlite
+.users_db.json
 
 # OS
 Thumbs.db

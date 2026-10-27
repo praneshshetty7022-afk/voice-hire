@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
+import { findFallbackUserById } from '../utils/fallbackStore.js';
 
 export const protect = async (req, res, next) => {
   let token;
@@ -26,8 +28,13 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // Load active user from database
-    const user = await User.findById(decoded.id);
+    // Load active user from database or fallback store
+    let user = null;
+    if (mongoose.connection.readyState === 1) {
+      user = await User.findById(decoded.id);
+    } else {
+      user = findFallbackUserById(decoded.id);
+    }
 
     if (!user) {
       return res.status(401).json({
