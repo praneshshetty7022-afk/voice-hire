@@ -179,7 +179,23 @@ export const login = async (req, res) => {
       });
     }
 
-    // 5. Update lastLogin and generate JWT
+    // 5. Strict Role Isolation: An account registered for one role cannot log in through the other portal
+    if (role) {
+      const requestedRole = String(role).trim().toLowerCase();
+      const userRole = String(user.role).trim().toLowerCase();
+      if (userRole !== requestedRole) {
+        const userLabel = userRole === 'employer' ? 'an Employer' : 'a Worker';
+        const targetLabel = requestedRole === 'employer' ? 'Employer' : 'Worker';
+        return res.status(403).json({
+          success: false,
+          roleMismatch: true,
+          actualRole: userRole,
+          message: `Role mismatch: This account is registered as ${userLabel}. You cannot log in through the ${targetLabel} portal with these credentials.`,
+        });
+      }
+    }
+
+    // 6. Update lastLogin and generate JWT
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 

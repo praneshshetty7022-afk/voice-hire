@@ -44,11 +44,11 @@ export const AuthProvider = ({ children }) => {
     refreshUser()
   }, [refreshUser])
 
-  // Login handler with email & password
-  const login = async ({ email, password }) => {
+  // Login handler with email, password & role
+  const login = async ({ email, password, role }) => {
     try {
       setLoading(true)
-      const res = await api.post('/auth/login', { email, password })
+      const res = await api.post('/auth/login', { email, password, role })
 
       if (res.data?.token && res.data?.user) {
         const { token: receivedToken, user: receivedUser } = res.data
@@ -63,7 +63,13 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       const msg = error.response?.data?.message || error.message || 'Invalid email or password.'
       toast.error(msg)
-      return { success: false, message: msg, status: error.response?.status }
+      return {
+        success: false,
+        message: msg,
+        status: error.response?.status,
+        roleMismatch: Boolean(error.response?.data?.roleMismatch),
+        actualRole: error.response?.data?.actualRole,
+      }
     } finally {
       setLoading(false)
     }
@@ -113,14 +119,15 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Logout handler
-  const logout = () => {
+  // Logout handler: preserves role portal redirect
+  const logout = (targetRole) => {
+    const previousRole = targetRole || user?.role || 'employee'
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setToken(null)
     setUser(null)
     toast.success('Logged out successfully.')
-    window.location.href = '/login'
+    window.location.href = `/login?role=${previousRole}`
   }
 
   const role = user?.role?.toLowerCase() || 'employee'
