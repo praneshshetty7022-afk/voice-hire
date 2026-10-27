@@ -1,70 +1,58 @@
-# VoiceHire - Voice-based Employment Platform
+# VoiceHire (Udyoga Mitra) - Voice-First Employment Platform
 
-A modern employment platform that leverages voice technology to make job searching and hiring more accessible, especially for users with limited literacy or visual impairments.
+A modern employment platform that leverages voice technology and AI to make job searching and hiring accessible, dignified, and frictionless for skilled workers and employers.
 
-## 🏗️ Project Structure
+## 🏗️ Project Architecture & Cloud Deployment
+
+```
+┌────────────────────────────────┐       ┌────────────────────────────────┐       ┌────────────────────────────────┐
+│        Vercel (Frontend)       │ HTTPS │        Render (Backend)        │  TLS  │     MongoDB Atlas (Database)   │
+│ https://voicehire.vercel.app   ├──────►│ https://api.voicehire.render   ├──────►│   Cluster0 (M0 Free Cloud DB)  │
+│     React 18 + Vite SPA        │       │   Node.js / Express Engine     │       │     Persistence & Schemas      │
+└────────────────────────────────┘       └────────────────────────────────┘       └────────────────────────────────┘
+```
 
 ```
 voicehire/
-├── frontend/          # React + Vite frontend application
-├── backend/           # Spring Boot + MongoDB backend
-├── docs/             # Documentation
-├── docker-compose.yml # Docker services configuration
-└── README.md         # This file
+├── frontend/          # React 18 + Vite frontend application (Vercel ready)
+├── server/            # Node.js + Express backend engine (Render ready)
+├── render.yaml        # Render Blueprint deployment configuration
+├── vercel.json        # Vercel SPA routing and build configuration
+├── package.json       # Monorepo orchestration scripts
+└── docs/              # Comprehensive guides and documentation
 ```
 
-## 🚀 Quick Start
+## 🚀 Quick Deployment Guide
 
-### Prerequisites
-- Java 17+
-- Node.js 18+
-- MongoDB 7.0 (or use Docker)
-- Maven 3.8+
+### 1. Database: MongoDB Atlas (Free M0)
+1. Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+2. Create a Free Cluster (`M0`).
+3. Under **Security -> Network Access**, allow `0.0.0.0/0` (access from anywhere).
+4. Under **Security -> Database Access**, create your user and password.
+5. Copy your connection string: `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/voicehire?retryWrites=true&w=majority`.
 
-### Using Docker (Recommended)
+### 2. Backend: Render Web Service
+1. Connect your repository to [Render](https://render.com).
+2. Click **New +** -> **Blueprint** (uses `render.yaml`) OR **Web Service**:
+   - **Root Directory**: `server`
+   - **Runtime**: `Node`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+3. Add Environment Variable:
+   - `MONGO_URI`: `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/voicehire?retryWrites=true&w=majority`
+4. Deploy and copy your backend URL: `https://<service-name>.onrender.com`.
 
-1. Start MongoDB and other services:
-```bash
-docker-compose up -d mongodb mongo-express
-```
+### 3. Frontend: Vercel SPA
+1. Connect your repository to [Vercel](https://vercel.com).
+2. Import project with preset **Vite**.
+3. Add Environment Variable:
+   - `VITE_API_BASE_URL`: `https://<your-render-backend>.onrender.com/api`
+4. Click **Deploy**. Your app is live with HTTPS and full Web Speech API support!
 
-2. Access MongoDB Express at `http://localhost:8081`
+---
 
-### Backend Setup
+## 💻 Local Development
 
-1. Navigate to backend directory:
-```bash
-cd backend
-```
-
-2. Build the project:
-```bash
-mvn clean install
-```
-
-3. Run the application:
-```bash
-mvn spring-boot:run
-```
-
-4. Access Swagger UI at `http://localhost:8080/api/swagger-ui.html`
-
-### Frontend Setup
-
-1. Navigate to frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start development server:
-```bash
-npm run dev
-```
 
 4. Access application at `http://localhost:3000`
 

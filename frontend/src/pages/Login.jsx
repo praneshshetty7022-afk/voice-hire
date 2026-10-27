@@ -17,6 +17,8 @@ import { useVoice } from '../context/VoiceContext'
 import ThemeToggle from '../components/ThemeToggle'
 import LanguageSelector from '../components/LanguageSelector'
 
+import { setBackendUrl, getBaseURL } from '../api/axios'
+
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -27,6 +29,10 @@ export default function Login() {
   const [phone, setPhone] = useState(location.state?.phone || '')
   const [isListeningPhone, setIsListeningPhone] = useState(false)
   const phoneRecognitionRef = useRef(null)
+
+  // Backend connection helper state (shown automatically if 405 occurs on Vercel)
+  const [showBackendConfig, setShowBackendConfig] = useState(false)
+  const [customBackend, setCustomBackend] = useState(() => getBaseURL())
 
   // Voice speech-to-text for phone input
   const startPhoneVoice = () => {
@@ -83,6 +89,26 @@ export default function Login() {
       } else {
         navigate('/jobs', { replace: true })
       }
+    } else if (res.status === 405) {
+      setShowBackendConfig(true)
+    }
+  }
+
+  const handleSaveBackend = (e) => {
+    e.preventDefault()
+    if (!customBackend.trim()) {
+      setBackendUrl('')
+      toast.success('Reset to default /api')
+      setShowBackendConfig(false)
+      return
+    }
+    const updated = setBackendUrl(customBackend)
+    setCustomBackend(updated)
+    toast.success(`Connected to: ${updated}`)
+    setShowBackendConfig(false)
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10)
+    if (cleanPhone.length >= 10) {
+      login({ phone: cleanPhone, role })
     }
   }
 
@@ -259,6 +285,46 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* Backend API Connection Helper (rendered if 405 error or toggled) */}
+              {showBackendConfig && (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs space-y-2.5">
+                  <div className="flex items-center justify-between font-bold text-sm">
+                    <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                      ⚠️ Connect Render Backend URL
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowBackendConfig(false)}
+                      className="text-slate-400 hover:text-slate-600 dark:hover:text-white text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    Vercel returned <strong>405 Method Not Allowed</strong> because requests are hitting Vercel static files instead of your Render server. Enter your live Render URL below:
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={customBackend}
+                      onChange={(e) => setCustomBackend(e.target.value)}
+                      placeholder="https://your-service.onrender.com"
+                      className="flex-1 px-3 py-2 text-xs rounded-xl bg-white dark:bg-black/30 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveBackend}
+                      className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-600 text-white font-bold text-xs cursor-pointer shadow-md"
+                    >
+                      Connect
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    💡 Permanent fix: Set <code>VITE_API_BASE_URL</code> in Vercel Project Settings &amp; Redeploy.
+                  </p>
+                </div>
+              )}
+
               {/* Submit CTA */}
               <button
                 type="submit"
@@ -276,13 +342,20 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-slate-100 dark:border-white/10 text-center">
+            <div className="mt-6 pt-5 border-t border-slate-100 dark:border-white/10 text-center space-y-2">
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
                 Don't have an account?{' '}
                 <Link to="/register" className="text-[#2563EB] dark:text-[#60A5FA] font-black hover:underline">
                   Create New Profile
                 </Link>
               </p>
+              <button
+                type="button"
+                onClick={() => setShowBackendConfig(!showBackendConfig)}
+                className="text-[11px] text-slate-400 hover:text-blue-500 underline cursor-pointer"
+              >
+                {showBackendConfig ? 'Hide Backend Settings' : '⚙️ Configure Backend URL'}
+              </button>
             </div>
           </div>
         </div>

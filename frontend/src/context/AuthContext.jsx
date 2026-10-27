@@ -70,9 +70,12 @@ export const AuthProvider = ({ children }) => {
       }
       throw new Error(res.data?.message || 'Login failed')
     } catch (error) {
-      const msg = error.response?.data?.message || error.message || 'Login failed. Please check phone number.'
-      toast.error(msg)
-      return { success: false, message: msg }
+      let msg = error.response?.data?.message || error.message || 'Login failed. Please check phone number.'
+      if (error.response?.status === 405) {
+        msg = 'Connection Error 405: Vercel rejected the request. Please connect your Render Backend URL.'
+      }
+      toast.error(msg, { duration: 6000 })
+      return { success: false, message: msg, status: error.response?.status }
     } finally {
       setLoading(false)
     }
@@ -96,9 +99,12 @@ export const AuthProvider = ({ children }) => {
       }
       throw new Error(res.data?.message || 'Registration failed')
     } catch (error) {
-      const msg = error.response?.data?.message || error.message || 'Registration failed.'
-      toast.error(msg)
-      return { success: false, message: msg }
+      let msg = error.response?.data?.message || error.message || 'Registration failed.'
+      if (error.response?.status === 405) {
+        msg = 'Connection Error 405: Vercel rejected the request. Please connect your Render Backend URL.'
+      }
+      toast.error(msg, { duration: 6000 })
+      return { success: false, message: msg, status: error.response?.status }
     } finally {
       setLoading(false)
     }
