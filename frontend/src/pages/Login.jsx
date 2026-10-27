@@ -176,7 +176,7 @@ export default function Login() {
               <div className="text-center space-y-3">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Choose Your Account Type</span>
+                  <span>{t.chooseAccountTypeBadge || 'Choose Your Account Type'}</span>
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
                   {t.roleSectionTitle || 'Choose How You Want to Use VoiceHire'}
@@ -202,7 +202,7 @@ export default function Login() {
                         <Users className="w-7 h-7 stroke-[2.2]" />
                       </div>
                       <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        Job Seekers
+                        {t.jobSeekersBadge || 'Job Seekers'}
                       </span>
                     </div>
 
@@ -237,7 +237,7 @@ export default function Login() {
                       type="button"
                       className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm sm:text-base shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group-hover:shadow-blue-500/40 transition-all cursor-pointer"
                     >
-                      <span>Log In as Worker</span>
+                      <span>{t.logInAsWorker || 'Log In as Worker'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
@@ -257,7 +257,7 @@ export default function Login() {
                         <Building2 className="w-7 h-7 stroke-[2.2]" />
                       </div>
                       <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                        Employers & Recruiters
+                        {t.employersBadge || 'Employers & Recruiters'}
                       </span>
                     </div>
 
@@ -292,7 +292,7 @@ export default function Login() {
                       type="button"
                       className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-black text-sm sm:text-base shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 group-hover:shadow-indigo-500/40 transition-all cursor-pointer"
                     >
-                      <span>Log In as Employer</span>
+                      <span>{t.logInAsEmployer || 'Log In as Employer'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
@@ -301,9 +301,9 @@ export default function Login() {
 
               {/* Bottom Switch to Register */}
               <div className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 pt-2">
-                <span>Don't have an account yet? </span>
+                <span>{t.dontHaveAccount || "Don't have an account yet?"} </span>
                 <Link to="/register" className="font-extrabold text-[#2563EB] dark:text-[#60A5FA] hover:underline">
-                  Create Account (Sign Up) →
+                  {t.createAccountSignUp || 'Create Account (Sign Up) →'}
                 </Link>
               </div>
             </motion.div>
@@ -331,25 +331,19 @@ export default function Login() {
                 <div className="space-y-6 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-black uppercase tracking-wider backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>{isWorker ? 'Worker Voice Network' : 'Verified Employer Hub'}</span>
+                    <span>{isWorker ? (t.workerVoiceNetwork || 'Worker Voice Network') : (t.verifiedEmployerHub || 'Verified Employer Hub')}</span>
                   </div>
 
                   <div className="space-y-3">
                     <h2 className="text-3xl font-black tracking-tight leading-tight">
-                      {isWorker ? (
-                        <>
-                          Your Voice is Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300">Resume.</span>
-                        </>
-                      ) : (
-                        <>
-                          Hire Verified Trades in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-300">Minutes.</span>
-                        </>
-                      )}
+                      {isWorker
+                        ? (t.workerShowcaseHeadline || 'Your Voice is Your Resume.')
+                        : (t.employerShowcaseHeadline || 'Hire Verified Trades in Minutes.')}
                     </h2>
                     <p className="text-slate-300 text-sm leading-relaxed font-medium">
                       {isWorker
-                        ? 'Skip typed resumes. Apply by speaking in Kannada, Hindi, or English, and connect directly with licensed employers.'
-                        : 'Review genuine voice introductions, screen verified candidate histories, and fill open positions same-day.'}
+                        ? (t.workerShowcaseDesc || 'Skip typed resumes. Apply by speaking in Kannada, Hindi, or English, and connect directly with licensed employers.')
+                        : (t.employerShowcaseDesc || 'Review genuine voice introductions, screen verified candidate histories, and fill open positions same-day.')}
                     </p>
                   </div>
 
@@ -358,9 +352,9 @@ export default function Login() {
                     <div className="flex items-center justify-between text-xs font-bold text-slate-300">
                       <span className="flex items-center gap-1.5">
                         <Mic className="w-4 h-4 text-blue-400" />
-                        <span>Voice Recognition NLP</span>
+                        <span>{t.voiceRecognitionNLP || 'Voice Recognition NLP'}</span>
                       </span>
-                      <span className="text-emerald-400 text-[10px] uppercase font-black">Active</span>
+                      <span className="text-emerald-400 text-[10px] uppercase font-black">{t.activeStatus || 'Active'}</span>
                     </div>
 
                     {/* Equalizer Soundwave Bars */}
@@ -382,9 +376,9 @@ export default function Login() {
                 <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 relative z-10">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>{isWorker ? '100% Free for Workers' : 'Direct Employer Connect'}</span>
+                    <span>{isWorker ? (t.freeForWorkers || '100% Free for Workers') : (t.directEmployerConnect || 'Direct Employer Connect')}</span>
                   </div>
-                  <span className="font-bold text-slate-300">15,000+ Placed</span>
+                  <span className="font-bold text-slate-300">{t.placedStat || '15,000+ Placed'}</span>
                 </div>
               </div>
 
@@ -410,7 +404,7 @@ export default function Login() {
                       }`}
                     >
                       {isWorker ? <Users className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
-                      <span>{isWorker ? 'Worker Portal' : 'Employer Portal'}</span>
+                      <span>{isWorker ? (t.workerPortalBadge || 'Worker Portal') : (t.employerPortalBadge || 'Employer Portal')}</span>
                     </div>
                   </div>
 
@@ -418,13 +412,13 @@ export default function Login() {
                   <div className="space-y-1">
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                       {isWorker
-                        ? t.loginTitleWorker || 'Worker Login Portal'
-                        : t.loginTitleEmployer || 'Employer Login Portal'}
+                        ? (t.loginTitleWorker || 'Worker Login Portal')
+                        : (t.loginTitleEmployer || 'Employer Login Portal')}
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                       {isWorker
-                        ? t.loginDescWorker || 'Sign in to browse daily wage & monthly jobs and voice applications.'
-                        : t.loginDescEmployer || 'Sign in to post job vacancies and screen verified applicants.'}
+                        ? (t.loginDescWorker || 'Sign in to browse daily wage & monthly jobs and voice applications.')
+                        : (t.loginDescEmployer || 'Sign in to post job vacancies and screen verified applicants.')}
                     </p>
                   </div>
 
@@ -436,7 +430,7 @@ export default function Login() {
                         <div className="space-y-1">
                           <p className="font-bold">{roleMismatchData.message}</p>
                           <p className="text-xs opacity-90">
-                            Accounts cannot be used interchangeably across Worker and Employer portals.
+                            {t.accountTypeWarning || 'Accounts cannot be used interchangeably across Worker and Employer portals.'}
                           </p>
                         </div>
                       </div>
@@ -448,7 +442,7 @@ export default function Login() {
                         className="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
-                        <span>Switch to {roleMismatchData.actualRole === 'employer' ? 'Employer' : 'Worker'} Portal</span>
+                        <span>{roleMismatchData.actualRole === 'employer' ? (t.switchPortalEmployer || 'Switch to Employer Portal') : (t.switchPortalWorker || 'Switch to Worker Portal')}</span>
                       </button>
                     </div>
                   )}
@@ -466,7 +460,7 @@ export default function Login() {
                     {/* Email Field */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {isWorker ? 'Worker Email Address' : 'Employer Work Email'}
+                        {isWorker ? (t.workerEmailLabel || 'Worker Email Address') : (t.employerEmailLabel || 'Employer Work Email')}
                       </label>
                       <div className="relative group/input">
                         <input
@@ -524,11 +518,11 @@ export default function Login() {
                       {loading ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" />
-                          <span>Verifying Credentials...</span>
+                          <span>{t.verifyingCredentials || 'Verifying Credentials...'}</span>
                         </>
                       ) : (
                         <>
-                          <span>{isWorker ? 'Sign In as Worker' : 'Sign In as Employer'}</span>
+                          <span>{isWorker ? (t.signInWorkerBtn || 'Sign In as Worker') : (t.signInEmployerBtn || 'Sign In as Employer')}</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
@@ -538,14 +532,14 @@ export default function Login() {
                   {/* Switch to Register */}
                   <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
                     <p>
-                      Don't have {isWorker ? 'a worker' : 'an employer'} account?{' '}
+                      {t.dontHaveAccount || "Don't have an account yet?"}{' '}
                       <Link
                         to={`/register?role=${activeRole}`}
                         className={`font-extrabold hover:underline ${
                           isWorker ? 'text-blue-600 dark:text-blue-400' : 'text-indigo-600 dark:text-indigo-400'
                         }`}
                       >
-                        Register as {isWorker ? 'Worker' : 'Employer'} →
+                        {isWorker ? (t.findJobsAsWorker || 'Find Jobs as Worker') : (t.hireTalentAsEmployer || 'Hire Talent as Employer')} →
                       </Link>
                     </p>
                   </div>

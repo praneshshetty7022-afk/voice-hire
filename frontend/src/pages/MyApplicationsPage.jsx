@@ -121,7 +121,7 @@ export default function MyApplicationsPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">{t.myApplications}</h1>
           <p className="text-xs font-semibold text-slate-400 mt-1">
-            Track your job applications and complete hiring progress
+            {t.myApplicationsSubtitle || 'Track your job applications and complete hiring progress'}
           </p>
         </div>
         <div className="w-12 h-12 bg-slate-800 text-cyan-400 border border-cyan-400/30 rounded-2xl flex items-center justify-center shadow-sm">
@@ -172,7 +172,7 @@ export default function MyApplicationsPage() {
       {loading ? (
         <div className="p-12 text-center bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/60 shadow-lg space-y-3">
           <RefreshCw className="w-9 h-9 animate-spin text-cyan-400 mx-auto" />
-          <p className="text-base font-black text-white">Loading Applications...</p>
+          <p className="text-base font-black text-white">{t.loadingApplications || 'Loading Applications...'}</p>
         </div>
       ) : (Array.isArray(filteredApps) && filteredApps.length > 0) ? (
         <div className="space-y-6">
@@ -208,7 +208,7 @@ export default function MyApplicationsPage() {
                         <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {app.jobLocation || app.location || 'Bengaluru'}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-cyan-400 font-extrabold">
-                          <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.minSalary || 1200}/{app.salaryType === 'MONTHLY' ? 'month' : 'day'}
+                          <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.minSalary || 1200}/{app.salaryType === 'MONTHLY' ? (t.perMonth || 'month') : (t.perDay || 'day')}
                         </span>
                         {app.experience && (
                           <>
@@ -224,11 +224,11 @@ export default function MyApplicationsPage() {
                     {app.applicationSource === 'VOICE' || app.applicationMethod === 'VOICE' ? (
                       <span className="px-3 py-1 bg-cyan-500/10 text-cyan-300 font-extrabold text-[10px] rounded-full border border-cyan-400/30 flex items-center gap-1">
                         <Mic className="w-3 h-3 text-cyan-400" />
-                        <span>Applied by Voice</span>
+                        <span>{t.appliedByVoiceBadge || 'Applied by Voice'}</span>
                       </span>
                     ) : (
                       <span className="px-3 py-1 bg-white/[0.06] text-slate-300 font-extrabold text-[10px] rounded-full border border-white/10">
-                        Manual Application
+                        {t.manualTab || 'Manual Application'}
                       </span>
                     )}
 
@@ -236,7 +236,7 @@ export default function MyApplicationsPage() {
                       onClick={() => setSelectedAppModal(app)}
                       className="text-xs font-black text-cyan-300 hover:text-white flex items-center gap-1 hover:underline pt-1 transition-colors"
                     >
-                      <Eye className="w-3.5 h-3.5" /> View Details
+                      <Eye className="w-3.5 h-3.5" /> {t.viewDetails || 'View Details'}
                     </button>
                   </div>
                 </div>

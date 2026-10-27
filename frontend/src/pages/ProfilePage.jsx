@@ -23,7 +23,7 @@ import { useVoice } from '../context/VoiceContext'
 
 export default function ProfilePage() {
   const { user, isEmployer, isEmployee, updateProfile, refreshUser } = useAuth()
-  const { selectedLang, setSelectedLang } = useVoice()
+  const { selectedLang, setSelectedLang, t } = useVoice()
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
@@ -101,13 +101,13 @@ export default function ProfilePage() {
   }
 
   const TRADES = [
-    { code: 'DRIVER', label: 'Driver (Commercial & Private)' },
-    { code: 'CARPENTER', label: 'Carpenter & Modular Interior' },
-    { code: 'ELECTRICIAN', label: 'Electrician & Wireman' },
-    { code: 'PLUMBER', label: 'Plumber & Pipe Fitting' },
-    { code: 'COOK', label: 'Cook & Kitchen Assistant' },
-    { code: 'PAINTER', label: 'Painter & Wall Polisher' },
-    { code: 'HELPER', label: 'Warehouse & Construction Helper' },
+    { code: 'DRIVER', label: t.tradeDriver || 'Driver (Commercial & Private)' },
+    { code: 'CARPENTER', label: t.tradeCarpenter || 'Carpenter & Modular Interior' },
+    { code: 'ELECTRICIAN', label: t.tradeElectrician || 'Electrician & Wireman' },
+    { code: 'PLUMBER', label: t.tradePlumber || 'Plumber & Pipe Fitting' },
+    { code: 'COOK', label: t.tradeCook || 'Cook & Kitchen Assistant' },
+    { code: 'PAINTER', label: t.tradePainter || 'Painter & Wall Polisher' },
+    { code: 'HELPER', label: t.tradeHelper || 'Warehouse & Construction Helper' },
   ]
 
   const LANGUAGES = [
@@ -130,11 +130,11 @@ export default function ProfilePage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                {isEmployer ? companyName || fullName : fullName || 'Worker Profile'}
+                {isEmployer ? companyName || fullName : fullName || (t.profileTitle || 'Worker Profile')}
               </h1>
               <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3" />
-                <span>Verified</span>
+                <span>{t.verifiedEmployer || 'Verified'}</span>
               </span>
             </div>
 
@@ -183,7 +183,7 @@ export default function ProfilePage() {
             className="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving...' : 'Save Profile'}</span>
+            <span>{saving ? (t.savingProfile || 'Saving...') : (t.saveProfile || 'Save Profile')}</span>
           </button>
         </div>
 
@@ -191,7 +191,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              {isEmployer ? 'Contact Person Name' : 'Full Name'}
+              {isEmployer ? (t.contactPersonLabel || 'Contact Person Name') : (t.fullNameLabel || 'Full Name')}
             </label>
             <div className="relative">
               <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -207,7 +207,7 @@ export default function ProfilePage() {
 
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Registered Phone Number
+              {t.mobilePhoneLabel || 'Registered Phone Number'}
             </label>
             <div className="relative">
               <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -225,7 +225,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Location / City
+              {t.location || 'Location / City'}
             </label>
             <div className="relative">
               <MapPin className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -240,7 +240,7 @@ export default function ProfilePage() {
 
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Preferred Language
+              {t.preferredLanguage || 'Preferred Language'}
             </label>
             <select
               value={preferredLanguage}
@@ -267,7 +267,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                    Company / Organization Name
+                    {t.companyNameLabel || 'Company / Organization Name'}
                   </label>
                   <input
                     type="text"
@@ -280,7 +280,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                    Industry / Business Domain
+                    {t.industryTypeLabel || 'Industry / Business Domain'}
                   </label>
                   <input
                     type="text"
@@ -315,7 +315,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                    Primary Trade
+                    {t.tradeCategoryLabel || 'Primary Trade'}
                   </label>
                   <select
                     value={tradeCategory}
@@ -332,7 +332,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                    Experience Level
+                    {t.experience || 'Experience Level'}
                   </label>
                   <select
                     value={experience}
@@ -349,7 +349,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                    Expected Daily Wage (₹)
+                    {t.salary || 'Expected Daily Wage'} (₹)
                   </label>
                   <input
                     type="number"
@@ -384,7 +384,7 @@ export default function ProfilePage() {
             className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-sm shadow-xl shadow-blue-500/30 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? 'Updating MongoDB Profile...' : 'Save & Update Profile'}</span>
+            <span>{saving ? (t.savingProfile || 'Updating MongoDB Profile...') : (t.saveProfile || 'Save & Update Profile')}</span>
           </button>
         </div>
       </form>

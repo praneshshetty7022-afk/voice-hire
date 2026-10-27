@@ -15,10 +15,12 @@ import {
 import toast from 'react-hot-toast'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
+import { useVoice } from '../context/VoiceContext'
 
 export default function PostJobPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t } = useVoice()
 
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('DRIVER')
@@ -32,13 +34,13 @@ export default function PostJobPage() {
   const [loading, setLoading] = useState(false)
 
   const TRADES = [
-    { code: 'DRIVER', label: 'Commercial / Private Driver' },
-    { code: 'CARPENTER', label: 'Modular Interior Carpenter' },
-    { code: 'ELECTRICIAN', label: 'Licensed Electrician & Wireman' },
-    { code: 'PLUMBER', label: 'Sanitary & Pipe Plumber' },
-    { code: 'COOK', label: 'Residential / Commercial Cook' },
-    { code: 'PAINTER', label: 'Wall Painter & Surface Polisher' },
-    { code: 'HELPER', label: 'Warehouse & Construction Helper' },
+    { code: 'DRIVER', label: t.tradeDriver || 'Commercial / Private Driver' },
+    { code: 'CARPENTER', label: t.tradeCarpenter || 'Modular Interior Carpenter' },
+    { code: 'ELECTRICIAN', label: t.tradeElectrician || 'Licensed Electrician & Wireman' },
+    { code: 'PLUMBER', label: t.tradePlumber || 'Sanitary & Pipe Plumber' },
+    { code: 'COOK', label: t.tradeCook || 'Residential / Commercial Cook' },
+    { code: 'PAINTER', label: t.tradePainter || 'Wall Painter & Surface Polisher' },
+    { code: 'HELPER', label: t.tradeHelper || 'Warehouse & Construction Helper' },
   ]
 
   const handleSubmit = async (e) => {
@@ -91,16 +93,16 @@ export default function PostJobPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
             <Link to="/employer/dashboard" className="hover:text-[#2563EB]">
-              Employer Dashboard
+              {t.employerPortalHeading || 'Employer Dashboard'}
             </Link>
             <span>/</span>
-            <span className="text-[#2563EB] dark:text-[#60A5FA]">Post New Job</span>
+            <span className="text-[#2563EB] dark:text-[#60A5FA]">{t.navPostJob || 'Post New Job'}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Create Worker Job Listing
+            {t.createWorkerJobListing || 'Create Worker Job Listing'}
           </h1>
           <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">
-            Post in 2 minutes. Local workers will be notified instantly via audio alerts.
+            {t.postJobSubtitle || 'Post in 2 minutes. Local workers will be notified instantly via audio alerts.'}
           </p>
         </div>
 
@@ -145,7 +147,7 @@ export default function PostJobPage() {
         {/* Job Title */}
         <div>
           <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-            Job Title
+            {t.jobTitleLabel || 'Job Title'}
           </label>
           <div className="relative">
             <Briefcase className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -164,7 +166,7 @@ export default function PostJobPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Trade Category
+              {t.tradeCategoryLabel || 'Trade Category'}
             </label>
             <select
               value={category}
@@ -181,7 +183,7 @@ export default function PostJobPage() {
 
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Work Location / City
+              {t.location || 'Work Location / City'}
             </label>
             <div className="relative">
               <MapPin className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -201,7 +203,7 @@ export default function PostJobPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Daily Work Timings
+              {t.workTime || 'Daily Work Timings'}
             </label>
             <div className="relative">
               <Clock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -217,7 +219,7 @@ export default function PostJobPage() {
 
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Required Experience
+              {t.experience || 'Required Experience'}
             </label>
             <select
               value={experience}
@@ -237,7 +239,7 @@ export default function PostJobPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-              Daily Wage Amount (₹ INR)
+              {t.salary || 'Daily Wage Amount'} (₹ INR)
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-black text-slate-400">₹</span>
@@ -270,7 +272,7 @@ export default function PostJobPage() {
         {/* Job Description */}
         <div>
           <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-            Job Description & Responsibilities
+            {t.jobDescriptionLabel || 'Job Description & Responsibilities'}
           </label>
           <textarea
             rows={3}
@@ -284,7 +286,7 @@ export default function PostJobPage() {
         {/* Requirements */}
         <div>
           <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-            Key Requirements (Comma-separated)
+            {t.keyRequirementsLabel || 'Key Requirements (Comma-separated)'}
           </label>
           <input
             type="text"
@@ -302,11 +304,11 @@ export default function PostJobPage() {
           className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-base shadow-xl shadow-blue-500/30 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           {loading ? (
-            <span>Publishing Job Listing...</span>
+            <span>{t.savingProfile || 'Publishing Job Listing...'}</span>
           ) : (
             <>
               <PlusCircle className="w-5 h-5" />
-              <span>Publish Job Listing to Workers</span>
+              <span>{t.postJobNow || 'Publish Job Listing to Workers'}</span>
               <ArrowRight className="w-5 h-5 ml-1" />
             </>
           )}

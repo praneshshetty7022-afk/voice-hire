@@ -109,71 +109,71 @@ export default function WorkerDashboardPage() {
   const FEATURED_CATEGORIES = [
     {
       id: 'DRIVER',
-      title: 'Drivers',
-      jobCount: '740+ Jobs',
-      wage: '₹800 – ₹1,500/day',
+      title: t.tradeDriver || 'Drivers',
+      jobCount: `740+ ${t.navJobs || 'Jobs'}`,
+      wage: `₹800 – ₹1,500${t.perDay || '/day'}`,
       image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=600&q=80',
       icon: '🚚',
-      cta: 'Browse Drivers',
+      cta: `${t.viewJob || 'Browse'} ${t.tradeDriver || 'Drivers'}`,
     },
     {
       id: 'CARPENTER',
-      title: 'Carpenters',
-      jobCount: '550+ Jobs',
-      wage: '₹900 – ₹1,600/day',
+      title: t.tradeCarpenter || 'Carpenters',
+      jobCount: `550+ ${t.navJobs || 'Jobs'}`,
+      wage: `₹900 – ₹1,600${t.perDay || '/day'}`,
       image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80',
       icon: '🔨',
-      cta: 'Browse Carpenters',
+      cta: `${t.viewJob || 'Browse'} ${t.tradeCarpenter || 'Carpenters'}`,
     },
     {
       id: 'HELPER',
-      title: 'General Workers',
-      jobCount: '1,200+ Jobs',
-      wage: '₹700 – ₹1,200/day',
+      title: t.tradeHelper || 'General Workers',
+      jobCount: `1,200+ ${t.navJobs || 'Jobs'}`,
+      wage: `₹700 – ₹1,200${t.perDay || '/day'}`,
       image: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156f?auto=format&fit=crop&w=600&q=80',
       icon: '🏗️',
-      cta: 'Browse Workers',
+      cta: `${t.viewJob || 'Browse'} ${t.tradeHelper || 'Workers'}`,
     },
     {
       id: 'HOUSEHELP',
-      title: 'Helpers / Maintenance',
-      jobCount: '890+ Jobs',
-      wage: '₹650 – ₹1,100/day',
+      title: t.tradeHousehelp || 'Helpers / Maintenance',
+      jobCount: `890+ ${t.navJobs || 'Jobs'}`,
+      wage: `₹650 – ₹1,100${t.perDay || '/day'}`,
       image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80',
       icon: '🧹',
-      cta: 'Browse Helpers',
+      cta: `${t.viewJob || 'Browse'} ${t.tradeHousehelp || 'Helpers'}`,
     },
   ]
 
   // Platform 5-Column Feature Benefits
   const FEATURES = [
     {
-      title: 'Voice Search',
-      desc: 'Speak in your local dialect to find matching roles instantly.',
+      title: t.benefitVoiceSearch || 'Voice Search',
+      desc: t.benefitVoiceSearchDesc || 'Speak in your local dialect to find matching roles instantly.',
       icon: Mic,
       color: 'text-[#2563EB] bg-blue-500/10 dark:bg-blue-500/20',
     },
     {
-      title: 'Verified Profiles',
-      desc: 'Employer-trusted ID verification & guaranteed payouts.',
+      title: t.benefitVerifiedProfiles || 'Verified Profiles',
+      desc: t.benefitVerifiedProfilesDesc || 'Employer-trusted ID verification & guaranteed payouts.',
       icon: ShieldCheck,
       color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20',
     },
     {
-      title: 'Secure Platform',
-      desc: 'Encrypted data & zero spam directly to your mobile.',
+      title: t.benefitSecurePlatform || 'Secure Platform',
+      desc: t.benefitSecurePlatformDesc || 'Encrypted data & zero spam directly to your mobile.',
       icon: Lock,
       color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 dark:bg-indigo-500/20',
     },
     {
-      title: 'Fast Hiring',
-      desc: 'Instant match alerts via WhatsApp and direct call.',
+      title: t.benefitFastHiring || 'Fast Hiring',
+      desc: t.benefitFastHiringDesc || 'Instant match alerts via WhatsApp and direct call.',
       icon: Zap,
       color: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20',
     },
     {
-      title: 'Grow Together',
-      desc: 'Skill development and verified career progression tracks.',
+      title: t.benefitGrowTogether || 'Grow Together',
+      desc: t.benefitGrowTogetherDesc || 'Skill development and verified career progression tracks.',
       icon: TrendingUp,
       color: 'text-sky-600 dark:text-sky-400 bg-sky-500/10 dark:bg-sky-500/20',
     },
@@ -181,12 +181,12 @@ export default function WorkerDashboardPage() {
 
   // Page 3: Mobile Touch Quick Access Tiles (2x3 Grid)
   const MOBILE_QUICK_TILES = [
-    { label: 'Voice Search', icon: '🎙️', action: handleMicTap },
-    { label: 'Select Language', icon: '🌐', action: () => navigate('/register') },
-    { label: 'Driver Jobs', icon: '🚚', action: () => handleChipClick('DRIVER') },
-    { label: 'Carpenter Jobs', icon: '🔨', action: () => handleChipClick('CARPENTER') },
-    { label: 'Construction', icon: '🏗️', action: () => handleChipClick('HELPER') },
-    { label: 'Watch Story 🎬', icon: '🎬', action: () => window.dispatchEvent(new CustomEvent('open-cinematic-intro')) },
+    { label: t.benefitVoiceSearch || 'Voice Search', icon: '🎙️', action: handleMicTap },
+    { label: t.selectLanguage || 'Select Language', icon: '🌐', action: () => navigate('/register') },
+    { label: t.tradeDriver || 'Driver Jobs', icon: '🚚', action: () => handleChipClick('DRIVER') },
+    { label: t.tradeCarpenter || 'Carpenter Jobs', icon: '🔨', action: () => handleChipClick('CARPENTER') },
+    { label: t.tradeHelper || 'Construction', icon: '🏗️', action: () => handleChipClick('HELPER') },
+    { label: t.watchStoryBtn || 'Watch Story 🎬', icon: '🎬', action: () => window.dispatchEvent(new CustomEvent('open-cinematic-intro')) },
   ]
 
   return (
@@ -214,10 +214,10 @@ export default function WorkerDashboardPage() {
             </div>
 
             <h2 className="text-lg font-black text-[#0F172A] dark:text-[#F8FAFC]">
-              {isListening ? 'Listening to your voice...' : 'Tap to Speak Job Search'}
+              {isListening ? (t.listeningToVoice || 'Listening to your voice...') : (t.tapToSpeakSearch || 'Tap to Speak Job Search')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1">
-              "Find driver jobs", "Carpenter work", "Helper work"
+              {t.trySaying || 'Try saying:'} "{t.tradeDriver || 'Driver'}", "{t.tradeCarpenter || 'Carpenter'}", "{t.tradeHelper || 'General Worker'}"
             </p>
           </div>
         </div>
@@ -225,7 +225,7 @@ export default function WorkerDashboardPage() {
         {/* 2x3 Mobile Touch Tile Grid */}
         <div>
           <p className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1 mb-2.5">
-            Quick Touch Navigation
+            {t.quickTouchNav || 'Quick Touch Navigation'}
           </p>
           <div className="grid grid-cols-2 gap-3">
             {MOBILE_QUICK_TILES.map((tile, idx) => (
@@ -261,7 +261,7 @@ export default function WorkerDashboardPage() {
             <div className="flex items-center gap-2.5 flex-wrap">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 text-xs font-black text-[#2563EB] dark:text-[#60A5FA]">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>⚡ Smart Voice Search · Verified Jobs</span>
+                <span>{t.smartVoiceBadge || '⚡ Smart Voice Search · Verified Jobs'}</span>
               </div>
 
               <button
@@ -269,22 +269,22 @@ export default function WorkerDashboardPage() {
                 onClick={() => window.dispatchEvent(new CustomEvent('open-cinematic-intro'))}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-md shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
-                <span>🎬 Watch Story: "The Power of Voice"</span>
+                <span>{t.watchStoryBtn || '🎬 Watch Story: "The Power of Voice"'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {/* H1 Title: YOUR VOICE. REAL JOBS. */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] dark:text-[#F8FAFC] tracking-tight leading-[1.12]">
-              YOUR VOICE.{' '}
+              {t.heroVoiceHeadline1 || 'YOUR VOICE.'}{' '}
               <span className="text-[#2563EB] dark:text-[#3B82F6] inline-block">
-                REAL JOBS.
+                {t.heroVoiceHeadline2 || 'REAL JOBS.'}
               </span>
             </h1>
 
             {/* Subheadline */}
             <p className="text-base sm:text-lg font-medium text-slate-600 dark:text-[#94A3B8] max-w-xl leading-relaxed">
-              VoiceHire connects skilled and entry-level workers with real employers using simple voice search.
+              {t.heroVoiceSubheadline || 'VoiceHire connects skilled and entry-level workers with real employers using simple voice search.'}
             </p>
 
             {/* Interactive Voice Bar (Main Feature) */}
@@ -327,7 +327,7 @@ export default function WorkerDashboardPage() {
               {/* Quick Filter Category Chips */}
               <div className="mt-4 flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mr-1">
-                  Quick Filters:
+                  {t.quickFilters || 'Quick Filters:'}
                 </span>
                 <button
                   type="button"
@@ -335,7 +335,7 @@ export default function WorkerDashboardPage() {
                   className="px-3.5 py-1.5 rounded-full bg-white dark:bg-[#0B0F19] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-[#60A5FA] border border-slate-200 dark:border-white/10 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>🚚</span>
-                  <span>Driver</span>
+                  <span>{t.tradeDriver || 'Driver'}</span>
                 </button>
                 <button
                   type="button"
@@ -343,7 +343,7 @@ export default function WorkerDashboardPage() {
                   className="px-3.5 py-1.5 rounded-full bg-white dark:bg-[#0B0F19] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-[#60A5FA] border border-slate-200 dark:border-white/10 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>🔨</span>
-                  <span>Carpenter</span>
+                  <span>{t.tradeCarpenter || 'Carpenter'}</span>
                 </button>
                 <button
                   type="button"
@@ -351,7 +351,7 @@ export default function WorkerDashboardPage() {
                   className="px-3.5 py-1.5 rounded-full bg-white dark:bg-[#0B0F19] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-[#60A5FA] border border-slate-200 dark:border-white/10 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>🏗️</span>
-                  <span>General Worker</span>
+                  <span>{t.tradeHelper || 'General Worker'}</span>
                 </button>
                 <button
                   type="button"
@@ -359,14 +359,14 @@ export default function WorkerDashboardPage() {
                   className="px-3.5 py-1.5 rounded-full bg-white dark:bg-[#0B0F19] hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-[#60A5FA] border border-slate-200 dark:border-white/10 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>🧹</span>
-                  <span>Helper</span>
+                  <span>{t.tradeHousehelp || 'Helper'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleChipClick('ALL')}
                   className="px-3.5 py-1.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-xs transition-all shadow-sm cursor-pointer"
                 >
-                  + View All
+                  {t.viewAllBtn || '+ View All'}
                 </button>
               </div>
 
@@ -374,7 +374,7 @@ export default function WorkerDashboardPage() {
               {debugLog?.rawSpeech && (
                 <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-500/30 rounded-2xl text-xs sm:text-sm font-bold text-[#1D4ED8] dark:text-[#60A5FA] flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA] shrink-0" />
-                  <span>Spoken Voice: "{debugLog.rawSpeech}"</span>
+                  <span>{t.spokenVoice || 'Spoken Voice:'} "{debugLog.rawSpeech}"</span>
                 </div>
               )}
             </div>
@@ -398,8 +398,8 @@ export default function WorkerDashboardPage() {
                   ✓
                 </span>
                 <div>
-                  <span className="block leading-tight">Verified Jobs</span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-300 font-semibold">100% Authenticated</span>
+                  <span className="block leading-tight">{t.verifiedJobsCard || 'Verified Jobs'}</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-300 font-semibold">{t.authenticated100 || '100% Authenticated'}</span>
                 </div>
               </div>
 
@@ -409,8 +409,8 @@ export default function WorkerDashboardPage() {
                   <Users className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <span className="block leading-tight">Real People, Better Future</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Direct Wage Payouts</span>
+                  <span className="block leading-tight">{t.realPeopleCard || 'Real People, Better Future'}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{t.directPayouts || 'Direct Wage Payouts'}</span>
                 </div>
               </div>
             </div>
@@ -429,10 +429,10 @@ export default function WorkerDashboardPage() {
       <section className="bg-white/80 dark:bg-[#151C2C]/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-300">
         <div className="text-center sm:text-left mb-6">
           <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] dark:text-[#F8FAFC] tracking-tight">
-            Why Skilled Workers Choose VoiceHire
+            {t.whyChooseVoiceHire || 'Why Skilled Workers Choose VoiceHire'}
           </h2>
           <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-[#94A3B8] mt-1">
-            Built from the ground up for low-literacy accessibility and immediate employment
+            {t.whyChooseSubtitle || 'Built from the ground up for low-literacy accessibility and immediate employment'}
           </p>
         </div>
 
@@ -470,10 +470,10 @@ export default function WorkerDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-[#0F172A] dark:text-[#F8FAFC] tracking-tight">
-              Featured Job Categories
+              {t.featuredJobCategories || 'Featured Job Categories'}
             </h2>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-[#94A3B8] mt-0.5">
-              Verified daily and monthly vacancies matching your trade skills
+              {t.featuredCategoriesSubtitle || 'Verified daily and monthly vacancies matching your trade skills'}
             </p>
           </div>
 
@@ -481,7 +481,7 @@ export default function WorkerDashboardPage() {
             to="/jobs-list"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#2563EB] dark:text-[#60A5FA] hover:underline"
           >
-            <span>Explore All 3,380+ Vacancies</span>
+            <span>{t.exploreAllVacancies || 'Explore All 3,380+ Vacancies'}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -520,7 +520,7 @@ export default function WorkerDashboardPage() {
                 {/* Details */}
                 <div className="p-5 space-y-3">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-[#94A3B8]">
-                    <span>Avg. Daily Wage</span>
+                    <span>{t.avgDailyWage || 'Avg. Daily Wage'}</span>
                     <span className="text-[#2563EB] dark:text-[#60A5FA] font-black">{cat.wage}</span>
                   </div>
                 </div>

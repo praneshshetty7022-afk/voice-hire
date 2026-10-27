@@ -18,9 +18,11 @@ import {
 import toast from 'react-hot-toast'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
+import { useVoice } from '../context/VoiceContext'
 
 export default function ManageApplicantsPage() {
   const { user } = useAuth()
+  const { t } = useVoice()
   const [applicants, setApplicants] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('ALL')
@@ -88,16 +90,16 @@ export default function ManageApplicantsPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
             <Link to="/employer/dashboard" className="hover:text-[#2563EB]">
-              Employer Dashboard
+              {t.employerPortalHeading || 'Employer Dashboard'}
             </Link>
             <span>/</span>
-            <span className="text-[#2563EB] dark:text-[#60A5FA]">Applicants</span>
+            <span className="text-[#2563EB] dark:text-[#60A5FA]">{t.navManageApplicants || 'Applicants'}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Candidate Applications & Voice Screenings
+            {t.candidateScreeningsTitle || 'Candidate Applications & Voice Screenings'}
           </h1>
           <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">
-            Review applicant trade credentials, listen to spoken audio introductions, and schedule interviews.
+            {t.candidateScreeningsDesc || 'Review applicant trade credentials, listen to spoken audio introductions, and schedule interviews.'}
           </p>
         </div>
 
@@ -105,18 +107,18 @@ export default function ManageApplicantsPage() {
           to="/employer/post-job"
           className="px-4 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-blue-500/25 w-fit"
         >
-          <span>+ Post Another Job</span>
+          <span>+ {t.postNewJobButton || 'Post Another Job'}</span>
         </Link>
       </div>
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6">
         {[
-          { key: 'ALL', label: 'All Candidates' },
-          { key: 'APPLIED', label: 'New / Applied' },
-          { key: 'SHORTLISTED', label: 'Shortlisted' },
-          { key: 'HIRED', label: 'Hired' },
-          { key: 'REJECTED', label: 'Rejected' },
+          { key: 'ALL', label: t.allTab || 'All Candidates' },
+          { key: 'APPLIED', label: t.statusTimeline?.applied || 'New / Applied' },
+          { key: 'SHORTLISTED', label: t.shortlistedCard || 'Shortlisted' },
+          { key: 'HIRED', label: t.statusTimeline?.hired || 'Hired' },
+          { key: 'REJECTED', label: t.statusTimeline?.rejected || 'Rejected' },
         ].map((tab) => (
           <button
             key={tab.key}

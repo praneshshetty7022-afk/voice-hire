@@ -15,7 +15,7 @@ export default function JobCard({ job, onApplyVoice }) {
 
   const title = job?.title || prof.title
   const location = job?.location || 'Bengaluru'
-  const salary = job?.dailyWage ? `₹${job.dailyWage} / Day` : (job?.salary || '₹1,200 / Day')
+  const salary = job?.dailyWage ? `₹${job.dailyWage} ${t.perDay || '/ Day'}` : (job?.salary || `₹1,200 ${t.perDay || '/ Day'}`)
   const workTime = job?.workTime || '9 AM – 6 PM'
   const experience = job?.experience || '1+ Years Experience'
   const employerName = job?.employerName || job?.companyName || 'Verified Employer'
@@ -99,7 +99,7 @@ export default function JobCard({ job, onApplyVoice }) {
           <Briefcase className="w-3.5 h-3.5 text-slate-400" />
           {employerName}
         </span>
-        <span className="text-emerald-600 font-black flex items-center gap-1">✓ Verified</span>
+        <span className="text-emerald-600 font-black flex items-center gap-1">✓ {t.verifiedEmployer || 'Verified'}</span>
       </div>
 
       {/* Action Buttons */}

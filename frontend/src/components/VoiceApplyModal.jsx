@@ -399,18 +399,18 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
             <div>
               <span className="px-3.5 py-1 bg-cyan-500/10 text-cyan-300 font-extrabold text-[11px] rounded-full uppercase tracking-widest border border-cyan-400/30">
-                🎙️ Apply by Voice
+                🎙️ {t.applyByVoice || 'Apply by Voice'}
               </span>
               <h2 className="text-2xl font-black text-white mt-2">{job?.title || prof.title}</h2>
-              <p className="text-sm font-extrabold text-slate-300 mt-1">{job?.location || 'Bengaluru'} • <span className="text-cyan-400">₹1,200/day</span></p>
+              <p className="text-sm font-extrabold text-slate-300 mt-1">{job?.location || 'Bengaluru'} • <span className="text-cyan-400">₹{job?.dailyWage || 1200}{t.perDay || '/day'}</span></p>
             </div>
 
             <div className="p-4 bg-slate-800/80 border border-cyan-400/30 text-cyan-200 font-extrabold rounded-2xl text-sm shadow-sm">
               {currentState === 'RECORDING'
-                ? `🎙️ Recording in progress... (${formatTimer(recordingTime)})`
+                ? `🎙️ ${t.recordingInProgress || 'Recording in progress...'} (${formatTimer(recordingTime)})`
                 : currentState === 'PROCESSING'
                 ? '⏳ Processing recorded voice...'
-                : 'Please tell your name and experience.'}
+                : (t.tellExperiencePrompt || 'Please tell your name and experience.')}
             </div>
 
             {/* Microphone Button Controls */}
@@ -436,10 +436,10 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
               <p className="text-base font-black text-white">
                 {currentState === 'RECORDING'
-                  ? 'Tap Red Button to Stop'
+                  ? (t.tapStopRecording || 'Tap Red Button to Stop')
                   : currentState === 'PROCESSING'
                   ? 'Processing audio...'
-                  : 'Tap Mic to Start Recording'}
+                  : (t.tapMicToRecord || 'Tap Mic to Start Recording')}
               </p>
 
               {transcript && (
@@ -464,9 +464,9 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
           <div className="p-8 space-y-5">
             <div className="text-center">
               <span className="px-3.5 py-1 bg-cyan-500/10 text-cyan-300 font-extrabold text-[11px] rounded-full uppercase tracking-widest border border-cyan-400/30">
-                Application Details
+                {t.extractedDetails || 'Application Details'}
               </span>
-              <h2 className="text-2xl font-black text-white mt-2">Confirm Application</h2>
+              <h2 className="text-2xl font-black text-white mt-2">{t.confirmApplication || 'Confirm Application'}</h2>
             </div>
 
             {/* Extracted Information Cards */}
@@ -474,7 +474,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               <div className="flex items-center gap-3 p-3.5 bg-slate-800/60 rounded-2xl border border-slate-700/60">
                 <Briefcase className="w-5 h-5 text-cyan-400 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selected Job</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.selectedJob || 'Selected Job'}</p>
                   <p className="text-base font-black text-white">{job?.title || prof.title} ({job?.location || 'Bengaluru'})</p>
                 </div>
               </div>
@@ -482,7 +482,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               <div className="flex items-center gap-3 p-3.5 bg-slate-800/60 rounded-2xl border border-slate-700/60">
                 <User className="w-5 h-5 text-cyan-300 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Applicant Name</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.applicantName || 'Applicant Name'}</p>
                   <p className="text-base font-black text-white">{extracted.name || currentUser?.name || 'Applicant'}</p>
                 </div>
               </div>
@@ -490,7 +490,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               <div className="flex items-center gap-3 p-3.5 bg-slate-800/60 rounded-2xl border border-slate-700/60">
                 <Star className="w-5 h-5 text-cyan-400 shrink-0" />
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Experience</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.experienceYears || 'Experience'}</p>
                   <p className="text-base font-black text-white">{extracted.experience || '2 years'}</p>
                 </div>
               </div>
@@ -514,7 +514,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 className="py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold rounded-2xl text-sm flex items-center justify-center gap-1.5 border border-slate-700 transition-all"
               >
                 <RotateCcw className="w-4 h-4 text-slate-400" />
-                <span>RECORD AGAIN</span>
+                <span>{t.recordAgain || 'RECORD AGAIN'}</span>
               </button>
 
               <button
@@ -523,7 +523,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
                 className="py-3.5 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black rounded-2xl text-sm shadow-md hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all border border-white/20"
               >
                 <CheckCircle2 className="w-4 h-4 text-white" />
-                <span>SUBMIT APPLICATION</span>
+                <span>{t.submitApplication || 'SUBMIT APPLICATION'}</span>
               </button>
             </div>
           </div>
@@ -533,7 +533,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
         {currentState === 'SUBMITTING' && (
           <div className="p-12 text-center space-y-4">
             <Loader2 className="w-14 h-14 text-cyan-400 animate-spin mx-auto" />
-            <h2 className="text-2xl font-black text-white">Submitting Application...</h2>
+            <h2 className="text-2xl font-black text-white">{t.applyingButton || 'Submitting Application...'}</h2>
           </div>
         )}
 
@@ -548,9 +548,9 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
 
             <div>
               <span className="inline-block px-3.5 py-1 bg-emerald-500/10 text-emerald-300 font-black text-xs rounded-full border border-emerald-400/30 mb-2">
-                🎤 Applied using Voice
+                🎤 {t.appliedByVoiceBadge || 'Applied using Voice'}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-white">🎉 Application Submitted Successfully!</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-white">🎉 {t.applicationSubmitted || 'Application Submitted Successfully!'}</h2>
               <p className="text-sm font-bold text-slate-300 mt-2">
                 Your application for <span className="text-cyan-300 font-black">{job?.title || prof.title}</span> has been sent to the employer.
               </p>
@@ -577,7 +577,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
               }}
               className="w-full py-4 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white font-black rounded-2xl text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/20"
             >
-              VIEW MY APPLICATIONS
+              {t.viewMyApplications || 'VIEW MY APPLICATIONS'}
             </button>
           </div>
         )}

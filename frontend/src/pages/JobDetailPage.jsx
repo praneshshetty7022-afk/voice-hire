@@ -185,7 +185,7 @@ export default function JobDetailPage() {
         className="flex items-center gap-2 font-extrabold text-slate-400 hover:text-white text-sm transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Back to Jobs</span>
+        <span>{t.backToJobs || 'Back to Jobs'}</span>
       </button>
 
       {/* Top Hero Banner */}
@@ -216,7 +216,7 @@ export default function JobDetailPage() {
         </p>
 
         <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300 mt-1">
-          ₹{job?.dailyWage || job?.minSalary || 1200} / Day
+          ₹{job?.dailyWage || job?.minSalary || 1200} {t.perDay || '/ Day'}
         </p>
 
         {/* Audio Speaker Listener Pill */}
@@ -246,7 +246,7 @@ export default function JobDetailPage() {
         <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <IndianRupee className="w-6 h-6 text-cyan-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.salary}</p>
-          <p className="text-base font-black text-cyan-300 mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} / Day</p>
+          <p className="text-base font-black text-cyan-300 mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} {t.perDay || '/ Day'}</p>
         </div>
 
         <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
@@ -270,7 +270,7 @@ export default function JobDetailPage() {
         </div>
 
         <div>
-          <h3 className="text-base font-black text-white mb-2">Job Description</h3>
+          <h3 className="text-base font-black text-white mb-2">{t.jobDescriptionLabel || 'Job Description'}</h3>
           <p className="text-sm text-slate-300 leading-relaxed font-normal">
             {job?.description}
           </p>
@@ -278,7 +278,7 @@ export default function JobDetailPage() {
 
         {/* Requirements Bullet Points */}
         <div className="pt-2">
-          <h4 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">Key Requirements:</h4>
+          <h4 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">{t.keyRequirementsLabel || 'Key Requirements:'}</h4>
           <ul className="space-y-2">
             {(prof?.props || []).map((prop, idx) => (
               <li key={idx} className="flex items-center gap-2 text-sm font-bold text-slate-200">
@@ -300,7 +300,7 @@ export default function JobDetailPage() {
               className="w-full py-4 bg-emerald-500/15 text-emerald-300 font-black text-base rounded-2xl border border-emerald-400/30 flex items-center justify-center gap-2 cursor-not-allowed opacity-95 shadow-glass-edge"
             >
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <span>{applicationMode === 'VOICE' ? '🎤 Applied by Voice' : '✓ Already Applied'}</span>
+              <span>{applicationMode === 'VOICE' ? `🎤 ${t.appliedByVoiceBadge || 'Applied by Voice'}` : (t.alreadyAppliedBadge || '✓ Already Applied')}</span>
             </button>
           ) : (
             <div className="flex gap-3">
@@ -310,7 +310,7 @@ export default function JobDetailPage() {
                 disabled={isApplying}
                 className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold rounded-2xl text-sm border border-slate-700 disabled:opacity-50 transition-all"
               >
-                {isApplying ? 'Applying...' : t.applyNormally}
+                {isApplying ? (t.applyingButton || 'Applying...') : t.applyNormally}
               </button>
 
               <button

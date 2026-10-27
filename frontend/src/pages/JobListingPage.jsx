@@ -160,7 +160,7 @@ export default function JobListingPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search work..."
+            placeholder={t.searchWorkPlaceholder || 'Search work...'}
             className="w-full pl-11 pr-9 py-3 bg-white border border-blue-200/80 rounded-2xl outline-none focus:border-blue-500 font-bold text-sm text-slate-800 placeholder-slate-400 shadow-sm transition-all"
           />
           {searchQuery && (
@@ -177,7 +177,7 @@ export default function JobListingPage() {
       {/* City Chips Filter */}
       <div className="space-y-2">
         <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest px-1 flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-blue-600" /> Select City / స్థలం
+          <MapPin className="w-3.5 h-3.5 text-blue-600" /> {t.selectCityLabel || 'Select City'}
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -189,7 +189,7 @@ export default function JobListingPage() {
                 : 'bg-white text-slate-600 border-blue-200/80 hover:bg-blue-50 hover:text-blue-900 shadow-sm'
             }`}
           >
-            All Cities
+            {t.allCities || 'All Cities'}
           </button>
           {(Array.isArray(CITIES) ? CITIES : []).map((city) => (
             <button
@@ -211,7 +211,7 @@ export default function JobListingPage() {
       {/* Category Filter Chips */}
       <div className="space-y-2">
         <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest px-1 flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-blue-600" /> Profession Category
+          <Filter className="w-3.5 h-3.5 text-blue-600" /> {t.professionCategoryLabel || 'Profession Category'}
         </p>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
@@ -226,7 +226,7 @@ export default function JobListingPage() {
                 : 'bg-white text-slate-600 border-blue-200/80 hover:bg-blue-50 hover:text-blue-900 shadow-sm'
             }`}
           >
-            All Professions
+            {t.allProfessions || 'All Professions'}
           </button>
           {Object.entries(PROFESSIONS || {}).map(([key, prof]) => (
             <button
@@ -253,7 +253,7 @@ export default function JobListingPage() {
       {loading ? (
         <div className="p-12 text-center bg-white/85 backdrop-blur-2xl rounded-3xl border border-blue-100/90 shadow-[0_10px_35px_rgba(37,99,235,0.06)] space-y-3">
           <RefreshCw className="w-9 h-9 animate-spin text-blue-600 mx-auto" />
-          <p className="text-base font-black text-slate-900">Loading Available Jobs...</p>
+          <p className="text-base font-black text-slate-900">{t.loadingJobs || 'Loading Available Jobs...'}</p>
         </div>
       ) : safeJobs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -271,22 +271,22 @@ export default function JobListingPage() {
           <div className="w-16 h-16 bg-blue-50 text-blue-600 border border-blue-200 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-sm">
             🚗
           </div>
-          <h3 className="text-2xl font-black text-slate-900">No jobs available here right now</h3>
+          <h3 className="text-2xl font-black text-slate-900">{t.noJobsHereTitle || 'No jobs available here right now'}</h3>
           <p className="text-sm text-slate-500 font-semibold max-w-md mx-auto">
-            Try searching nearby cities or select another profession category.
+            {t.noJobsHereDesc || 'Try searching nearby cities or select another profession category.'}
           </p>
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
               onClick={() => setSelectedCity('ALL')}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
             >
-              Search Nearby
+              {t.searchNearby || 'Search Nearby'}
             </button>
             <button
               onClick={() => setSelectedCategory('ALL')}
               className="px-6 py-3 bg-white text-slate-700 font-extrabold rounded-2xl border border-blue-200 hover:bg-blue-50 transition-all text-sm shadow-sm"
             >
-              Choose Another Work
+              {t.chooseAnotherWork || 'Choose Another Work'}
             </button>
           </div>
         </div>

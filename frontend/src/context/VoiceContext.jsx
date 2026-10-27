@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { parseFullVoiceCommand, SUPPORTED_LANGUAGES } from '../services/voiceNLP'
 import { detectVisiblePageLanguage, detectTextLanguage, SCRIPT_RANGES } from '../utils/languageDetector'
+import { getTranslation } from '../utils/translations'
 import VoiceCommandModal from '../components/VoiceCommandModal'
 import axios from '../api/axios'
 import toast from 'react-hot-toast'
@@ -466,9 +467,12 @@ export const VoiceProvider = ({ children }) => {
     }
   }, [selectedLang, processVoiceInput])
 
+  const t = useMemo(() => getTranslation(selectedLang), [selectedLang])
+
   return (
     <VoiceContext.Provider
       value={{
+        t,
         selectedLang,
         setSelectedLang,
         detectedLangInfo,

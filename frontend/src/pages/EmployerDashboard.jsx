@@ -18,9 +18,11 @@ import {
 import toast from 'react-hot-toast'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
+import { useVoice } from '../context/VoiceContext'
 
 export default function EmployerDashboard() {
   const { user } = useAuth()
+  const { t } = useVoice()
   const [jobs, setJobs] = useState([])
   const [applicants, setApplicants] = useState([])
   const [loading, setLoading] = useState(true)
@@ -78,14 +80,14 @@ export default function EmployerDashboard() {
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
               <Building2 className="w-3.5 h-3.5" />
-              <span>Verified Employer Portal</span>
+              <span>{t.employerPortalHeading || 'Verified Employer Portal'}</span>
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Welcome, {user?.companyName || user?.fullName || 'Hiring Partner'}
+            {t.greetingGeneric || 'Welcome'}, {user?.companyName || user?.fullName || 'Hiring Partner'}
           </h1>
           <p className="text-xs sm:text-sm font-semibold text-slate-400">
-            Manage your worker hiring pipeline, post open job requisitions, and listen to spoken candidate applications.
+            {t.employerWelcomeText || 'Manage your worker hiring pipeline, post open job requisitions, and listen to spoken candidate applications.'}
           </p>
         </div>
 
@@ -95,7 +97,7 @@ export default function EmployerDashboard() {
             className="px-5 py-3 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-blue-500/30 flex items-center gap-2 active:scale-95 transition-all"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>+ Post New Job</span>
+            <span>+ {t.postNewJobButton || 'Post New Job'}</span>
           </Link>
 
           <Link
@@ -103,7 +105,7 @@ export default function EmployerDashboard() {
             className="px-5 py-3 rounded-2xl bg-white/[0.1] hover:bg-white/[0.18] border border-white/20 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 active:scale-95 transition-all"
           >
             <Users className="w-4 h-4 text-amber-400" />
-            <span>Manage Candidates</span>
+            <span>{t.manageCandidates || 'Manage Candidates'}</span>
           </Link>
         </div>
       </div>
@@ -117,7 +119,9 @@ export default function EmployerDashboard() {
           <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
             {activeJobs}
           </span>
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">Active Job Listings</p>
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
+            {t.activeJobsCard || 'Active Job Listings'}
+          </p>
         </div>
 
         <div className="p-5 rounded-3xl bg-white dark:bg-[#151C2C] border border-slate-200/80 dark:border-white/10 shadow-lg shadow-slate-200/30 dark:shadow-black/30">
@@ -127,7 +131,9 @@ export default function EmployerDashboard() {
           <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
             {totalApplicants}
           </span>
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">Total Applicants</p>
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
+            {t.totalApplicantsCard || 'Total Applicants'}
+          </p>
         </div>
 
         <div className="p-5 rounded-3xl bg-white dark:bg-[#151C2C] border border-slate-200/80 dark:border-white/10 shadow-lg shadow-slate-200/30 dark:shadow-black/30">
@@ -137,7 +143,9 @@ export default function EmployerDashboard() {
           <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
             {shortlistedCount}
           </span>
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">Shortlisted / Interview</p>
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
+            {t.shortlistedCard || 'Shortlisted / Interview'}
+          </p>
         </div>
 
         <div className="p-5 rounded-3xl bg-white dark:bg-[#151C2C] border border-slate-200/80 dark:border-white/10 shadow-lg shadow-slate-200/30 dark:shadow-black/30">
@@ -147,7 +155,9 @@ export default function EmployerDashboard() {
           <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
             {hiredCount}
           </span>
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">Hired Candidates</p>
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">
+            {t.selectedHiredCard || 'Hired Candidates'}
+          </p>
         </div>
       </div>
 
@@ -156,10 +166,10 @@ export default function EmployerDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              Your Published Job Listings
+              {t.yourPublishedListings || 'Your Published Job Listings'}
             </h2>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              Live listings active on the worker job board
+              {t.liveListingsActive || 'Live listings active on the worker job board'}
             </p>
           </div>
 
@@ -167,7 +177,7 @@ export default function EmployerDashboard() {
             to="/employer/post-job"
             className="text-xs sm:text-sm font-bold text-[#2563EB] dark:text-[#60A5FA] hover:underline flex items-center gap-1"
           >
-            <span>Create new listing</span>
+            <span>{t.createNewListing || 'Create new listing'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -180,16 +190,16 @@ export default function EmployerDashboard() {
           <div className="p-10 text-center rounded-3xl bg-white dark:bg-[#151C2C] border border-slate-200/80 dark:border-white/10">
             <Briefcase className="w-10 h-10 text-slate-400 mx-auto mb-2" />
             <h3 className="text-base font-bold text-slate-800 dark:text-white">
-              No jobs posted yet
+              {t.noJobsPostedYet || 'No jobs posted yet'}
             </h3>
             <p className="text-xs text-slate-500 mt-1 mb-4">
-              Publish your first listing to start receiving voice applications from workers.
+              {t.publishFirstListing || 'Publish your first listing to start receiving voice applications from workers.'}
             </p>
             <Link
               to="/employer/post-job"
               className="px-4 py-2 rounded-xl bg-[#2563EB] text-white font-bold text-xs"
             >
-              Post a Job Now
+              {t.postJobNow || 'Post a Job Now'}
             </Link>
           </div>
         ) : (
@@ -222,7 +232,7 @@ export default function EmployerDashboard() {
                             : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
                         }`}
                       >
-                        {isClosed ? 'Closed' : 'Active'}
+                        {isClosed ? (t.closedStatus || 'Closed') : (t.activeStatus || 'Active')}
                       </button>
                     </div>
 
@@ -236,21 +246,21 @@ export default function EmployerDashboard() {
                         <span>{job.location}</span>
                       </span>
                       <span>•</span>
-                      <span>₹{job.dailyWage}/day</span>
+                      <span>₹{job.dailyWage}{t.perDay || '/day'}</span>
                     </div>
                   </div>
 
                   <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                     <span className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1">
                       <Users className="w-3.5 h-3.5 text-blue-500" />
-                      <span>{job.applicantsCount || 0} Applicants</span>
+                      <span>{job.applicantsCount || 0} {t.applicantsCount || 'Applicants'}</span>
                     </span>
 
                     <Link
                       to="/employer/applicants"
                       className="text-xs font-black text-[#2563EB] dark:text-[#60A5FA] hover:underline flex items-center gap-1"
                     >
-                      <span>Review</span>
+                      <span>{t.reviewAction || 'Review'}</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>

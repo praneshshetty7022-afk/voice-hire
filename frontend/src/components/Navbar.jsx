@@ -310,21 +310,21 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-white/[0.08]"
               >
-                Find Jobs
+                {t.navFindJobs || 'Find Jobs'}
               </Link>
               <Link
                 to="/jobs-list"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-white/[0.08]"
               >
-                Browse All Jobs
+                {t.navBrowseAll || 'Browse All Jobs'}
               </Link>
               <Link
                 to="/intro"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-white/[0.08]"
               >
-                Watch Cinematic Story
+                {t.navStory || 'Watch Cinematic Story'}
               </Link>
               <div className="pt-2 flex items-center gap-2 border-t border-slate-100 dark:border-white/10">
                 <Link
@@ -332,14 +332,14 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex-1 text-center py-2 rounded-xl text-sm font-bold bg-slate-100 dark:bg-white/[0.08] text-slate-800 dark:text-white"
                 >
-                  Login
+                  {t.navLogin || 'Login'}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex-1 text-center py-2 rounded-xl text-sm font-bold bg-[#2563EB] text-white"
                 >
-                  Sign Up
+                  {t.navSignUp || 'Sign Up'}
                 </Link>
               </div>
             </>
@@ -350,28 +350,28 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                Dashboard
+                {t.navDashboard || 'Dashboard'}
               </Link>
               <Link
                 to="/jobs-list"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                Browse Jobs
+                {t.navBrowseAll || 'Browse Jobs'}
               </Link>
               <Link
                 to="/applications/my"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                My Applications
+                {t.myApplications || 'My Applications'}
               </Link>
               <Link
                 to="/profile"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                My Profile
+                {t.myProfile || t.navProfile || 'My Profile'}
               </Link>
               <button
                 type="button"
@@ -381,7 +381,7 @@ export default function Navbar() {
                 }}
                 className="w-full text-left px-3 py-2 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
               >
-                Logout
+                {t.navLogout || 'Logout'}
               </button>
             </>
           ) : (
@@ -391,28 +391,28 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-amber-600 dark:text-amber-400"
               >
-                Employer Dashboard
+                {t.employerPortalHeading || 'Employer Dashboard'}
               </Link>
               <Link
                 to="/employer/post-job"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                Post New Job Listing
+                {t.postNewJobButton || 'Post New Job Listing'}
               </Link>
               <Link
                 to="/employer/applicants"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                Manage Candidates & Audio
+                {t.navManageApplicants || 'Manage Candidates & Audio'}
               </Link>
               <Link
                 to="/profile"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200"
               >
-                Company Profile
+                {t.companyProfile || 'Company Profile'}
               </Link>
               <button
                 type="button"
@@ -422,7 +422,7 @@ export default function Navbar() {
                 }}
                 className="w-full text-left px-3 py-2 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
               >
-                Logout
+                {t.navLogout || 'Logout'}
               </button>
             </>
           )}

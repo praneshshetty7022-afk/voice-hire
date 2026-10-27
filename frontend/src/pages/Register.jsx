@@ -211,7 +211,7 @@ export default function Register() {
               <div className="text-center space-y-3">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Choose Your Account Type</span>
+                  <span>{t.chooseAccountTypeBadge || 'Choose Your Account Type'}</span>
                 </div>
                 <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
                   {t.roleSectionTitle || 'Choose How You Want to Use VoiceHire'}
@@ -237,7 +237,7 @@ export default function Register() {
                         <Users className="w-7 h-7 stroke-[2.2]" />
                       </div>
                       <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        Job Seekers
+                        {t.jobSeekersBadge || 'Job Seekers'}
                       </span>
                     </div>
 
@@ -272,7 +272,7 @@ export default function Register() {
                       type="button"
                       className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm sm:text-base shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group-hover:shadow-blue-500/40 transition-all cursor-pointer"
                     >
-                      <span>Find Jobs as Worker</span>
+                      <span>{t.findJobsAsWorker || 'Find Jobs as Worker'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
@@ -292,7 +292,7 @@ export default function Register() {
                         <Building2 className="w-7 h-7 stroke-[2.2]" />
                       </div>
                       <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                        Employers & Recruiters
+                        {t.employersBadge || 'Employers & Recruiters'}
                       </span>
                     </div>
 
@@ -327,7 +327,7 @@ export default function Register() {
                       type="button"
                       className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-black text-sm sm:text-base shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 group-hover:shadow-indigo-500/40 transition-all cursor-pointer"
                     >
-                      <span>Hire Talent as Employer</span>
+                      <span>{t.hireTalentAsEmployer || 'Hire Talent as Employer'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
@@ -336,9 +336,9 @@ export default function Register() {
 
               {/* Bottom Switch to Login */}
               <div className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 pt-2">
-                <span>Already have an account? </span>
+                <span>{t.alreadyHaveAccount || 'Already have an account?'} </span>
                 <Link to="/login" className="font-extrabold text-[#2563EB] dark:text-[#60A5FA] hover:underline">
-                  Log In to Account →
+                  {t.logInToAccount || 'Log In to Account →'}
                 </Link>
               </div>
             </motion.div>
@@ -366,25 +366,19 @@ export default function Register() {
                 <div className="space-y-6 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-black uppercase tracking-wider backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>{isWorker ? 'Voice Profile Setup' : 'Verified Employer Portal'}</span>
+                    <span>{isWorker ? (t.workerVoiceNetwork || 'Worker Voice Network') : (t.verifiedEmployerHub || 'Verified Employer Hub')}</span>
                   </div>
 
                   <div className="space-y-3">
                     <h2 className="text-3xl font-black tracking-tight leading-tight">
-                      {isWorker ? (
-                        <>
-                          Apply with your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300">Voice.</span> Get hired instantly.
-                        </>
-                      ) : (
-                        <>
-                          Access <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-300">Pre-Screened</span> Trade Professionals.
-                        </>
-                      )}
+                      {isWorker
+                        ? (t.workerShowcaseHeadline || 'Your Voice is Your Resume.')
+                        : (t.employerShowcaseHeadline || 'Hire Verified Trades in Minutes.')}
                     </h2>
                     <p className="text-slate-300 text-sm leading-relaxed font-medium">
                       {isWorker
-                        ? 'Join thousands of electricians, drivers, carpenters, and helpers finding steady jobs with guaranteed wage terms.'
-                        : 'Post vacancies with daily wage or monthly salary terms, receive voice applications, and shortlist licensed staff.'}
+                        ? (t.workerShowcaseDesc || 'Join thousands of skilled trade workers finding steady jobs with guaranteed wage terms.')
+                        : (t.employerShowcaseDesc || 'Post vacancies with daily wage or monthly salary terms, receive voice applications, and shortlist licensed staff.')}
                     </p>
                   </div>
 
@@ -392,15 +386,15 @@ export default function Register() {
                   <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md space-y-3">
                     <div className="flex items-center gap-2.5 text-xs font-bold text-slate-200">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>{isWorker ? 'Apply in Kannada, Hindi, Telugu or English' : 'Direct Call & WhatsApp Candidate Contact'}</span>
+                      <span>{t.benefitVoiceSearchDesc || 'Apply in Kannada, Hindi, Telugu or English'}</span>
                     </div>
                     <div className="flex items-center gap-2.5 text-xs font-bold text-slate-200">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>{isWorker ? 'Daily wage and monthly salary listings' : 'Screen audio introductions before interviewing'}</span>
+                      <span>{t.benefitVerifiedProfilesDesc || 'Daily wage and monthly salary listings'}</span>
                     </div>
                     <div className="flex items-center gap-2.5 text-xs font-bold text-slate-200">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>{isWorker ? 'Direct interview alerts to your mobile' : 'Zero middleman commission'}</span>
+                      <span>{t.benefitFastHiringDesc || 'Direct interview alerts to your mobile'}</span>
                     </div>
                   </div>
                 </div>
@@ -409,9 +403,9 @@ export default function Register() {
                 <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 relative z-10">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>{isWorker ? '100% Free for Workers' : 'Instant Company Verification'}</span>
+                    <span>{isWorker ? (t.freeForWorkers || '100% Free for Workers') : (t.directEmployerConnect || 'Direct Employer Connect')}</span>
                   </div>
-                  <span className="font-bold text-slate-300">Trusted Platform</span>
+                  <span className="font-bold text-slate-300">{t.trustedPlatform || 'Trusted Platform'}</span>
                 </div>
               </div>
 
@@ -437,19 +431,21 @@ export default function Register() {
                       }`}
                     >
                       {isWorker ? <Users className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
-                      <span>{isWorker ? 'Worker Registration' : 'Employer Registration'}</span>
+                      <span>{isWorker ? (t.workerRegistrationBadge || 'Worker Registration') : (t.employerRegistrationBadge || 'Employer Registration')}</span>
                     </div>
                   </div>
 
                   {/* Header */}
                   <div className="space-y-1">
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                      {isWorker ? 'Register as a Skilled Worker' : 'Register as an Employer'}
+                      {isWorker
+                        ? (t.workerRegisterTitle || 'Register as a Skilled Worker')
+                        : (t.employerRegisterTitle || 'Register as an Employer')}
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                       {isWorker
-                        ? 'Create your worker profile to apply for jobs and connect with employers.'
-                        : 'Create your hiring manager account to post vacancies and screen candidates.'}
+                        ? (t.workerRegisterDesc || 'Create your worker profile to apply for jobs and connect with employers.')
+                        : (t.employerRegisterDesc || 'Create your hiring manager account to post vacancies and screen candidates.')}
                     </p>
                   </div>
 
@@ -466,7 +462,7 @@ export default function Register() {
                     {/* Full Name / Contact Person */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {isWorker ? 'Your Full Name' : 'Contact Person / Representative Name'}
+                        {isWorker ? (t.fullNameLabel || 'Your Full Name') : (t.contactPersonLabel || 'Contact Person / Representative Name')}
                       </label>
                       <div className="relative group/input">
                         <input
@@ -485,7 +481,7 @@ export default function Register() {
                     {!isWorker && (
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Company / Enterprise Name
+                          {t.companyNameLabel || 'Company / Enterprise Name'}
                         </label>
                         <div className="relative group/input">
                           <input
@@ -505,7 +501,7 @@ export default function Register() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          {isWorker ? 'Email Address' : 'Work Email Address'}
+                          {isWorker ? (t.workerEmailLabel || 'Email Address') : (t.employerEmailLabel || 'Work Email Address')}
                         </label>
                         <div className="relative group/input">
                           <input
@@ -523,7 +519,7 @@ export default function Register() {
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Mobile Phone (For Interview Calls)
+                          {t.mobilePhoneLabel || 'Mobile Phone (For Interview Calls)'}
                         </label>
                         <div className="relative group/input">
                           <input
@@ -543,7 +539,7 @@ export default function Register() {
                     {isWorker ? (
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Primary Trade / Skill Category
+                          {t.tradeCategoryLabel || 'Primary Trade / Skill Category'}
                         </label>
                         <div className="relative group/input">
                           <select
@@ -551,9 +547,9 @@ export default function Register() {
                             onChange={(e) => setTradeCategory(e.target.value)}
                             className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all cursor-pointer"
                           >
-                            {TRADES.map((t) => (
-                              <option key={t.code} value={t.code} className="dark:bg-slate-900">
-                                {t.label}
+                            {TRADES.map((item) => (
+                              <option key={item.code} value={item.code} className="dark:bg-slate-900">
+                                {t[`trade${item.code.charAt(0) + item.code.slice(1).toLowerCase()}`] || item.label}
                               </option>
                             ))}
                           </select>
@@ -563,7 +559,7 @@ export default function Register() {
                     ) : (
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Industry / Business Type
+                          {t.industryTypeLabel || 'Industry / Business Type'}
                         </label>
                         <div className="relative group/input">
                           <select
@@ -585,7 +581,7 @@ export default function Register() {
                     {/* Password Field */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Create Password (min. 6 characters)
+                        {t.createPasswordLabel || 'Create Password (min. 6 characters)'}
                       </label>
                       <div className="relative group/input">
                         <input
@@ -622,11 +618,11 @@ export default function Register() {
                       {loading ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" />
-                          <span>Creating Your Profile...</span>
+                          <span>{t.creatingProfile || 'Creating Your Profile...'}</span>
                         </>
                       ) : (
                         <>
-                          <span>{isWorker ? 'Create Worker Account' : 'Register Enterprise Account'}</span>
+                          <span>{isWorker ? (t.createWorkerBtn || 'Create Worker Account') : (t.registerEnterpriseBtn || 'Register Enterprise Account')}</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
@@ -636,14 +632,14 @@ export default function Register() {
                   {/* Switch to Login */}
                   <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
                     <p>
-                      Already have an account?{' '}
+                      {t.alreadyHaveAccount || 'Already have an account?'}{' '}
                       <Link
                         to={`/login?role=${role}`}
                         className={`font-extrabold hover:underline ${
                           isWorker ? 'text-blue-600 dark:text-blue-400' : 'text-indigo-600 dark:text-indigo-400'
                         }`}
                       >
-                        Sign in as {isWorker ? 'Worker' : 'Employer'} →
+                        {isWorker ? (t.logInAsWorker || 'Sign in as Worker') : (t.logInAsEmployer || 'Sign in as Employer')} →
                       </Link>
                     </p>
                   </div>
