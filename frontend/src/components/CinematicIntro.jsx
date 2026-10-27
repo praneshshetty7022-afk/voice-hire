@@ -9,21 +9,21 @@ import {
   Users,
   Building2,
   CheckCircle2,
-  Briefcase,
-  Zap,
-  Globe2,
   LogIn,
   UserPlus,
+  Zap,
 } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
 import { useVoice } from '../context/VoiceContext'
 import { useAuth } from '../context/AuthContext'
+import { getTranslation } from '../utils/translations'
 
 export default function CinematicIntro({ isOpen = true, onClose }) {
   const navigate = useNavigate()
   const { selectedLang, setSelectedLang } = useVoice()
   const { isAuthenticated, isEmployer } = useAuth()
+  const t = getTranslation(selectedLang)
 
   const handleGetStarted = (role = 'employee') => {
     if (isAuthenticated) {
@@ -55,7 +55,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 Voice<span className="text-[#2563EB] dark:text-[#60A5FA]">Hire</span>
               </span>
               <span className="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mt-0.5">
-                Udyoga Mitra
+                {t.brandName || 'Udyoga Mitra'}
               </span>
             </div>
           </Link>
@@ -74,7 +74,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 onClick={() => navigate(isEmployer ? '/employer/dashboard' : '/jobs')}
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5"
               >
-                <span>Dashboard</span>
+                <span>{t.navDashboard}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
@@ -84,14 +84,14 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                   className="px-4 py-2 rounded-xl border border-slate-300 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <LogIn className="w-4 h-4 text-slate-500" />
-                  <span>Log In</span>
+                  <span>{t.navLogin}</span>
                 </button>
                 <button
                   onClick={() => handleGetStarted('employee')}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span>Sign Up</span>
+                  <span>{t.navSignUp}</span>
                 </button>
               </div>
             )}
@@ -113,7 +113,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 text-xs font-bold tracking-wide shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-            <span>Next-Gen Voice-First Employment Platform</span>
+            <span>{t.heroBadge}</span>
           </motion.div>
 
           {/* Main Headline */}
@@ -123,9 +123,9 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] text-slate-900 dark:text-white"
           >
-            Speak Your Skills.{' '}
+            {t.heroHeadlineMain}{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 dark:from-blue-400 dark:via-indigo-400 dark:to-sky-400">
-              Get Hired Instantly.
+              {t.heroHeadlineGradient}
             </span>
           </motion.h1>
 
@@ -136,8 +136,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-base sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed"
           >
-            VoiceHire empowers skilled trade workers and employers to connect directly using multilingual voice
-            applications. No complex resumes or typing required.
+            {t.heroSubhead}
           </motion.p>
 
           {/* Call-to-Actions (Prominent Log In & Sign Up) */}
@@ -152,7 +151,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-base shadow-xl shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
             >
               <Mic className="w-5 h-5 text-amber-300" />
-              <span>Create Account (Sign Up)</span>
+              <span>{t.btnCreateAccount}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
 
@@ -161,7 +160,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-white/20 hover:border-blue-500 dark:hover:border-blue-400 text-slate-800 dark:text-white font-extrabold text-base hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-sm"
             >
               <LogIn className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span>Log In to Account</span>
+              <span>{t.btnLoginAccount}</span>
             </button>
           </motion.div>
 
@@ -172,9 +171,9 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 <Mic className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white">Voice Applications</h4>
+                <h4 className="font-bold text-sm text-slate-900 dark:text-white">{t.featureVoiceTitle}</h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Apply in Kannada, Hindi, or English using natural voice.
+                  {t.featureVoiceDesc}
                 </p>
               </div>
             </div>
@@ -184,9 +183,9 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white">Verified Profiles</h4>
+                <h4 className="font-bold text-sm text-slate-900 dark:text-white">{t.featureVerifiedTitle}</h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Trusted talent and licensed employers across commercial trades.
+                  {t.featureVerifiedDesc}
                 </p>
               </div>
             </div>
@@ -196,9 +195,9 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 <Zap className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white">Direct Connect</h4>
+                <h4 className="font-bold text-sm text-slate-900 dark:text-white">{t.featureDirectTitle}</h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Instant status updates and candidate screening in minutes.
+                  {t.featureDirectDesc}
                 </p>
               </div>
             </div>
@@ -211,10 +210,10 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
         <div className="max-w-5xl mx-auto">
           <div className="text-center space-y-2 mb-10">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-              Choose How You Want to Use VoiceHire
+              {t.roleSectionTitle}
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium">
-              Tailored workflows for job seekers and hiring managers.
+              {t.roleSectionSubhead}
             </p>
           </div>
 
@@ -225,23 +224,22 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                   <Users className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">I am a Skilled Worker</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t.workerCardTitle}</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Looking for driving, carpentry, plumbing, electrical, or construction opportunities. Apply by
-                  speaking your experience.
+                  {t.workerCardDesc}
                 </p>
                 <ul className="space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-2">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Search daily wage & monthly salary jobs</span>
+                    <span>{t.workerBullet1 || 'Search daily wage & monthly salary jobs'}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Apply via audio mic in your native tongue</span>
+                    <span>{t.workerBullet2 || 'Apply via audio mic in your native tongue'}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Track interview calls & job status in real time</span>
+                    <span>{t.workerBullet3 || 'Track interview calls & job status in real time'}</span>
                   </li>
                 </ul>
               </div>
@@ -250,7 +248,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 onClick={() => handleGetStarted('employee')}
                 className="mt-8 w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Find Jobs as Worker</span>
+                <span>{t.btnWorkerGetStarted || t.workerCardBtn || 'Find Jobs as Worker'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -261,22 +259,22 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                   <Building2 className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">I am an Employer</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t.employerCardTitle}</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Hiring verified workers for logistics, fleet, manufacturing, construction, or private services.
+                  {t.employerCardDesc}
                 </p>
                 <ul className="space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-2">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Post job openings with daily/monthly wage terms</span>
+                    <span>{t.employerBullet1 || 'Post job openings with daily/monthly wage terms'}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Listen to worker voice applications & transcripts</span>
+                    <span>{t.employerBullet2 || 'Listen to worker voice applications & transcripts'}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Shortlist and connect directly over call</span>
+                    <span>{t.employerBullet3 || 'Shortlist and connect directly over call'}</span>
                   </li>
                 </ul>
               </div>
@@ -285,7 +283,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
                 onClick={() => handleGetStarted('employer')}
                 className="mt-8 w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Hire Talent as Employer</span>
+                <span>{t.btnEmployerGetStarted || t.employerCardBtn || 'Hire Talent as Employer'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -295,7 +293,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-white/10 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>© {new Date().getFullYear()} VoiceHire (Udyoga Mitra). Built with Voice AI & MERN Stack.</p>
+        <p>© {new Date().getFullYear()} VoiceHire ({t.brandName || 'Udyoga Mitra'}). {t.footerTagline || 'Built with Voice AI & MERN Stack.'}</p>
       </footer>
     </div>
   )

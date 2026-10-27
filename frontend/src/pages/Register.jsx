@@ -18,12 +18,14 @@ import { useAuth } from '../context/AuthContext'
 import ThemeToggle from '../components/ThemeToggle'
 import LanguageSelector from '../components/LanguageSelector'
 import { useVoice } from '../context/VoiceContext'
+import { getTranslation } from '../utils/translations'
 
 export default function Register() {
   const navigate = useNavigate()
   const location = useLocation()
   const { register, loading, isAuthenticated, isEmployer } = useAuth()
   const { selectedLang, setSelectedLang } = useVoice()
+  const t = getTranslation(selectedLang)
 
   // Pre-selected role from query params if any
   const queryParams = new URLSearchParams(location.search)
@@ -175,7 +177,7 @@ export default function Register() {
                 }`}
               >
                 <Users className="w-4 h-4" />
-                <span>Worker Form</span>
+                <span>{t.portalWorker || 'Worker Form'}</span>
               </button>
 
               <button
@@ -188,7 +190,7 @@ export default function Register() {
                 }`}
               >
                 <Building2 className="w-4 h-4" />
-                <span>Employer Form</span>
+                <span>{t.portalEmployer || 'Employer Form'}</span>
               </button>
             </div>
           </div>
@@ -198,21 +200,21 @@ export default function Register() {
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase mb-1">
               {isWorker ? (
                 <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/60">
-                  👷 Worker Registration
+                  👷 {t.portalWorker || 'Worker Registration'}
                 </span>
               ) : (
                 <span className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-900/60">
-                  🏢 Employer Registration
+                  🏢 {t.portalEmployer || 'Employer Registration'}
                 </span>
               )}
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-              {isWorker ? 'Register as a Skilled Worker' : 'Register as an Employer'}
+              {isWorker ? (t.workerCardTitle || 'Register as a Skilled Worker') : (t.employerCardTitle || 'Register as an Employer')}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
               {isWorker
-                ? 'Create your worker profile to apply for jobs and connect with employers'
-                : 'Create your hiring manager account to post vacancies and screen candidates'}
+                ? (t.workerCardDesc || 'Create your worker profile to apply for jobs and connect with employers')
+                : (t.employerCardDesc || 'Create your hiring manager account to post vacancies and screen candidates')}
             </p>
           </div>
 

@@ -17,12 +17,14 @@ import { useAuth } from '../context/AuthContext'
 import ThemeToggle from '../components/ThemeToggle'
 import LanguageSelector from '../components/LanguageSelector'
 import { useVoice } from '../context/VoiceContext'
+import { getTranslation } from '../utils/translations'
 
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const { login, loading, isAuthenticated, isEmployer } = useAuth()
   const { selectedLang, setSelectedLang } = useVoice()
+  const t = getTranslation(selectedLang)
 
   // Pre-select role from URL param if present (e.g. /login?role=employer)
   const queryParams = new URLSearchParams(location.search)
@@ -139,7 +141,7 @@ export default function Login() {
                 }`}
               >
                 <Users className="w-4 h-4" />
-                <span>Worker Login</span>
+                <span>{t.portalWorker || 'Worker Login'}</span>
               </button>
 
               <button
@@ -152,7 +154,7 @@ export default function Login() {
                 }`}
               >
                 <Building2 className="w-4 h-4" />
-                <span>Employer Login</span>
+                <span>{t.portalEmployer || 'Employer Login'}</span>
               </button>
             </div>
           </div>
@@ -162,21 +164,21 @@ export default function Login() {
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase mb-1">
               {isWorker ? (
                 <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/60">
-                  👷 Worker Portal Only
+                  👷 {t.portalWorker || 'Worker Portal'}
                 </span>
               ) : (
                 <span className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-900/60">
-                  🏢 Employer Portal Only
+                  🏢 {t.portalEmployer || 'Employer Portal'}
                 </span>
               )}
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-              {isWorker ? 'Skilled Worker Login' : 'Employer & Recruiter Login'}
+              {isWorker ? (t.loginTitleWorker || 'Skilled Worker Login') : (t.loginTitleEmployer || 'Employer Login')}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
               {isWorker
-                ? 'Sign in to browse daily wage & monthly jobs and voice applications'
-                : 'Sign in to post job vacancies and screen verified applicants'}
+                ? (t.loginDescWorker || 'Sign in to browse daily wage & monthly jobs and voice applications')
+                : (t.loginDescEmployer || 'Sign in to post job vacancies and screen verified applicants')}
             </p>
           </div>
 

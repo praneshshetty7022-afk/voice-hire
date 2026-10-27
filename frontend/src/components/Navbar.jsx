@@ -17,12 +17,14 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useVoice } from '../context/VoiceContext'
+import { getTranslation } from '../utils/translations'
 import LanguageSelector from './LanguageSelector'
 import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const { user, isAuthenticated, isEmployee, isEmployer, logout } = useAuth()
   const { selectedLang, setSelectedLang, voiceState, startListening, stopListening } = useVoice()
+  const t = getTranslation(selectedLang)
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -56,7 +58,7 @@ export default function Navbar() {
                 Voice<span className="text-[#2563EB] dark:text-[#60A5FA]">Hire</span>
               </span>
               <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mt-0.5">
-                Udyoga Mitra
+                {t.brandName || 'Udyoga Mitra'}
               </span>
             </div>
           </Link>
@@ -71,7 +73,7 @@ export default function Navbar() {
               }`}
             >
               {isEmployer ? <Building2 className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />}
-              <span>{isEmployer ? 'Employer' : 'Worker'}</span>
+              <span>{isEmployer ? (t.roleEmployer || 'Employer') : (t.roleWorker || 'Worker')}</span>
             </span>
           )}
         </div>
@@ -91,7 +93,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white'
                 }`}
               >
-                Find Jobs
+                {t.navFindJobs || 'Find Jobs'}
               </Link>
               <Link
                 to="/jobs-list"
@@ -101,14 +103,14 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white'
                 }`}
               >
-                Browse All
+                {t.navBrowseAll || 'Browse All'}
               </Link>
               <Link
                 to="/intro"
                 className="px-3 py-1.5 rounded-xl text-xs lg:text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white flex items-center gap-1.5"
               >
                 <Film className="w-3.5 h-3.5 text-blue-500" />
-                <span>Story</span>
+                <span>{t.navStory || 'Story'}</span>
               </Link>
             </>
           ) : isEmployee ? (
@@ -122,7 +124,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white'
                 }`}
               >
-                Dashboard
+                {t.navDashboard || 'Dashboard'}
               </Link>
               <Link
                 to="/jobs-list"
@@ -132,7 +134,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white'
                 }`}
               >
-                Browse Jobs
+                {t.navBrowseAll || 'Browse Jobs'}
               </Link>
               <Link
                 to="/applications/my"
@@ -142,7 +144,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white'
                 }`}
               >
-                My Applications
+                {t.myApplications || 'My Applications'}
               </Link>
               <Link
                 to="/profile"
@@ -152,7 +154,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white'
                 }`}
               >
-                Profile
+                {t.navProfile || 'Profile'}
               </Link>
             </>
           ) : (
@@ -166,7 +168,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-white'
                 }`}
               >
-                Overview
+                {t.navDashboard || 'Overview'}
               </Link>
               <Link
                 to="/employer/post-job"
@@ -177,7 +179,7 @@ export default function Navbar() {
                 }`}
               >
                 <PlusCircle className="w-3.5 h-3.5 text-blue-500" />
-                <span>Post Job</span>
+                <span>{t.navPostJob || 'Post Job'}</span>
               </Link>
               <Link
                 to="/employer/applicants"
@@ -188,7 +190,7 @@ export default function Navbar() {
                 }`}
               >
                 <Users className="w-3.5 h-3.5 text-indigo-500" />
-                <span>Applicants</span>
+                <span>{t.navManageApplicants || 'Applicants'}</span>
               </Link>
               <Link
                 to="/profile"
@@ -198,7 +200,7 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-white'
                 }`}
               >
-                Company
+                {t.navProfile || 'Company'}
               </Link>
             </>
           )}
@@ -240,7 +242,7 @@ export default function Navbar() {
                 to="/login"
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-all"
               >
-                Login
+                {t.navLogin || 'Login'}
               </Link>
 
               <Link
@@ -248,7 +250,7 @@ export default function Navbar() {
                 className="bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-95 text-white font-extrabold px-4 py-2 rounded-full text-xs sm:text-sm shadow-md shadow-blue-500/30 flex items-center gap-1.5 transition-all"
               >
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
-                <span>Sign Up</span>
+                <span>{t.navSignUp || 'Sign Up'}</span>
               </Link>
             </div>
           ) : (

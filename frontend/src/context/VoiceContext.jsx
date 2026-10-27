@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
 import { parseFullVoiceCommand, SUPPORTED_LANGUAGES } from '../services/voiceNLP'
+import { detectVisiblePageLanguage, detectTextLanguage, SCRIPT_RANGES } from '../utils/languageDetector'
 import VoiceCommandModal from '../components/VoiceCommandModal'
 import axios from '../api/axios'
 import toast from 'react-hot-toast'
@@ -24,7 +25,7 @@ export const VoiceProvider = ({ children }) => {
     }
   })
 
-  // Normalize language codes (e.g. 'en' -> 'en-IN', 'hi' -> 'hi-IN')
+  // Normalize language codes (e.g. 'en' -> 'en-IN', 'hi' -> 'hi-IN', 'kn' -> 'kn-IN')
   const setSelectedLang = useCallback((langCode) => {
     if (!langCode) return
     const langMap = {
@@ -34,6 +35,7 @@ export const VoiceProvider = ({ children }) => {
       te: 'te-IN',
       ta: 'ta-IN',
       ml: 'ml-IN',
+      bn: 'bn-IN',
       es: 'es-ES',
     }
     const normalized = langMap[langCode] || langCode
@@ -42,6 +44,71 @@ export const VoiceProvider = ({ children }) => {
       localStorage.setItem('voicehire_lang', normalized)
     } catch (e) {}
   }, [])
+
+  // 1b. Real-Time Language Detection for visible rendered page texts
+  const [detectedLangInfo, setDetectedLangInfo] = useState(() => ({
+    code: 'en',
+    fullCode: 'en-IN',
+    name: 'English',
+    native: 'English',
+    flag: '🇬🇧',
+    confidence: 1,
+    reason: 'Initial load check',
+  }))
+
+  const detectCurrentLanguage = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const detected = detectVisiblePageLanguage()
+    setDetectedLangInfo(detected)
+    return detected
+  }, [])
+
+  // Scan language on mount and whenever selectedLang changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      detectCurrentLanguage()
+    }, 120)
+    return () => clearTimeout(timer)
+  }, [selectedLang, detectCurrentLanguage])
+
+  // Periodic / event-driven detection
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleRefresh = () => setTimeout(detectCurrentLanguage, 150)
+    window.addEventListener('popstate', handleRefresh)
+    window.addEventListener('language-detect-refresh', handleRefresh)
+
+    let observer = null
+    try {
+      observer = new MutationObserver(() => {
+        clearTimeout(window.__vh_lang_timer)
+        window.__vh_lang_timer = setTimeout(detectCurrentLanguage, 500)
+      })
+      const target = document.getElementById('root') || document.body
+      if (target) {
+        observer.observe(target, { childList: true, subtree: true, characterData: true })
+      }
+    } catch (e) {}
+
+    return () => {
+      window.removeEventListener('popstate', handleRefresh)
+      window.removeEventListener('language-detect-refresh', handleRefresh)
+      if (observer) observer.disconnect()
+    }
+  }, [detectCurrentLanguage])
+
+  // Flag indicating if selected language is out of sync with actual rendered text
+  const isLanguageMismatch =
+    selectedLang.split('-')[0].toLowerCase() !== (detectedLangInfo?.code || 'en').toLowerCase()
+
+  // Function to synchronize selected language with detected text language
+  const autoSyncToDetected = useCallback(() => {
+    if (detectedLangInfo?.fullCode) {
+      setSelectedLang(detectedLangInfo.fullCode)
+      toast.success(`Language updated to detected text: ${detectedLangInfo.native}`)
+    }
+  }, [detectedLangInfo, setSelectedLang])
 
   const [voiceState, setVoiceState] = useState('IDLE') // IDLE, LISTENING, PROCESSING, CONFIRMATION, SUCCESS, ERROR
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false)
@@ -404,6 +471,11 @@ export const VoiceProvider = ({ children }) => {
       value={{
         selectedLang,
         setSelectedLang,
+        detectedLangInfo,
+        detectedLang: detectedLangInfo.fullCode,
+        isLanguageMismatch,
+        detectCurrentLanguage,
+        autoSyncToDetected,
         voiceState,
         setVoiceState,
         contextMemory,
