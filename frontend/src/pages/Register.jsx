@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   User,
   Mail,
@@ -8,10 +9,17 @@ import {
   Building2,
   Users,
   ArrowRight,
+  ArrowLeft,
   Mic,
   AlertCircle,
   Loader2,
   Briefcase,
+  ShieldCheck,
+  CheckCircle2,
+  Sparkles,
+  Eye,
+  EyeOff,
+  Wrench,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
@@ -27,11 +35,19 @@ export default function Register() {
   const { selectedLang, setSelectedLang } = useVoice()
   const t = getTranslation(selectedLang)
 
-  // Pre-selected role from query params if any
   const queryParams = new URLSearchParams(location.search)
-  const initialRole = queryParams.get('role') === 'employer' ? 'employer' : 'employee'
+  const roleParam = queryParams.get('role')
 
-  const [role, setRole] = useState(initialRole)
+  // Step 1: 'choose' (The 2 boxes: Worker vs Employer)
+  // Step 2: 'form' (The world-class registration form)
+  const [step, setStep] = useState(() => {
+    return roleParam === 'employer' || roleParam === 'employee' ? 'form' : 'choose'
+  })
+
+  const [role, setRole] = useState(() => {
+    return roleParam === 'employer' ? 'employer' : 'employee'
+  })
+
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -39,13 +55,15 @@ export default function Register() {
   const [tradeCategory, setTradeCategory] = useState('DRIVER')
   const [companyName, setCompanyName] = useState('')
   const [businessType, setBusinessType] = useState('Logistics & Fleet Transport')
+  const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   // Sync role if query param changes
   useEffect(() => {
-    const roleParam = new URLSearchParams(location.search).get('role')
-    if (roleParam === 'employer' || roleParam === 'employee') {
-      setRole(roleParam)
+    const param = new URLSearchParams(location.search).get('role')
+    if (param === 'employer' || param === 'employee') {
+      setRole(param)
+      setStep('form')
     }
   }, [location.search])
 
@@ -55,10 +73,17 @@ export default function Register() {
     return null
   }
 
-  const handleSwitchRole = (targetRole) => {
+  const handleSelectRole = (targetRole) => {
     setRole(targetRole)
     setErrorMessage('')
+    setStep('form')
     navigate(`/register?role=${targetRole}`, { replace: true })
+  }
+
+  const handleBackToChoose = () => {
+    setStep('choose')
+    setErrorMessage('')
+    navigate('/register', { replace: true })
   }
 
   const TRADES = [
@@ -140,16 +165,25 @@ export default function Register() {
   const isWorker = role === 'employee'
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-sans transition-colors duration-300">
-      {/* Header */}
-      <header className="px-6 py-4 flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-[#0B0F19]/70 backdrop-blur-md">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white flex items-center justify-center shadow-md shadow-blue-500/25">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#070B14] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col font-sans transition-colors duration-300 relative overflow-x-hidden">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[350px] bg-gradient-to-tr from-blue-600/15 via-indigo-600/10 to-transparent blur-[120px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-10 right-1/4 w-[450px] h-[350px] bg-gradient-to-bl from-purple-600/10 via-sky-600/10 to-transparent blur-[120px] pointer-events-none rounded-full" />
+
+      {/* Top Header */}
+      <header className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#070B14]/80 backdrop-blur-xl">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
             <Mic className="w-5 h-5 text-white stroke-[2.5]" />
           </div>
-          <span className="text-xl font-black tracking-tight text-[#0F172A] dark:text-white">
-            Voice<span className="text-[#2563EB] dark:text-[#60A5FA]">Hire</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xl font-black tracking-tight text-[#0F172A] dark:text-white leading-none">
+              Voice<span className="text-[#2563EB] dark:text-[#60A5FA]">Hire</span>
+            </span>
+            <span className="text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase mt-0.5">
+              {t.brandName || 'Udyoga Mitra'}
+            </span>
+          </div>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -158,246 +192,467 @@ export default function Register() {
         </div>
       </header>
 
-      {/* Main Container */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 py-8">
-        <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/90 dark:border-white/10 p-6 sm:p-8 space-y-6">
-          {/* Two Dedicated Portal Selector Tabs */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Select Registration Account Type
-            </span>
-            <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10">
-              <button
-                type="button"
-                onClick={() => handleSwitchRole('employee')}
-                className={`py-3 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  isWorker
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Users className="w-4 h-4" />
-                <span>{t.portalWorker || 'Worker Form'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSwitchRole('employer')}
-                className={`py-3 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  !isWorker
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 scale-[1.02]'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Building2 className="w-4 h-4" />
-                <span>{t.portalEmployer || 'Employer Form'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Form Header */}
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase mb-1">
-              {isWorker ? (
-                <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/60">
-                  👷 {t.portalWorker || 'Worker Registration'}
-                </span>
-              ) : (
-                <span className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-900/60">
-                  🏢 {t.portalEmployer || 'Employer Registration'}
-                </span>
-              )}
-            </div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-              {isWorker ? (t.workerCardTitle || 'Register as a Skilled Worker') : (t.employerCardTitle || 'Register as an Employer')}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-              {isWorker
-                ? (t.workerCardDesc || 'Create your worker profile to apply for jobs and connect with employers')
-                : (t.employerCardDesc || 'Create your hiring manager account to post vacancies and screen candidates')}
-            </p>
-          </div>
-
-          {/* Error Banner */}
-          {errorMessage && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-center gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          {/* Dedicated Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {isWorker ? 'Full Name' : 'Contact Person / Representative Name'}
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder={isWorker ? 'e.g. Ramesh Kumar' : 'e.g. Suresh Gowda'}
-                  autoComplete="name"
-                  required
-                  className="w-full px-4 py-3 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-                />
-                <User className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Email Address */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {isWorker ? 'Personal Email Address' : 'Official Work Email'}
-              </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={isWorker ? 'ramesh@example.com' : 'hr@company.com'}
-                  autoComplete="email"
-                  required
-                  className="w-full px-4 py-3 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-                />
-                <Mail className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Password <span className="font-normal text-slate-400">(min 6 characters)</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a secure password"
-                  autoComplete="new-password"
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-                />
-                <Lock className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Mobile Number */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Mobile Number <span className="font-normal text-slate-400">(for direct calls)</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="10-digit mobile number"
-                  autoComplete="tel"
-                  className="w-full px-4 py-3 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-                />
-                <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Worker-Specific Field */}
-            {isWorker ? (
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Primary Trade Skill</label>
-                <div className="relative">
-                  <select
-                    value={tradeCategory}
-                    onChange={(e) => setTradeCategory(e.target.value)}
-                    className="w-full px-4 py-3 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  >
-                    {TRADES.map((t) => (
-                      <option key={t.code} value={t.code} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                  <Briefcase className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      {/* Main Content Area */}
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 relative z-10">
+        <AnimatePresence mode="wait">
+          {step === 'choose' ? (
+            /* ===================================================================
+               STEP 1: THE TWO ROLE BOXES ("Choose How You Want to Use VoiceHire")
+               =================================================================== */
+            <motion.div
+              key="choose-role-register"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className="w-full max-w-5xl mx-auto space-y-10 py-6"
+            >
+              {/* Header */}
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Choose Your Account Type</span>
                 </div>
+                <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {t.roleSectionTitle || 'Choose How You Want to Use VoiceHire'}
+                </h1>
+                <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 font-medium max-w-xl mx-auto">
+                  {t.roleSectionSubhead || 'Tailored workflows for job seekers and hiring managers.'}
+                </p>
               </div>
-            ) : (
-              /* Employer-Specific Fields */
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Company / Enterprise Name
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="e.g. Nandi Transport Logistics"
-                      required
-                      className="w-full px-4 py-3 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400"
-                    />
-                    <Building2 className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+
+              {/* The Two Dedicated Role Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                {/* 1. Skilled Worker Card */}
+                <motion.div
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  onClick={() => handleSelectRole('employee')}
+                  className="group relative p-8 sm:p-9 rounded-[32px] bg-white/90 dark:bg-[#0E1526]/90 border border-slate-200/90 dark:border-white/10 hover:border-blue-500/60 dark:hover:border-blue-500/60 shadow-xl shadow-slate-200/50 dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-col justify-between cursor-pointer transition-all"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all" />
+
+                  <div className="space-y-6 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <div className="w-14 h-14 rounded-2xl bg-blue-500/10 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 flex items-center justify-center ring-1 ring-blue-500/30 group-hover:scale-110 transition-transform">
+                        <Users className="w-7 h-7 stroke-[2.2]" />
+                      </div>
+                      <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        Job Seekers
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h2 className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {t.workerCardTitle || 'I am a Skilled Worker'}
+                      </h2>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                        {t.workerCardDesc ||
+                          'Looking for driving, carpentry, plumbing, electrical, or construction opportunities. Apply by speaking your experience.'}
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 pt-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                      <li className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{t.workerBullet1 || 'Search daily wage & monthly salary jobs'}</span>
+                      </li>
+                      <li className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{t.workerBullet2 || 'Apply via audio mic in your native tongue'}</span>
+                      </li>
+                      <li className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{t.workerBullet3 || 'Track interview calls & job status in real time'}</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-8 relative z-10">
+                    <button
+                      type="button"
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm sm:text-base shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 group-hover:shadow-blue-500/40 transition-all cursor-pointer"
+                    >
+                      <span>Find Jobs as Worker</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* 2. Employer Card */}
+                <motion.div
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  onClick={() => handleSelectRole('employer')}
+                  className="group relative p-8 sm:p-9 rounded-[32px] bg-white/90 dark:bg-[#0E1526]/90 border border-slate-200/90 dark:border-white/10 hover:border-indigo-500/60 dark:hover:border-indigo-500/60 shadow-xl shadow-slate-200/50 dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-col justify-between cursor-pointer transition-all"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/20 transition-all" />
+
+                  <div className="space-y-6 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center ring-1 ring-indigo-500/30 group-hover:scale-110 transition-transform">
+                        <Building2 className="w-7 h-7 stroke-[2.2]" />
+                      </div>
+                      <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        Employers & Recruiters
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h2 className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {t.employerCardTitle || 'I am an Employer'}
+                      </h2>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                        {t.employerCardDesc ||
+                          'Hiring verified workers for logistics, fleet, manufacturing, construction, or private services.'}
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 pt-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                      <li className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{t.employerBullet1 || 'Post job openings with daily/monthly wage terms'}</span>
+                      </li>
+                      <li className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{t.employerBullet2 || 'Listen to worker voice applications & transcripts'}</span>
+                      </li>
+                      <li className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>{t.employerBullet3 || 'Shortlist and connect directly over call'}</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-8 relative z-10">
+                    <button
+                      type="button"
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-black text-sm sm:text-base shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 group-hover:shadow-indigo-500/40 transition-all cursor-pointer"
+                    >
+                      <span>Hire Talent as Employer</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Bottom Switch to Login */}
+              <div className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 pt-2">
+                <span>Already have an account? </span>
+                <Link to="/login" className="font-extrabold text-[#2563EB] dark:text-[#60A5FA] hover:underline">
+                  Log In to Account →
+                </Link>
+              </div>
+            </motion.div>
+          ) : (
+            /* ===================================================================
+               STEP 2: WORLD-CLASS MODERN REGISTRATION FORM (Split-Canvas Experience)
+               =================================================================== */
+            <motion.div
+              key="register-form"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+              className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-4"
+            >
+              {/* Left Column: World-Class Interactive Experience Showcase */}
+              <div className="hidden lg:flex lg:col-span-5 flex-col justify-between p-8 rounded-[36px] bg-gradient-to-br from-slate-900 via-[#0B132B] to-[#070B14] text-white border border-white/10 shadow-2xl relative overflow-hidden min-h-[640px]">
+                {/* Ambient Glow */}
+                <div
+                  className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none ${
+                    isWorker ? 'bg-blue-500' : 'bg-indigo-500'
+                  }`}
+                />
+
+                <div className="space-y-6 relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-black uppercase tracking-wider backdrop-blur-md">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>{isWorker ? 'Voice Profile Setup' : 'Verified Employer Portal'}</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h2 className="text-3xl font-black tracking-tight leading-tight">
+                      {isWorker ? (
+                        <>
+                          Apply with your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300">Voice.</span> Get hired instantly.
+                        </>
+                      ) : (
+                        <>
+                          Access <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-300">Pre-Screened</span> Trade Professionals.
+                        </>
+                      )}
+                    </h2>
+                    <p className="text-slate-300 text-sm leading-relaxed font-medium">
+                      {isWorker
+                        ? 'Join thousands of electricians, drivers, carpenters, and helpers finding steady jobs with guaranteed wage terms.'
+                        : 'Post vacancies with daily wage or monthly salary terms, receive voice applications, and shortlist licensed staff.'}
+                    </p>
+                  </div>
+
+                  {/* Highlights List */}
+                  <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur-md space-y-3">
+                    <div className="flex items-center gap-2.5 text-xs font-bold text-slate-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{isWorker ? 'Apply in Kannada, Hindi, Telugu or English' : 'Direct Call & WhatsApp Candidate Contact'}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-xs font-bold text-slate-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{isWorker ? 'Daily wage and monthly salary listings' : 'Screen audio introductions before interviewing'}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-xs font-bold text-slate-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{isWorker ? 'Direct interview alerts to your mobile' : 'Zero middleman commission'}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Business Sector</label>
-                  <select
-                    value={businessType}
-                    onChange={(e) => setBusinessType(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                  >
-                    {BUSINESS_TYPES.map((b) => (
-                      <option key={b} value={b} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                        {b}
-                      </option>
-                    ))}
-                  </select>
+                {/* Bottom Proof Metric */}
+                <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>{isWorker ? '100% Free for Workers' : 'Instant Company Verification'}</span>
+                  </div>
+                  <span className="font-bold text-slate-300">Trusted Platform</span>
                 </div>
               </div>
-            )}
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] mt-2 ${
-                isWorker
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25'
-                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-500/25'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Creating {isWorker ? 'Worker' : 'Employer'} Account...</span>
-                </>
-              ) : (
-                <>
-                  <span>Create {isWorker ? 'Worker' : 'Employer'} Account</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
+              {/* Right Column: World-Class Form Canvas */}
+              <div className="lg:col-span-7">
+                <div className="p-7 sm:p-10 rounded-[36px] bg-white/95 dark:bg-[#0E1526]/95 border border-slate-200/90 dark:border-white/10 shadow-2xl backdrop-blur-2xl space-y-6">
+                  {/* Top Bar: Back to Choice + Active Role Badge */}
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-white/10">
+                    <button
+                      type="button"
+                      onClick={handleBackToChoose}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer py-1 px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>{t.backToAccountTypes || 'Change Account Type'}</span>
+                    </button>
 
-          {/* Footer Navigation */}
-          <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Already have an account?{' '}
-            <Link
-              to={`/login?role=${role}`}
-              className={`font-bold hover:underline ${
-                isWorker ? 'text-blue-600 dark:text-blue-400' : 'text-indigo-600 dark:text-indigo-400'
-              }`}
-            >
-              Log in as {isWorker ? 'Worker' : 'Employer'}
-            </Link>
-          </div>
-        </div>
-      </div>
+                    <div
+                      className={`inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full border ${
+                        isWorker
+                          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25'
+                          : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/25'
+                      }`}
+                    >
+                      {isWorker ? <Users className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
+                      <span>{isWorker ? 'Worker Registration' : 'Employer Registration'}</span>
+                    </div>
+                  </div>
+
+                  {/* Header */}
+                  <div className="space-y-1">
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {isWorker ? 'Register as a Skilled Worker' : 'Register as an Employer'}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                      {isWorker
+                        ? 'Create your worker profile to apply for jobs and connect with employers.'
+                        : 'Create your hiring manager account to post vacancies and screen candidates.'}
+                    </p>
+                  </div>
+
+                  {/* Error Banner */}
+                  {errorMessage && (
+                    <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex items-center gap-2.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
+
+                  {/* Form */}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Full Name / Contact Person */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {isWorker ? 'Your Full Name' : 'Contact Person / Representative Name'}
+                      </label>
+                      <div className="relative group/input">
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder={isWorker ? 'e.g. Ramesh Kumar' : 'e.g. Anand Sharma'}
+                          required
+                          className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                        />
+                        <User className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                      </div>
+                    </div>
+
+                    {/* Employer Specific: Company Name */}
+                    {!isWorker && (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Company / Enterprise Name
+                        </label>
+                        <div className="relative group/input">
+                          <input
+                            type="text"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            placeholder="e.g. Apex Logistics Pvt Ltd"
+                            required
+                            className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+                          />
+                          <Building2 className="w-5 h-5 text-slate-400 group-focus-within/input:text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Email and Phone Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {isWorker ? 'Email Address' : 'Work Email Address'}
+                        </label>
+                        <div className="relative group/input">
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder={isWorker ? 'worker@example.com' : 'hr@company.com'}
+                            autoComplete="email"
+                            required
+                            className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                          />
+                          <Mail className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Mobile Phone (For Interview Calls)
+                        </label>
+                        <div className="relative group/input">
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="e.g. 9876543210"
+                            required
+                            className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                          />
+                          <Phone className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Role-Specific Field: Trade Category vs Business Type */}
+                    {isWorker ? (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Primary Trade / Skill Category
+                        </label>
+                        <div className="relative group/input">
+                          <select
+                            value={tradeCategory}
+                            onChange={(e) => setTradeCategory(e.target.value)}
+                            className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all cursor-pointer"
+                          >
+                            {TRADES.map((t) => (
+                              <option key={t.code} value={t.code} className="dark:bg-slate-900">
+                                {t.label}
+                              </option>
+                            ))}
+                          </select>
+                          <Wrench className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Industry / Business Type
+                        </label>
+                        <div className="relative group/input">
+                          <select
+                            value={businessType}
+                            onChange={(e) => setBusinessType(e.target.value)}
+                            className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all cursor-pointer"
+                          >
+                            {BUSINESS_TYPES.map((bt) => (
+                              <option key={bt} value={bt} className="dark:bg-slate-900">
+                                {bt}
+                              </option>
+                            ))}
+                          </select>
+                          <Briefcase className="w-5 h-5 text-slate-400 group-focus-within/input:text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Password Field */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Create Password (min. 6 characters)
+                      </label>
+                      <div className="relative group/input">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••••••"
+                          autoComplete="new-password"
+                          required
+                          className="w-full px-4 py-3.5 pl-11 pr-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                        />
+                        <Lock className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Submit CTA */}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className={`w-full py-4 px-4 rounded-2xl text-white font-black text-sm sm:text-base shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] mt-3 ${
+                        isWorker
+                          ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 shadow-blue-500/25'
+                          : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-700 hover:to-purple-800 shadow-indigo-500/25'
+                      }`}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Creating Your Profile...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>{isWorker ? 'Create Worker Account' : 'Register Enterprise Account'}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  {/* Switch to Login */}
+                  <div className="pt-2 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    <p>
+                      Already have an account?{' '}
+                      <Link
+                        to={`/login?role=${role}`}
+                        className={`font-extrabold hover:underline ${
+                          isWorker ? 'text-blue-600 dark:text-blue-400' : 'text-indigo-600 dark:text-indigo-400'
+                        }`}
+                      >
+                        Sign in as {isWorker ? 'Worker' : 'Employer'} →
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   )
 }

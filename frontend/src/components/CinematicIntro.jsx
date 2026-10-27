@@ -25,20 +25,28 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
   const { isAuthenticated, isEmployer } = useAuth()
   const t = getTranslation(selectedLang)
 
-  const handleGetStarted = (role = 'employee') => {
+  const handleGetStarted = (role) => {
     if (isAuthenticated) {
       navigate(isEmployer ? '/employer/dashboard' : '/jobs')
       return
     }
-    navigate(`/register?role=${role}`)
+    if (role) {
+      navigate(`/register?role=${role}`)
+    } else {
+      navigate('/register')
+    }
   }
 
-  const handleLogin = () => {
+  const handleLogin = (role) => {
     if (isAuthenticated) {
       navigate(isEmployer ? '/employer/dashboard' : '/jobs')
       return
     }
-    navigate('/login')
+    if (role) {
+      navigate(`/login?role=${role}`)
+    } else {
+      navigate('/login')
+    }
   }
 
   return (
@@ -80,14 +88,14 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <button
-                  onClick={handleLogin}
+                  onClick={() => handleLogin()}
                   className="px-4 py-2 rounded-xl border border-slate-300 dark:border-white/15 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <LogIn className="w-4 h-4 text-slate-500" />
                   <span>{t.navLogin}</span>
                 </button>
                 <button
-                  onClick={() => handleGetStarted('employee')}
+                  onClick={() => handleGetStarted()}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <UserPlus className="w-4 h-4" />
@@ -147,7 +155,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
           >
             <button
-              onClick={() => handleGetStarted('employee')}
+              onClick={() => handleGetStarted()}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-base shadow-xl shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
             >
               <Mic className="w-5 h-5 text-amber-300" />
@@ -156,7 +164,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
             </button>
 
             <button
-              onClick={handleLogin}
+              onClick={() => handleLogin()}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-white/20 hover:border-blue-500 dark:hover:border-blue-400 text-slate-800 dark:text-white font-extrabold text-base hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-sm"
             >
               <LogIn className="w-5 h-5 text-blue-600 dark:text-blue-400" />
