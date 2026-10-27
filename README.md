@@ -59,12 +59,11 @@ voicehire/
 ## 🛠️ Technology Stack
 
 ### Backend
-- **Framework**: Spring Boot 3.2.0
-- **Database**: MongoDB 7.0
-- **Security**: Spring Security + JWT
-- **Documentation**: SpringDoc OpenAPI (Swagger)
-- **Build Tool**: Maven
-- **Java Version**: 17
+- **Runtime**: Node.js 18+ / 20+
+- **Framework**: Express.js
+- **Database**: MongoDB Atlas (Mongoose ODM)
+- **Security**: JWT Authentication + bcryptjs
+- **Deployment**: Render Web Service (render.yaml)
 
 ### Frontend
 - **Framework**: React 18

@@ -35,21 +35,22 @@ services:
     networks:
       - voicehire-network
 
-  # Backend service (optional - for containerized deployment)
+  # Backend service (Node.js Express engine)
   backend:
     build:
-      context: ./backend
+      context: ./server
       dockerfile: Dockerfile
     container_name: voicehire-backend
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "5000:5000"
     environment:
-      SPRING_DATA_MONGODB_HOST: mongodb
-      SPRING_DATA_MONGODB_PORT: 27017
-      SPRING_DATA_MONGODB_DATABASE: voicehire
-      SPRING_DATA_MONGODB_USERNAME: admin
-      SPRING_DATA_MONGODB_PASSWORD: admin123
+      PORT: 5000
+      NODE_ENV: production
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/voicehire?authSource=admin
+      JWT_SECRET: voicehire_super_secret_jwt_key_2026_udyoga_mitra_platform_secure_token
+      JWT_EXPIRES_IN: 7d
+      CLIENT_URL: "*"
     depends_on:
       - mongodb
     networks:
