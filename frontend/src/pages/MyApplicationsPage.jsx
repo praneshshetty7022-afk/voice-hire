@@ -5,6 +5,7 @@ import { getTranslation } from '../utils/translations'
 import axios from '../api/axios'
 import ApplicationDetailModal from '../components/ApplicationDetailModal'
 import { CheckCircle2, Clock, MapPin, IndianRupee, Mic, FileCheck, RefreshCw, Calendar, XCircle, Eye, Info } from 'lucide-react'
+import { getCachedApplications } from '../utils/applicationCache'
 
 export default function MyApplicationsPage() {
   const { selectedLang } = useVoice()
@@ -34,57 +35,38 @@ export default function MyApplicationsPage() {
         data = Array.isArray(res2?.data) ? res2.data : null
       }
 
-      if (data && data.length > 0) {
-        setApplications(data)
-      } else {
-        setApplications(getMockApplications())
-      }
+      // Merge backend applications with locally cached submissions
+      const cached = getCachedApplications()
+      const serverApps = Array.isArray(data) ? data : []
+      const combined = [...serverApps]
+
+      cached.forEach((c) => {
+        const cId = String(c._id || c.id)
+        const alreadyInList = combined.some(
+          (m) =>
+            String(m._id || m.id) === cId ||
+            (m.jobId && c.jobId && String(m.jobId) === String(c.jobId))
+        )
+        if (!alreadyInList) {
+          combined.push(c)
+        }
+      })
+
+      setApplications(combined)
     } catch (e) {
-      setApplications(getMockApplications())
+      console.error('Error fetching applications:', e)
+      const cached = getCachedApplications()
+      setApplications(cached)
     } finally {
       setLoading(false)
     }
   }
 
-  const getMockApplications = () => [
-    {
-      id: 'app_carp_1',
-      jobId: 'job_carp_1',
-      jobTitle: 'Wood Carpenter (ಮರಗೆಲಸ / Carpenter)',
-      category: 'CARPENTER',
-      location: 'Bengaluru',
-      dailyWage: 1200,
-      experience: '3 years',
-      applicationSource: 'VOICE',
-      appliedAt: Date.now() - 86400000 * 2,
-      status: 'UNDER_REVIEW',
-      employerName: 'Mysuru Furniture Works',
-    },
-    {
-      id: 'app_drv_1',
-      jobId: 'job_drv_1',
-      jobTitle: 'Personal Car Driver (गाड़ी ड्राइवर)',
-      category: 'DRIVER',
-      location: 'Bengaluru',
-      dailyWage: 18000,
-      salaryType: 'MONTHLY',
-      experience: '5 years',
-      applicationSource: 'MANUAL',
-      appliedAt: Date.now() - 86400000 * 5,
-      status: 'INTERVIEW_SCHEDULED',
-      interviewDate: '28 September 2026',
-      interviewTime: '10:30 AM',
-      interviewMode: 'In Person',
-      interviewLocation: 'Koramangala, Bengaluru',
-      employerMessage: 'Please bring your valid Driving License and Aadhaar ID proof.',
-      employerName: 'Sharma Household',
-    },
-  ]
-
   const safeApplications = Array.isArray(applications) ? applications : []
   const filteredApps = safeApplications.filter((app) => {
-    if (filterTab === 'VOICE') return app.applicationSource === 'VOICE'
-    if (filterTab === 'MANUAL') return app.applicationSource !== 'VOICE'
+    const mode = (app.applicationSource || app.applicationMethod || app.appliedMode || 'MANUAL').toUpperCase()
+    if (filterTab === 'VOICE') return mode === 'VOICE'
+    if (filterTab === 'MANUAL') return mode !== 'VOICE'
     return true
   })
 
@@ -184,7 +166,7 @@ export default function MyApplicationsPage() {
 
             return (
               <div
-                key={app.id}
+                key={app._id || app.id}
                 className="bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-6 border border-slate-700/60 hover:border-cyan-400/50 shadow-lg space-y-6 relative overflow-hidden text-white transition-all"
               >
                 {/* 3D Glass Light Highlight Bar */}
@@ -203,17 +185,17 @@ export default function MyApplicationsPage() {
                     </div>
 
                     <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white">{app.jobTitle}</h3>
+                      <h3 className="text-lg sm:text-xl font-black text-white">{app.jobTitle || app.jobId?.title || 'Job Application'}</h3>
                       <p className="text-xs font-bold text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {app.jobLocation || app.location || 'Bengaluru'}</span>
+                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {app.jobLocation || app.location || app.jobId?.location || 'Bengaluru'}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-cyan-400 font-extrabold">
-                          <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.minSalary || 1200}/{app.salaryType === 'MONTHLY' ? (t.perMonth || 'month') : (t.perDay || 'day')}
+                          <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.expectedWage || app.jobId?.dailyWage || 1200}/{app.salaryType === 'MONTHLY' ? (t.perMonth || 'month') : (t.perDay || 'day')}
                         </span>
-                        {app.experience && (
+                        {(app.experience || app.applicantExperience) && (
                           <>
                             <span>•</span>
-                            <span className="text-cyan-300 font-bold">⭐ {app.experience}</span>
+                            <span className="text-cyan-300 font-bold">⭐ {app.experience || app.applicantExperience}</span>
                           </>
                         )}
                       </p>
@@ -221,7 +203,7 @@ export default function MyApplicationsPage() {
                   </div>
 
                   <div className="flex flex-col items-end gap-2 shrink-0">
-                    {app.applicationSource === 'VOICE' || app.applicationMethod === 'VOICE' ? (
+                    {app.applicationSource === 'VOICE' || app.applicationMethod === 'VOICE' || app.appliedMode === 'VOICE' ? (
                       <span className="px-3 py-1 bg-cyan-500/10 text-cyan-300 font-extrabold text-[10px] rounded-full border border-cyan-400/30 flex items-center gap-1">
                         <Mic className="w-3 h-3 text-cyan-400" />
                         <span>{t.appliedByVoiceBadge || 'Applied by Voice'}</span>
@@ -242,13 +224,13 @@ export default function MyApplicationsPage() {
                 </div>
 
                 {/* Voice Recording Player (if present) */}
-                {app.voiceRecording && (
+                {(app.voiceRecording || app.voiceRecordingUrl) && (
                   <div className="p-3.5 bg-slate-800/60 border border-cyan-400/30 rounded-2xl space-y-2">
                     <p className="text-[11px] font-black text-cyan-400 uppercase flex items-center gap-1.5">
                       <Mic className="w-3.5 h-3.5 text-cyan-400" />
                       <span>🎤 Voice Recording</span>
                     </p>
-                    <audio controls src={app.voiceRecording} className="w-full h-10 rounded-xl" />
+                    <audio controls src={app.voiceRecording || app.voiceRecordingUrl} className="w-full h-10 rounded-xl" />
                     {app.voiceTranscript && (
                       <p className="text-xs font-semibold text-slate-300 italic">
                         "{app.voiceTranscript}"

@@ -126,7 +126,7 @@ export default function ApplicationDetailModal({ application, onClose }) {
           </div>
 
           {/* Applicant Info (If view by employer) */}
-          {application.workerName && (
+          {(application.workerName || application.applicantName) && (
             <div className="p-4 bg-slate-800/60 border border-slate-700/60 rounded-2xl flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white font-black flex items-center justify-center">
@@ -134,13 +134,13 @@ export default function ApplicationDetailModal({ application, onClose }) {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.applicantName || 'Applicant'}</p>
-                  <p className="text-base font-black text-white">{application.workerName}</p>
+                  <p className="text-base font-black text-white">{application.workerName || application.applicantName}</p>
                 </div>
               </div>
-              {application.workerPhone && (
+              {(application.workerPhone || application.applicantPhone) && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 font-bold text-xs">
                   <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{application.workerPhone}</span>
+                  <span>{application.workerPhone || application.applicantPhone}</span>
                 </div>
               )}
             </div>
@@ -237,13 +237,13 @@ export default function ApplicationDetailModal({ application, onClose }) {
           )}
 
           {/* Voice Recording Section */}
-          {application.voiceRecording && (
+          {(application.voiceRecording || application.voiceRecordingUrl) && (
             <div className="p-4 bg-slate-800/60 border border-cyan-400/30 rounded-2xl space-y-2">
               <p className="text-[11px] font-black text-cyan-400 uppercase flex items-center gap-1.5">
                 <Mic className="w-4 h-4 text-cyan-400" />
                 <span>Voice Application Audio Recording</span>
               </p>
-              <audio controls src={application.voiceRecording} className="w-full h-10 rounded-xl" />
+              <audio controls src={application.voiceRecording || application.voiceRecordingUrl} className="w-full h-10 rounded-xl" />
               {application.voiceTranscript && (
                 <p className="text-xs font-semibold text-slate-300 italic pt-1">
                   "{application.voiceTranscript}"

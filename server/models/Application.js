@@ -54,7 +54,18 @@ const applicationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['APPLIED', 'SHORTLISTED', 'INTERVIEW', 'HIRED', 'REJECTED'],
+      enum: [
+        'APPLIED',
+        'PENDING',
+        'UNDER_REVIEW',
+        'SHORTLISTED',
+        'INTERVIEW_SCHEDULED',
+        'INTERVIEW',
+        'HIRED',
+        'ACCEPTED',
+        'APPROVED',
+        'REJECTED',
+      ],
       default: 'APPLIED',
       index: true,
     },
@@ -63,9 +74,33 @@ const applicationSchema = new mongoose.Schema(
       enum: ['VOICE', 'ONE_CLICK', 'MANUAL'],
       default: 'ONE_CLICK',
     },
+    jobLocation: {
+      type: String,
+      default: 'Bengaluru',
+    },
+    employerName: {
+      type: String,
+      default: 'Verified Employer',
+    },
     interviewDate: {
-      type: Date,
+      type: mongoose.Schema.Types.Mixed,
       default: null,
+    },
+    interviewTime: {
+      type: String,
+      default: '',
+    },
+    interviewMode: {
+      type: String,
+      default: 'In Person',
+    },
+    interviewLocation: {
+      type: String,
+      default: '',
+    },
+    employerMessage: {
+      type: String,
+      default: '',
     },
     employerNotes: {
       type: String,
@@ -80,6 +115,16 @@ const applicationSchema = new mongoose.Schema(
 applicationSchema.methods.toJSON = function () {
   const obj = this.toObject();
   obj.id = obj._id.toString();
+  // Ensure frontend component compatibility
+  obj.jobLocation = obj.jobLocation || obj.jobId?.location || obj.location || 'Bengaluru';
+  obj.location = obj.jobLocation;
+  obj.category = obj.jobCategory || obj.applicantTrade || obj.jobId?.category || 'DRIVER';
+  obj.dailyWage = obj.dailyWage || obj.expectedWage || obj.jobId?.dailyWage || 1200;
+  obj.experience = obj.applicantExperience || '1+ Years';
+  obj.voiceRecording = obj.voiceRecordingUrl || '';
+  obj.applicationSource = obj.appliedMode || 'MANUAL';
+  obj.applicationMethod = obj.appliedMode || 'MANUAL';
+  obj.employerName = obj.employerName || obj.jobId?.employerName || obj.jobId?.companyName || 'Verified Employer';
   delete obj.__v;
   return obj;
 };

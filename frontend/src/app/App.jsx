@@ -139,7 +139,7 @@ function AppContent() {
           <Route
             path="/applications/my"
             element={
-              <ProtectedRoute allowedRoles={['employee']}>
+              <ProtectedRoute allowedRoles={['employee', 'employer']}>
                 <MyApplicationsPage />
               </ProtectedRoute>
             }

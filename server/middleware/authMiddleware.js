@@ -72,4 +72,36 @@ export const authorize = (...roles) => {
   };
 };
 
-export default { protect, authorize };
+export const optionalProtect = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const secret = process.env.JWT_SECRET || 'voicehire_super_secret_jwt_key_2026_udyoga_mitra_platform_secure_token';
+    const decoded = jwt.verify(token, secret);
+
+    if (decoded && decoded.id) {
+      let user = null;
+      if (mongoose.connection.readyState === 1) {
+        user = await User.findById(decoded.id);
+      } else {
+        user = findFallbackUserById(decoded.id);
+      }
+      if (user) {
+        req.user = user;
+      }
+    }
+  } catch (error) {
+    // Proceed as unauthenticated guest without error
+  }
+  next();
+};
+
+export default { protect, optionalProtect, authorize };
