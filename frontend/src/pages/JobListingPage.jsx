@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { PROFESSIONS, CITIES } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
+import { getLocalizedProfessionBadge } from '../utils/jobLocalization'
 import JobCard from '../components/JobCard'
 import VoiceApplyModal from '../components/VoiceApplyModal'
 import axios from '../api/axios'
@@ -145,7 +146,7 @@ export default function JobListingPage() {
           <div className="flex items-center gap-2.5">
             <span className="text-3xl">{activeProf ? activeProf.icon : '🔎'}</span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900">
-              {activeProf ? activeProf.title : t.viewAllJobs}
+              {activeProf ? getLocalizedProfessionBadge(selectedCategory, activeProf.title, selectedLang) : t.viewAllJobs}
             </h1>
           </div>
           <p className="text-xs font-semibold text-slate-500 mt-1">
@@ -243,7 +244,7 @@ export default function JobListingPage() {
               }`}
             >
               <span>{prof.icon}</span>
-              <span>{prof.title}</span>
+              <span>{getLocalizedProfessionBadge(key, prof.title, selectedLang)}</span>
             </button>
           ))}
         </div>

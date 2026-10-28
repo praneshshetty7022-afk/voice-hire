@@ -3,6 +3,7 @@ import { X, MapPin, IndianRupee, Briefcase, Calendar, Clock, Mic, CheckCircle2, 
 import { PROFESSIONS, getProfession } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
+import { getLocalizedJobTitle, getLocalizedLocation, getLocalizedExperience, getLocalizedEmployer } from '../utils/jobLocalization'
 
 export default function ApplicationDetailModal({ application, onClose }) {
   if (!application) return null
@@ -73,10 +74,12 @@ export default function ApplicationDetailModal({ application, onClose }) {
               <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black bg-cyan-500/15 text-cyan-300 uppercase tracking-widest border border-cyan-400/30 mb-1">
                 {application.status || 'APPLIED'}
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white">{application.jobTitle}</h2>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                {getLocalizedJobTitle(application.jobTitle, application.category || application.applicantTrade, selectedLang)}
+              </h2>
               <p className="text-xs font-semibold text-slate-400 flex items-center gap-1 mt-0.5">
                 <Building2 className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{application.employerName || application.employer || (t.verifiedEmployer || 'Verified Employer')}</span>
+                <span>{getLocalizedEmployer(application.employerName || application.employer, selectedLang) || (t.verifiedEmployer || 'Verified Employer')}</span>
               </p>
             </div>
           </div>
@@ -106,7 +109,7 @@ export default function ApplicationDetailModal({ application, onClose }) {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.location || 'Location'}</span>
               <p className="text-sm font-black text-white flex items-center gap-1 truncate">
                 <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                {application.jobLocation || application.location || 'Bengaluru'}
+                {getLocalizedLocation(application.jobLocation || application.location, selectedLang)}
               </p>
             </div>
 
@@ -114,7 +117,7 @@ export default function ApplicationDetailModal({ application, onClose }) {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.experience || 'Experience'}</span>
               <p className="text-sm font-black text-white flex items-center gap-1">
                 <Briefcase className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
-                {application.experience || '2 Years'}
+                {getLocalizedExperience(application.experience, selectedLang)}
               </p>
             </div>
 

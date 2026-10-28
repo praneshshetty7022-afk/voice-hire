@@ -4,26 +4,26 @@ import { PROFESSIONS, getProfession } from '../styles/theme'
 import { MapPin, Clock, IndianRupee, Briefcase, Star, Volume2 } from 'lucide-react'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
+import { getLocalizedJob } from '../utils/jobLocalization'
 
 export default function JobCard({ job, onApplyVoice }) {
   const navigate = useNavigate()
   const { selectedLang, speakAudio } = useVoice()
   const t = getTranslation(selectedLang)
 
-  const prof = getProfession(job?.category, job?.title)
-  const profCategory = prof.id
-
-  const title = job?.title || prof.title
-  const location = job?.location || 'Bengaluru'
-  const salary = job?.dailyWage ? `₹${job.dailyWage} ${t.perDay || '/ Day'}` : (job?.salary || `₹1,200 ${t.perDay || '/ Day'}`)
-  const workTime = job?.workTime || '9 AM – 6 PM'
-  const experience = job?.experience || '1+ Years Experience'
-  const employerName = job?.employerName || job?.companyName || 'Verified Employer'
+  const localized = getLocalizedJob(job, selectedLang)
+  const prof = localized.prof
+  const title = localized.title
+  const badge = localized.badge
+  const location = localized.location
+  const salary = localized.salary
+  const workTime = localized.workTime
+  const experience = localized.experience
+  const employerName = localized.employerName
 
   const handleListenClick = (e) => {
     e.stopPropagation()
-    const speechText = `${title}. Location ${location}. Salary ${salary}. Work time ${workTime}. Experience required ${experience}.`
-    speakAudio(speechText)
+    speakAudio(localized.speechText, selectedLang)
   }
 
   return (
@@ -51,7 +51,7 @@ export default function JobCard({ job, onApplyVoice }) {
               className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider mb-1 border border-blue-100"
               style={{ backgroundColor: `${prof.color}15`, color: prof.color }}
             >
-              {prof.title}
+              {badge}
             </span>
             <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
               {title}
@@ -64,7 +64,7 @@ export default function JobCard({ job, onApplyVoice }) {
           type="button"
           onClick={handleListenClick}
           className="p-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-2xl transition-all shadow-sm active:scale-95 border border-blue-200/80 shrink-0"
-          title="Listen to Job Details"
+          title={t.listenToJob || 'Listen to Job Details'}
         >
           <Volume2 className="w-5 h-5 text-blue-600" />
         </button>

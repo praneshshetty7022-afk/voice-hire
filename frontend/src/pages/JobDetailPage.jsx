@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { PROFESSIONS, getProfession } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
+import { getLocalizedJob } from '../utils/jobLocalization'
 import VoiceApplyModal from '../components/VoiceApplyModal'
 import axios from '../api/axios'
 import { ArrowLeft, MapPin, Clock, IndianRupee, Star, ShieldCheck, Volume2, Mic, CheckCircle2, AlertCircle } from 'lucide-react'
@@ -83,12 +84,17 @@ export default function JobDetailPage() {
     }
   }
 
-  const prof = getProfession(job?.category, job?.title)
+  const localized = getLocalizedJob(job, selectedLang)
+  const prof = localized?.prof || getProfession(job?.category, job?.title)
   const profCategory = prof.id
 
   const handleListenJob = () => {
-    const text = `${job?.title || prof.title}. Located in ${job?.location || 'Bengaluru'}. Daily salary ${job?.dailyWage ? `₹${job.dailyWage}` : '₹1200'}. Work timing ${job?.workTime || '9 AM to 6 PM'}. Experience required ${job?.experience || '2 years'}.`
-    speakAudio(text)
+    if (localized?.speechText) {
+      speakAudio(localized.speechText, selectedLang)
+    } else {
+      const text = `${job?.title || prof.title}. Located in ${job?.location || 'Bengaluru'}. Daily salary ${job?.dailyWage ? `₹${job.dailyWage}` : '₹1200'}. Work timing ${job?.workTime || '9 AM to 6 PM'}. Experience required ${job?.experience || '2 years'}.`
+      speakAudio(text, selectedLang)
+    }
   }
 
   const checkAccountStatus = () => {
@@ -241,17 +247,17 @@ export default function JobDetailPage() {
           className="inline-block px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest mb-2 border border-white/10"
           style={{ backgroundColor: `${prof.color}25`, color: prof.color }}
         >
-          {prof.title}
+          {localized?.badge || prof.title}
         </span>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-white">{job?.title}</h1>
+        <h1 className="text-3xl sm:text-4xl font-black text-white">{localized?.title || job?.title}</h1>
         
         <p className="text-lg font-extrabold text-slate-300 mt-2 flex items-center justify-center gap-1.5">
-          <MapPin className="w-4 h-4 text-slate-400" /> {job?.location}
+          <MapPin className="w-4 h-4 text-slate-400" /> {localized?.location || job?.location}
         </p>
 
         <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-emerald-300 mt-1">
-          ₹{job?.dailyWage || job?.minSalary || 1200} {t.perDay || '/ Day'}
+          {localized?.salary || (job?.dailyWage ? `₹${job.dailyWage} ${t.perDay || '/ Day'}` : '₹1200 / Day')}
         </p>
 
         {/* Audio Speaker Listener Pill */}
@@ -269,25 +275,25 @@ export default function JobDetailPage() {
         <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <MapPin className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.location}</p>
-          <p className="text-base font-black text-white mt-0.5">{job?.location}</p>
+          <p className="text-base font-black text-white mt-0.5">{localized?.location || job?.location}</p>
         </div>
 
         <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <Clock className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.workTime}</p>
-          <p className="text-base font-black text-white mt-0.5">{job?.workTime || '9 AM – 6 PM'}</p>
+          <p className="text-base font-black text-white mt-0.5">{localized?.workTime || job?.workTime || '9 AM – 6 PM'}</p>
         </div>
 
         <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <IndianRupee className="w-6 h-6 text-cyan-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.salary}</p>
-          <p className="text-base font-black text-cyan-300 mt-0.5">₹{job?.dailyWage || job?.minSalary || 1200} {t.perDay || '/ Day'}</p>
+          <p className="text-base font-black text-cyan-300 mt-0.5">{localized?.salary || (job?.dailyWage ? `₹${job.dailyWage} ${t.perDay || '/ Day'}` : '₹1200 / Day')}</p>
         </div>
 
         <div className="p-5 bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-700/60 shadow-lg text-center">
           <Star className="w-6 h-6 text-cyan-400 mx-auto mb-1.5" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.experience}</p>
-          <p className="text-base font-black text-white mt-0.5">{job?.experience || '2+ Years'}</p>
+          <p className="text-base font-black text-white mt-0.5">{localized?.experience || job?.experience || '2+ Years'}</p>
         </div>
       </div>
 
@@ -296,7 +302,7 @@ export default function JobDetailPage() {
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.employer}</p>
-            <p className="text-xl font-black text-white">{job?.employerName}</p>
+            <p className="text-xl font-black text-white">{localized?.employerName || job?.employerName}</p>
           </div>
           <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-300 font-extrabold text-xs rounded-full border border-emerald-400/30">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { PROFESSIONS, getProfession } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
+import { getLocalizedJobTitle, getLocalizedLocation, getLocalizedExperience } from '../utils/jobLocalization'
 import axios from '../api/axios'
 import ApplicationDetailModal from '../components/ApplicationDetailModal'
 import { CheckCircle2, Clock, MapPin, IndianRupee, Mic, FileCheck, RefreshCw, Calendar, XCircle, Eye, Info } from 'lucide-react'
@@ -159,13 +160,16 @@ export default function MyApplicationsPage() {
       ) : (Array.isArray(filteredApps) && filteredApps.length > 0) ? (
         <div className="space-y-6">
           {(Array.isArray(filteredApps) ? filteredApps : []).map((app) => {
-            const jobTitle = app.jobTitle || app.jobId?.title || 'Job Application'
-            const prof = getProfession(app.category || app.applicantTrade || app.jobId?.category, jobTitle)
+            const rawJobTitle = app.jobTitle || app.jobId?.title || 'Job Application'
+            const jobTitle = getLocalizedJobTitle(rawJobTitle, app.category || app.applicantTrade, selectedLang)
+            const prof = getProfession(app.category || app.applicantTrade || app.jobId?.category, rawJobTitle)
             const currentStepIdx = getStatusIndex(app.status)
             const isRejected = app.status === 'REJECTED'
             const salaryUnit = app.salaryType === 'MONTHLY'
               ? (t.perMonth?.replace(/^\/+/, '') || 'month')
               : (t.perDay?.replace(/^\/+/, '') || 'day')
+            const localizedLocation = getLocalizedLocation(app.jobLocation || app.location || app.jobId?.location, selectedLang)
+            const localizedExp = getLocalizedExperience(app.experience || app.applicantExperience, selectedLang)
 
             return (
               <div
@@ -190,7 +194,7 @@ export default function MyApplicationsPage() {
                     <div>
                       <h3 className="text-lg sm:text-xl font-black text-white">{jobTitle}</h3>
                       <p className="text-xs font-bold text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {app.jobLocation || app.location || app.jobId?.location || 'Bengaluru'}</span>
+                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {localizedLocation}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-cyan-400 font-extrabold">
                           <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.expectedWage || app.jobId?.dailyWage || 1200}/{salaryUnit}
@@ -198,7 +202,7 @@ export default function MyApplicationsPage() {
                         {(app.experience || app.applicantExperience) && (
                           <>
                             <span>•</span>
-                            <span className="text-cyan-300 font-bold">⭐ {app.experience || app.applicantExperience}</span>
+                            <span className="text-cyan-300 font-bold">⭐ {localizedExp}</span>
                           </>
                         )}
                       </p>
