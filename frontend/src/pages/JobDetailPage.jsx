@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { PROFESSIONS } from '../styles/theme'
+import { PROFESSIONS, getProfession } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 import VoiceApplyModal from '../components/VoiceApplyModal'
@@ -83,8 +83,8 @@ export default function JobDetailPage() {
     }
   }
 
-  const profCategory = (job?.category || 'DRIVER').toUpperCase()
-  const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
+  const prof = getProfession(job?.category, job?.title)
+  const profCategory = prof.id
 
   const handleListenJob = () => {
     const text = `${job?.title || prof.title}. Located in ${job?.location || 'Bengaluru'}. Daily salary ${job?.dailyWage ? `₹${job.dailyWage}` : '₹1200'}. Work timing ${job?.workTime || '9 AM to 6 PM'}. Experience required ${job?.experience || '2 years'}.`

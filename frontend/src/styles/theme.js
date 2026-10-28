@@ -267,6 +267,279 @@ export const PROFESSIONS = {
     pattern: 'radial-gradient(circle at 80% 20%, rgba(190,24,93,0.08) 0%, transparent 50%)',
     props: ['Sewing Machine', 'Alterations', 'Garment Design'],
   },
+  HELPER: {
+    id: 'HELPER',
+    title: 'General Helper',
+    nativeTitles: {
+      en: 'General Helper',
+      te: 'హెల్పర్ (General Helper)',
+      kn: 'ಸಹಾಯಕ (General Helper)',
+      hi: 'हेल्पर / सहायक (General Helper)',
+      ta: 'உதவியாளர் (General Helper)',
+    },
+    subtitle: 'Warehouse • Construction • Loading',
+    icon: '👷',
+    color: '#0284c7', // Sky Blue
+    bgGradient: 'from-sky-600 to-blue-700',
+    lightBg: 'bg-sky-50 border-sky-200 text-sky-900',
+    accentColor: '#38bdf8',
+    pattern: 'radial-gradient(circle at 80% 20%, rgba(2,132,199,0.08) 0%, transparent 50%)',
+    props: ['Loading & Unloading', 'Site Assistance', 'Physical Fitness'],
+  },
+  GARDENER: {
+    id: 'GARDENER',
+    title: 'Professional Gardener',
+    nativeTitles: {
+      en: 'Professional Gardener',
+      te: 'తోటమాలి (Professional Gardener)',
+      kn: 'ತೋಟಗಾರ (Professional Gardener)',
+      hi: 'माली (Professional Gardener)',
+      ta: 'தோட்டக்காரர் (Professional Gardener)',
+    },
+    subtitle: 'Garden • Plants • Lawn Maintenance',
+    icon: '🌱',
+    color: '#16a34a',
+    bgGradient: 'from-green-600 to-emerald-700',
+    lightBg: 'bg-green-50 border-green-200 text-green-900',
+    accentColor: '#4ade80',
+    pattern: 'radial-gradient(circle at 80% 20%, rgba(22,163,74,0.08) 0%, transparent 50%)',
+    props: ['Lawn Care', 'Plant Pruning', 'Watering'],
+  },
+}
+
+// Aliases for alternate category naming conventions
+PROFESSIONS.SECURITY = PROFESSIONS.SECURITY_GUARD
+PROFESSIONS.DELIVERY = PROFESSIONS.DELIVERY_WORKER
+PROFESSIONS.FARM = PROFESSIONS.FARM_WORKER
+PROFESSIONS.FARMER = PROFESSIONS.FARM_WORKER
+PROFESSIONS.GENERAL_HELPER = PROFESSIONS.HELPER
+
+/**
+ * Smart profession resolver that determines the accurate role & icon
+ * by inspecting both the category field AND the job title / text.
+ * Prevents mismatch (e.g. Electrician showing Driver's car icon).
+ */
+export const getProfession = (category = '', title = '') => {
+  const combined = `${category || ''} ${title || ''}`.toLowerCase()
+
+  // Match Electrician (⚡)
+  if (
+    combined.includes('electr') ||
+    combined.includes('wireman') ||
+    combined.includes('बिजली') ||
+    combined.includes('ವಿದ್ಯುತ್') ||
+    combined.includes('ಎಲೆಕ್ಟ್ರಿಷಿಯನ್') ||
+    combined.includes('ఎలక్ట్రీషియన్') ||
+    combined.includes('மின்சார')
+  ) {
+    return PROFESSIONS.ELECTRICIAN
+  }
+
+  // Match Plumber (🔧)
+  if (
+    combined.includes('plumb') ||
+    combined.includes('pipe') ||
+    combined.includes('drain') ||
+    combined.includes('leak') ||
+    combined.includes('नल') ||
+    combined.includes('ಪ್ಲಂಬರ್') ||
+    combined.includes('కుళాయి')
+  ) {
+    return PROFESSIONS.PLUMBER
+  }
+
+  // Match Carpenter (🔨)
+  if (
+    combined.includes('carpent') ||
+    combined.includes('wood') ||
+    combined.includes('furniture') ||
+    combined.includes('timber') ||
+    combined.includes('बढ़ई') ||
+    combined.includes('ಬಡಗಿ') ||
+    combined.includes('ವಡ್ರಂಗಿ') ||
+    combined.includes('தச்சர்')
+  ) {
+    return PROFESSIONS.CARPENTER
+  }
+
+  // Match Painter (🎨)
+  if (
+    combined.includes('paint') ||
+    combined.includes('polish') ||
+    combined.includes('putty') ||
+    combined.includes('varnish') ||
+    combined.includes('पेंटर') ||
+    combined.includes('ಪೇಂಟರ್') ||
+    combined.includes('పెయింటర్') ||
+    combined.includes('வண்ணப்பூச்சு')
+  ) {
+    return PROFESSIONS.PAINTER
+  }
+
+  // Match Cook (🧑‍🍳)
+  if (
+    combined.includes('cook') ||
+    combined.includes('chef') ||
+    combined.includes('kitchen') ||
+    combined.includes('food') ||
+    combined.includes('catering') ||
+    combined.includes('रसोइया') ||
+    combined.includes('अಡುಗೆ') ||
+    combined.includes('ಅಡುಗೆ') ||
+    combined.includes('వంట') ||
+    combined.includes('சமையல்')
+  ) {
+    return PROFESSIONS.COOK
+  }
+
+  // Match Cleaner (🧹)
+  if (
+    combined.includes('clean') ||
+    combined.includes('maid') ||
+    combined.includes('housekeep') ||
+    combined.includes('sweeper') ||
+    combined.includes('janitor') ||
+    combined.includes('सफाई') ||
+    combined.includes('ಸ್ವಚ್ಛ') ||
+    combined.includes('సఫాయి') ||
+    combined.includes('துப்புரவு')
+  ) {
+    return PROFESSIONS.CLEANER
+  }
+
+  // Match Mason (🧱)
+  if (
+    combined.includes('mason') ||
+    combined.includes('brick') ||
+    combined.includes('civil') ||
+    combined.includes('plaster') ||
+    combined.includes('rajmistri') ||
+    combined.includes('मिस्त्री') ||
+    combined.includes('ಮೇಸ್ತ್ರಿ') ||
+    combined.includes('మేస్త్రీ') ||
+    combined.includes('கொத்தனார்')
+  ) {
+    return PROFESSIONS.MASON
+  }
+
+  // Match Helper (👷)
+  if (
+    combined.includes('helper') ||
+    combined.includes('warehouse') ||
+    combined.includes('loader') ||
+    combined.includes('unloader') ||
+    combined.includes('labor') ||
+    combined.includes('labour') ||
+    combined.includes('सहायक') ||
+    combined.includes('ಸಹಾಯಕ')
+  ) {
+    return PROFESSIONS.HELPER
+  }
+
+  // Match Welder (🔥)
+  if (
+    combined.includes('weld') ||
+    combined.includes('fabricat') ||
+    combined.includes('iron work') ||
+    combined.includes('grill') ||
+    combined.includes('वेल्डर') ||
+    combined.includes('ವೆಲ್ಡರ್')
+  ) {
+    return PROFESSIONS.WELDER
+  }
+
+  // Match Mechanic (🔩)
+  if (
+    combined.includes('mechanic') ||
+    combined.includes('garage') ||
+    combined.includes('automobile') ||
+    combined.includes('bike repair') ||
+    combined.includes('car repair') ||
+    combined.includes('मेकेनिक') ||
+    combined.includes('ಮೆಕ್ಯಾನಿಕ್')
+  ) {
+    return PROFESSIONS.MECHANIC
+  }
+
+  // Match Security Guard (🛡️)
+  if (
+    combined.includes('security') ||
+    combined.includes('guard') ||
+    combined.includes('watchman') ||
+    combined.includes('सुरक्षा') ||
+    combined.includes('ಕಾವಲುಗಾರ')
+  ) {
+    return PROFESSIONS.SECURITY_GUARD
+  }
+
+  // Match Delivery (📦)
+  if (
+    combined.includes('delivery') ||
+    combined.includes('courier') ||
+    combined.includes('डिलीवरी') ||
+    combined.includes('ಡೆಲಿವರಿ')
+  ) {
+    return PROFESSIONS.DELIVERY_WORKER
+  }
+
+  // Match Farmer / Agriculture (🌾)
+  if (
+    combined.includes('farm') ||
+    combined.includes('agri') ||
+    combined.includes('crop') ||
+    combined.includes('harvest') ||
+    combined.includes('खेती') ||
+    combined.includes('ರೈತ')
+  ) {
+    return PROFESSIONS.FARM_WORKER
+  }
+
+  // Match Tailor (✂️)
+  if (
+    combined.includes('tailor') ||
+    combined.includes('stitch') ||
+    combined.includes('sewing') ||
+    combined.includes('garment') ||
+    combined.includes('दर्जी') ||
+    combined.includes('ದರ್ಜಿ')
+  ) {
+    return PROFESSIONS.TAILOR
+  }
+
+  // Match Gardener (🌱)
+  if (
+    combined.includes('garden') ||
+    combined.includes('lawn') ||
+    combined.includes('plant') ||
+    combined.includes('माली') ||
+    combined.includes('ತೋಟಗಾರ')
+  ) {
+    return PROFESSIONS.GARDENER
+  }
+
+  // Match Driver (🚗)
+  if (
+    combined.includes('driv') ||
+    combined.includes('cab') ||
+    combined.includes('taxi') ||
+    combined.includes('truck') ||
+    combined.includes('chauffeur') ||
+    combined.includes('auto driver') ||
+    combined.includes('कार') ||
+    combined.includes('ड्राइवर') ||
+    combined.includes('ಚಾಲಕ') ||
+    combined.includes('డ్రైవర్')
+  ) {
+    return PROFESSIONS.DRIVER
+  }
+
+  // Direct category lookup fallback
+  const cleanCat = String(category || '').trim().toUpperCase()
+  if (PROFESSIONS[cleanCat]) {
+    return PROFESSIONS[cleanCat]
+  }
+
+  return PROFESSIONS.DRIVER
 }
 
 export const CITIES = [

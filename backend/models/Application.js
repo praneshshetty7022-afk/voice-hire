@@ -118,7 +118,24 @@ applicationSchema.methods.toJSON = function () {
   // Ensure frontend component compatibility
   obj.jobLocation = obj.jobLocation || obj.jobId?.location || obj.location || 'Bengaluru';
   obj.location = obj.jobLocation;
-  obj.category = obj.jobCategory || obj.applicantTrade || obj.jobId?.category || 'DRIVER';
+  let resolvedCat = obj.jobCategory || obj.applicantTrade || obj.jobId?.category;
+  const titleToCheck = obj.jobTitle || obj.jobId?.title || '';
+  if (!resolvedCat || resolvedCat === 'DRIVER') {
+    if (/electr|wireman|बिजली|ವಿದ್ಯುತ್/i.test(titleToCheck)) resolvedCat = 'ELECTRICIAN';
+    else if (/plumb|pipe|नल|ಪ್ಲಂಬರ್/i.test(titleToCheck)) resolvedCat = 'PLUMBER';
+    else if (/carpent|wood|बढ़ई|ಬಡಗಿ/i.test(titleToCheck)) resolvedCat = 'CARPENTER';
+    else if (/cook|chef|kitchen|रसोइया|ಅಡುಗೆ/i.test(titleToCheck)) resolvedCat = 'COOK';
+    else if (/paint|पुताई|ಪೇಂಟರ್/i.test(titleToCheck)) resolvedCat = 'PAINTER';
+    else if (/welder|fabricat|वेल्डर|ವೆಲ್ಡರ್/i.test(titleToCheck)) resolvedCat = 'WELDER';
+    else if (/mechanic|garage|mistri|मेकेनिक|ಮೆಕ್ಯಾನಿಕ್/i.test(titleToCheck)) resolvedCat = 'MECHANIC';
+    else if (/mason|brick|राजमिस्त्री|ಮೇಸ್ತ್ರಿ/i.test(titleToCheck)) resolvedCat = 'MASON';
+    else if (/clean|maid|housekeep|सफाई|ಸ್ವಚ್ಛತೆ/i.test(titleToCheck)) resolvedCat = 'CLEANER';
+    else if (/secur|guard|सुरक्षा|ಸೆಕ್ಯುರಿಟಿ/i.test(titleToCheck)) resolvedCat = 'SECURITY';
+    else if (/deliver|courier|डिलीवरी|ಡೆಲಿವರಿ/i.test(titleToCheck)) resolvedCat = 'DELIVERY';
+    else if (/garden|mali|माली|ತೋಟ/i.test(titleToCheck)) resolvedCat = 'GARDENER';
+    else if (/help|hamali|labour|मजदूर|ಸಹಾಯಕ/i.test(titleToCheck)) resolvedCat = 'HELPER';
+  }
+  obj.category = resolvedCat || 'DRIVER';
   obj.dailyWage = obj.dailyWage || obj.expectedWage || obj.jobId?.dailyWage || 1200;
   obj.experience = obj.applicantExperience || '1+ Years';
   obj.voiceRecording = obj.voiceRecordingUrl || '';

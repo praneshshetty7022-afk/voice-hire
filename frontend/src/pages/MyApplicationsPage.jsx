@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { PROFESSIONS } from '../styles/theme'
+import { PROFESSIONS, getProfession } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 import axios from '../api/axios'
@@ -159,10 +159,13 @@ export default function MyApplicationsPage() {
       ) : (Array.isArray(filteredApps) && filteredApps.length > 0) ? (
         <div className="space-y-6">
           {(Array.isArray(filteredApps) ? filteredApps : []).map((app) => {
-            const profCategory = (app.category || 'DRIVER').toUpperCase()
-            const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
+            const jobTitle = app.jobTitle || app.jobId?.title || 'Job Application'
+            const prof = getProfession(app.category || app.applicantTrade || app.jobId?.category, jobTitle)
             const currentStepIdx = getStatusIndex(app.status)
             const isRejected = app.status === 'REJECTED'
+            const salaryUnit = app.salaryType === 'MONTHLY'
+              ? (t.perMonth?.replace(/^\/+/, '') || 'month')
+              : (t.perDay?.replace(/^\/+/, '') || 'day')
 
             return (
               <div
@@ -185,12 +188,12 @@ export default function MyApplicationsPage() {
                     </div>
 
                     <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white">{app.jobTitle || app.jobId?.title || 'Job Application'}</h3>
+                      <h3 className="text-lg sm:text-xl font-black text-white">{jobTitle}</h3>
                       <p className="text-xs font-bold text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {app.jobLocation || app.location || app.jobId?.location || 'Bengaluru'}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-cyan-400 font-extrabold">
-                          <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.expectedWage || app.jobId?.dailyWage || 1200}/{app.salaryType === 'MONTHLY' ? (t.perMonth || 'month') : (t.perDay || 'day')}
+                          <IndianRupee className="w-3.5 h-3.5 text-cyan-400" /> ₹{app.dailyWage || app.expectedWage || app.jobId?.dailyWage || 1200}/{salaryUnit}
                         </span>
                         {(app.experience || app.applicantExperience) && (
                           <>

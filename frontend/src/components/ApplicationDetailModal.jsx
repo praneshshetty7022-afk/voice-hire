@@ -1,6 +1,6 @@
 import React from 'react'
 import { X, MapPin, IndianRupee, Briefcase, Calendar, Clock, Mic, CheckCircle2, XCircle, Building2, User, Phone, MessageSquare } from 'lucide-react'
-import { PROFESSIONS } from '../styles/theme'
+import { PROFESSIONS, getProfession } from '../styles/theme'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
 
@@ -9,8 +9,10 @@ export default function ApplicationDetailModal({ application, onClose }) {
 
   const { selectedLang, t } = useVoice()
 
-  const profCategory = (application.category || 'DRIVER').toUpperCase()
-  const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
+  const prof = getProfession(
+    application.category || application.applicantTrade,
+    application.jobTitle
+  )
 
   const getStatusStepIndex = (status) => {
     switch (status) {
@@ -96,7 +98,7 @@ export default function ApplicationDetailModal({ application, onClose }) {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.salary || 'Wage'}</span>
               <p className="text-sm font-black text-cyan-400 flex items-center gap-0.5">
                 <IndianRupee className="w-3.5 h-3.5 text-cyan-400" />
-                ₹{application.dailyWage || application.minSalary || 1200}/{application.salaryType === 'MONTHLY' ? (t.perMonth || 'month') : (t.perDay || 'day')}
+                ₹{application.dailyWage || application.minSalary || 1200}/{application.salaryType === 'MONTHLY' ? (t.perMonth?.replace(/^\/+/, '') || 'month') : (t.perDay?.replace(/^\/+/, '') || 'day')}
               </p>
             </div>
 

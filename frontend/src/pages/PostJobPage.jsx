@@ -16,6 +16,7 @@ import toast from 'react-hot-toast'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import { useVoice } from '../context/VoiceContext'
+import { PROFESSIONS, getProfession } from '../styles/theme'
 
 export default function PostJobPage() {
   const navigate = useNavigate()
@@ -35,13 +36,28 @@ export default function PostJobPage() {
 
   const TRADES = [
     { code: 'DRIVER', label: t.tradeDriver || 'Commercial / Private Driver' },
-    { code: 'CARPENTER', label: t.tradeCarpenter || 'Modular Interior Carpenter' },
     { code: 'ELECTRICIAN', label: t.tradeElectrician || 'Licensed Electrician & Wireman' },
     { code: 'PLUMBER', label: t.tradePlumber || 'Sanitary & Pipe Plumber' },
+    { code: 'CARPENTER', label: t.tradeCarpenter || 'Modular Interior Carpenter' },
     { code: 'COOK', label: t.tradeCook || 'Residential / Commercial Cook' },
     { code: 'PAINTER', label: t.tradePainter || 'Wall Painter & Surface Polisher' },
     { code: 'HELPER', label: t.tradeHelper || 'Warehouse & Construction Helper' },
+    { code: 'MASON', label: 'Civil Construction Mason' },
+    { code: 'WELDER', label: 'Metal & Arc Welder' },
+    { code: 'MECHANIC', label: 'Automobile & Two-Wheeler Mechanic' },
+    { code: 'SECURITY_GUARD', label: 'Security Guard' },
+    { code: 'DELIVERY_WORKER', label: 'Delivery Associate' },
+    { code: 'TAILOR', label: 'Garment Tailor & Stitching' },
+    { code: 'GARDENER', label: 'Gardener & Lawn Care' },
   ]
+
+  const handleTitleChange = (val) => {
+    setTitle(val)
+    const detected = getProfession('', val)
+    if (detected?.id) {
+      setCategory(detected.id)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -51,11 +67,13 @@ export default function PostJobPage() {
       return
     }
 
+    const resolvedCategory = getProfession(category, title)?.id || category || 'DRIVER'
+
     try {
       setLoading(true)
       const res = await api.post('/jobs', {
         title: title.trim(),
-        category,
+        category: resolvedCategory,
         location: location.trim(),
         workTime,
         experience,
@@ -107,7 +125,21 @@ export default function PostJobPage() {
         </div>
 
         {/* Templates Dropdown Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              applyPreset(
+                'ELECTRICIAN',
+                'Licensed Building Electrician & Wireman',
+                '1300',
+                'Looking for a skilled building electrician for residential house wiring, MCB setup, inverter fitting, and circuit testing.'
+              )
+            }
+            className="px-3 py-1.5 rounded-xl bg-yellow-50 dark:bg-white/[0.06] text-amber-600 dark:text-amber-400 border border-yellow-200 dark:border-white/10 text-xs font-bold hover:bg-yellow-100 transition-all cursor-pointer flex items-center gap-1"
+          >
+            <span>⚡</span> + Electrician
+          </button>
           <button
             type="button"
             onClick={() =>
@@ -118,9 +150,23 @@ export default function PostJobPage() {
                 'Need safe driver with commercial license for full-time daily routes across Bengaluru.'
               )
             }
-            className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-white/[0.06] text-[#2563EB] dark:text-[#60A5FA] border border-blue-200 dark:border-white/10 text-xs font-bold hover:bg-blue-100 transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-white/[0.06] text-[#2563EB] dark:text-[#60A5FA] border border-blue-200 dark:border-white/10 text-xs font-bold hover:bg-blue-100 transition-all cursor-pointer flex items-center gap-1"
           >
-            + Driver Template
+            <span>🚗</span> + Driver
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              applyPreset(
+                'PLUMBER',
+                'Sanitary & Commercial Pipe Plumber',
+                '1250',
+                'CPVC/UPVC pipe fittings, motor pump repairs, bathroom fixture installations, and leakage solving.'
+              )
+            }
+            className="px-3 py-1.5 rounded-xl bg-cyan-50 dark:bg-white/[0.06] text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-white/10 text-xs font-bold hover:bg-cyan-100 transition-all cursor-pointer flex items-center gap-1"
+          >
+            <span>🔧</span> + Plumber
           </button>
           <button
             type="button"
@@ -132,9 +178,9 @@ export default function PostJobPage() {
                 'Skilled modular woodwork assembler needed for residential flat furnishing.'
               )
             }
-            className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-white/[0.06] text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-white/10 text-xs font-bold hover:bg-amber-100 transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-white/[0.06] text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-white/10 text-xs font-bold hover:bg-amber-100 transition-all cursor-pointer flex items-center gap-1"
           >
-            + Carpenter Template
+            <span>🔨</span> + Carpenter
           </button>
         </div>
       </div>
@@ -146,17 +192,25 @@ export default function PostJobPage() {
       >
         {/* Job Title */}
         <div>
-          <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-            {t.jobTitleLabel || 'Job Title'}
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              {t.jobTitleLabel || 'Job Title'}
+            </label>
+            {title && (
+              <span className="text-[11px] font-black text-amber-500 flex items-center gap-1">
+                <span>{getProfession(category, title).icon}</span>
+                <span>{getProfession(category, title).title}</span>
+              </span>
+            )}
+          </div>
           <div className="relative">
             <Briefcase className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               required
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Commercial Van Driver or Furniture Carpenter"
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="e.g. Electrician, Car Driver, Furniture Carpenter"
               className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-900 dark:text-white focus:border-[#2563EB] outline-none"
             />
           </div>

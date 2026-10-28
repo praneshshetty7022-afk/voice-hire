@@ -87,6 +87,22 @@ const jobSchema = new mongoose.Schema(
 jobSchema.methods.toJSON = function () {
   const obj = this.toObject();
   obj.id = obj._id.toString();
+  const t = String(obj.title || '').toLowerCase();
+  if (!obj.category || obj.category === 'DRIVER') {
+    if (/electr|wireman|बिजली|ವಿದ್ಯುತ್/i.test(t)) obj.category = 'ELECTRICIAN';
+    else if (/plumb|pipe|नल|ಪ್ಲಂಬರ್/i.test(t)) obj.category = 'PLUMBER';
+    else if (/carpent|wood|बढ़ई|ಬಡಗಿ/i.test(t)) obj.category = 'CARPENTER';
+    else if (/cook|chef|kitchen|रसोइया|ಅಡುಗೆ/i.test(t)) obj.category = 'COOK';
+    else if (/paint|पुताई|ಪೇಂಟರ್/i.test(t)) obj.category = 'PAINTER';
+    else if (/welder|fabricat|वेल्डर|ವೆಲ್ಡರ್/i.test(t)) obj.category = 'WELDER';
+    else if (/mechanic|garage|mistri|मेकेनिक|ಮೆಕ್ಯಾನಿಕ್/i.test(t)) obj.category = 'MECHANIC';
+    else if (/mason|brick|राजमिस्त्री|ಮೇಸ್ತ್ರಿ/i.test(t)) obj.category = 'MASON';
+    else if (/clean|maid|housekeep|सफाई|ಸ್ವಚ್ಛತೆ/i.test(t)) obj.category = 'CLEANER';
+    else if (/secur|guard|सुरक्षा|ಸೆಕ್ಯುರಿಟಿ/i.test(t)) obj.category = 'SECURITY';
+    else if (/deliver|courier|डिलीवरी|ಡೆಲಿವರಿ/i.test(t)) obj.category = 'DELIVERY';
+    else if (/garden|mali|माली|ತೋಟ/i.test(t)) obj.category = 'GARDENER';
+    else if (/help|hamali|labour|मजदूर|ಸಹಾಯಕ/i.test(t)) obj.category = 'HELPER';
+  }
   delete obj.__v;
   return obj;
 };

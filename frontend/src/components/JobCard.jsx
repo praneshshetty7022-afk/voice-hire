@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PROFESSIONS } from '../styles/theme'
+import { PROFESSIONS, getProfession } from '../styles/theme'
 import { MapPin, Clock, IndianRupee, Briefcase, Star, Volume2 } from 'lucide-react'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
@@ -10,8 +10,8 @@ export default function JobCard({ job, onApplyVoice }) {
   const { selectedLang, speakAudio } = useVoice()
   const t = getTranslation(selectedLang)
 
-  const profCategory = (job?.category || 'DRIVER').toUpperCase()
-  const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
+  const prof = getProfession(job?.category, job?.title)
+  const profCategory = prof.id
 
   const title = job?.title || prof.title
   const location = job?.location || 'Bengaluru'

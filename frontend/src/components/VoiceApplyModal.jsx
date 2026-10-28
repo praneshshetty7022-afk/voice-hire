@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Mic, CheckCircle2, XCircle, Volume2, User, Star, Briefcase, MapPin, IndianRupee, AlertCircle, RefreshCw, Loader2, Play, Square, RotateCcw } from 'lucide-react'
 import { useVoice } from '../context/VoiceContext'
 import { getTranslation } from '../utils/translations'
-import { PROFESSIONS } from '../styles/theme'
+import { PROFESSIONS, getProfession } from '../styles/theme'
 import axios from '../api/axios'
 import toast from 'react-hot-toast'
 import { saveAppToLocalCache } from '../utils/applicationCache'
@@ -31,8 +31,8 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
   }
 
   const currentUser = getUserProfile()
-  const profCategory = (job?.category || 'DRIVER').toUpperCase()
-  const prof = PROFESSIONS[profCategory] || PROFESSIONS.DRIVER
+  const prof = getProfession(job?.category, job?.title)
+  const profCategory = prof.id
 
   // State Machine States: IDLE, REQUEST_MIC_PERMISSION, RECORDING, PROCESSING, CONFIRMATION, SUBMITTING, SUCCESS, ALREADY_APPLIED, MICROPHONE_DENIED, RECORDING_FAILED, SUBMISSION_FAILED
   const [currentState, setCurrentState] = useState('IDLE')
