@@ -6,9 +6,6 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  Users,
-  Building2,
-  CheckCircle2,
   LogIn,
   UserPlus,
   Zap,
@@ -213,91 +210,7 @@ export default function CinematicIntro({ isOpen = true, onClose }) {
         </div>
       </section>
 
-      {/* Two Role Options Section */}
-      <section className="bg-slate-100/60 dark:bg-slate-900/30 border-t border-slate-200/80 dark:border-white/10 py-16 px-6 sm:px-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center space-y-2 mb-10">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-              {t.roleSectionTitle}
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium">
-              {t.roleSectionSubhead}
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Worker Card */}
-            <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-lg flex flex-col justify-between hover:border-blue-500/50 transition-all group">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                  <Users className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t.workerCardTitle}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {t.workerCardDesc}
-                </p>
-                <ul className="space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-2">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{t.workerBullet1 || 'Search daily wage & monthly salary jobs'}</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{t.workerBullet2 || 'Apply via audio mic in your native tongue'}</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{t.workerBullet3 || 'Track interview calls & job status in real time'}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => handleGetStarted('employee')}
-                className="mt-8 w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>{t.btnWorkerGetStarted || t.workerCardBtn || 'Find Jobs as Worker'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Employer Card */}
-            <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-lg flex flex-col justify-between hover:border-indigo-500/50 transition-all group">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t.employerCardTitle}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {t.employerCardDesc}
-                </p>
-                <ul className="space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-2">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{t.employerBullet1 || 'Post job openings with daily/monthly wage terms'}</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{t.employerBullet2 || 'Listen to worker voice applications & transcripts'}</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>{t.employerBullet3 || 'Shortlist and connect directly over call'}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => handleGetStarted('employer')}
-                className="mt-8 w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>{t.btnEmployerGetStarted || t.employerCardBtn || 'Hire Talent as Employer'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-white/10 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
