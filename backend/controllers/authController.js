@@ -3,6 +3,9 @@ import User from '../models/User.js';
 import {
   findFallbackUserByEmail,
   findFallbackUserById,
+  findFallbackUserByIdentifier,
+  findFallbackUser,
+  fallbackUsers,
   createFallbackUser,
   updateFallbackUser,
 } from '../utils/fallbackStore.js';
@@ -203,11 +206,14 @@ export const login = async (req, res) => {
 
       user = await User.findOne({ $or: orConditions }).select('+password');
     } else {
-      user = fallbackUsers.find(
-        (u) =>
-          (cleanEmail && u.email?.toLowerCase() === cleanEmail) ||
-          (cleanPhone && u.phone?.replace(/[^\d]/g, '').slice(-10) === cleanPhone)
-      );
+      user =
+        findFallbackUserByIdentifier(loginInput) ||
+        findFallbackUser({ email: cleanEmail, phone: cleanPhone, identifier: loginInput }) ||
+        fallbackUsers.find(
+          (u) =>
+            (cleanEmail && u.email?.toLowerCase() === cleanEmail) ||
+            (cleanPhone && u.phone?.replace(/[^\d]/g, '').slice(-10) === cleanPhone)
+        );
     }
 
     // 3. Generic 401 if user does not exist
