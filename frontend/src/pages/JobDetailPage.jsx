@@ -136,7 +136,7 @@ export default function JobDetailPage() {
       applicantName: workerName,
       workerName: workerName,
       workerId: workerId,
-      applicantPhone: user?.phone || user?.phoneNumber || '9876543210',
+      applicantPhone: user?.phone || user?.phoneNumber || user?.mobile || '',
       applicantTrade: job?.category || profCategory || 'DRIVER',
       applicantExperience: user?.experience || '2+ Years',
       expectedWage: job?.dailyWage || job?.minSalary || 1200,

@@ -139,12 +139,34 @@ export default function ApplicationDetailModal({ application, onClose }) {
                   <p className="text-base font-black text-white">{application.workerName || application.applicantName}</p>
                 </div>
               </div>
-              {(application.workerPhone || application.applicantPhone) && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 font-bold text-xs">
-                  <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{application.workerPhone || application.applicantPhone}</span>
-                </div>
-              )}
+              {(() => {
+                const workerCallablePhone = String(
+                  application.applicantId?.phone ||
+                  application.applicantPhone ||
+                  application.workerPhone ||
+                  application.phone ||
+                  ''
+                ).trim()
+                const digits = workerCallablePhone.replace(/[^\d+]/g, '')
+                const dialHref = digits.startsWith('+')
+                  ? `tel:${digits}`
+                  : digits.length === 10
+                  ? `tel:+91${digits}`
+                  : digits.startsWith('91') && digits.length === 12
+                  ? `tel:+${digits}`
+                  : digits ? `tel:${digits}` : '#'
+
+                return workerCallablePhone ? (
+                  <a
+                    href={dialHref}
+                    title={`Call candidate directly at +91 ${workerCallablePhone.replace(/^\+?91/, '')}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 rounded-xl text-emerald-300 font-bold text-xs transition-colors shadow-sm"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Call +91 {workerCallablePhone.replace(/^\+?91/, '')}</span>
+                  </a>
+                ) : null
+              })()}
             </div>
           )}
 

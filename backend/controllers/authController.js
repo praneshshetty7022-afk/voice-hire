@@ -167,32 +167,54 @@ export const register = async (req, res) => {
  */
 export const login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-    const cleanEmail = normalizeEmail(email);
+    const { email, identifier, phone, password, role } = req.body;
+    const loginInput = String(identifier || email || phone || '').trim();
 
     // 1. Basic validation
-    if (!cleanEmail || !password) {
+    if (!loginInput || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide both email and password.',
+        message: 'Please provide both mobile number/email and password.',
       });
     }
 
     const isDbConnected = mongoose.connection.readyState === 1;
 
-    // 2. Look up user by email
+    // Check if input is a phone number (e.g. 10 digits or digits with +91)
+    const digitsOnly = loginInput.replace(/[^\d]/g, '');
+    const cleanPhone = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : '';
+    const cleanEmail = normalizeEmail(loginInput);
+
+    // 2. Look up user by email or phone number
     let user = null;
     if (isDbConnected) {
-      user = await User.findOne({ email: cleanEmail }).select('+password');
+      const orConditions = [];
+      if (cleanEmail && cleanEmail.includes('@')) {
+        orConditions.push({ email: cleanEmail });
+      }
+      if (cleanPhone) {
+        orConditions.push({ phone: cleanPhone });
+        orConditions.push({ phone: `+91${cleanPhone}` });
+        orConditions.push({ phone: loginInput });
+      }
+      if (orConditions.length === 0) {
+        orConditions.push({ email: cleanEmail });
+      }
+
+      user = await User.findOne({ $or: orConditions }).select('+password');
     } else {
-      user = findFallbackUserByEmail(cleanEmail);
+      user = fallbackUsers.find(
+        (u) =>
+          (cleanEmail && u.email?.toLowerCase() === cleanEmail) ||
+          (cleanPhone && u.phone?.replace(/[^\d]/g, '').slice(-10) === cleanPhone)
+      );
     }
 
     // 3. Generic 401 if user does not exist
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'Invalid mobile number/email or password.',
       });
     }
 

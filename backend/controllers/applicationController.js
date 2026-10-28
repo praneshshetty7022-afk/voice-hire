@@ -108,8 +108,13 @@ export const applyForJob = async (req, res) => {
     // 4. Normalise Candidate Information
     const cleanName =
       applicantName || workerName || name || req.user?.fullName || req.user?.name || 'Worker Applicant';
-    const cleanPhone =
-      applicantPhone || workerPhone || phone || req.user?.phone || req.user?.phoneNumber || '9876543210';
+    // Prioritize authenticated worker's live mobile number from auth middleware
+    const authPhone = req.user?.phone || req.user?.phoneNumber;
+    const candidateProvidedPhone =
+      (applicantPhone && applicantPhone !== '9876543210' && applicantPhone !== '1234567890' ? applicantPhone : null) ||
+      (workerPhone && workerPhone !== '9876543210' ? workerPhone : null) ||
+      (phone && phone !== '9876543210' ? phone : null);
+    const cleanPhone = authPhone || candidateProvidedPhone || applicantPhone || workerPhone || phone || '';
     const cleanTrade =
       applicantTrade || category || tradeCategory || skill || targetJob?.category || 'DRIVER';
     const cleanExp =
@@ -441,7 +446,14 @@ export const getEmployerApplicants = async (req, res) => {
           .sort({ createdAt: -1 });
       }
 
-      const formatted = apps.map((a) => (a.toJSON ? a.toJSON() : a));
+      const formatted = apps.map((a) => {
+        const item = a.toJSON ? a.toJSON() : { ...a };
+        const realPhone = item.applicantId?.phone || item.applicantId?.phoneNumber;
+        if (realPhone && (!item.applicantPhone || item.applicantPhone === '9876543210')) {
+          item.applicantPhone = realPhone;
+        }
+        return item;
+      });
 
       // Combine with in-memory applications
       inMemoryApps.forEach((mem) => {

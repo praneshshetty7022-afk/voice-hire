@@ -307,8 +307,9 @@ export const VoiceProvider = ({ children }) => {
 
             const res = await axios.post('/applications', {
               jobId: action.job.id,
-              workerId: user?.id || user?.phoneNumber || 'guest_applicant',
+              workerId: user?.id || user?._id || user?.phoneNumber || 'guest_applicant',
               workerName: user?.name || user?.fullName || 'Applicant',
+              applicantPhone: user?.phone || user?.phoneNumber || user?.mobile || '',
               applicationSource: 'VOICE',
             })
 

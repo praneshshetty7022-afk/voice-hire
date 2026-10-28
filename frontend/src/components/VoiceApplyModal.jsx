@@ -19,15 +19,17 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
       if (userStr) {
         const u = JSON.parse(userStr)
         return {
-          name: u.name || u.firstName || 'Worker',
+          ...u,
+          name: u.name || u.fullName || u.firstName || 'Worker',
           id: u.id || u._id || 'worker_1',
+          phone: u.phone || u.phoneNumber || u.mobile || '',
           experience: u.experience || '2 years',
         }
       }
     } catch (e) {
       console.error(e)
     }
-    return { name: 'Worker', id: 'worker_1', experience: '2 years' }
+    return { name: 'Worker', id: 'worker_1', phone: '', experience: '2 years' }
   }
 
   const currentUser = getUserProfile()
@@ -340,7 +342,7 @@ export default function VoiceApplyModal({ job, onClose, onSuccess }) {
         name: extracted.name || user?.name || 'Applicant',
         applicantName: extracted.name || user?.name || 'Applicant',
         workerName: extracted.name || user?.name || 'Applicant',
-        applicantPhone: user?.phone || user?.phoneNumber || '9876543210',
+        applicantPhone: user?.phone || user?.phoneNumber || user?.mobile || '',
         applicantTrade: job?.category || profCategory || 'DRIVER',
         experienceYears: expVal,
         experience: extracted.experience || `${expVal} years`,

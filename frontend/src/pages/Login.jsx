@@ -94,17 +94,20 @@ export default function Login() {
     setErrorMessage('')
     setRoleMismatchData(null)
 
-    const cleanEmail = email.trim().toLowerCase()
-    if (!cleanEmail) {
-      setErrorMessage('Please enter your email address.')
-      toast.error('Email address is required.')
+    const cleanInput = email.trim()
+    if (!cleanInput) {
+      setErrorMessage(isWorker ? 'Please enter your mobile phone number or email.' : 'Please enter your email address or mobile number.')
+      toast.error('Mobile number or email is required.')
       return
     }
 
+    const digitsOnly = cleanInput.replace(/[^\d]/g, '')
+    const isNumericPhone = digitsOnly.length >= 10 && /^[+\d\s-]{10,16}$/.test(cleanInput)
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/
-    if (!emailRegex.test(cleanEmail)) {
-      setErrorMessage('Please enter a valid email address.')
-      toast.error('Invalid email address format.')
+
+    if (!isNumericPhone && !emailRegex.test(cleanInput.toLowerCase())) {
+      setErrorMessage('Please enter a valid 10-digit mobile number or email address.')
+      toast.error('Invalid mobile number or email format.')
       return
     }
 
@@ -114,7 +117,15 @@ export default function Login() {
       return
     }
 
-    const res = await login({ email: cleanEmail, password, role: activeRole })
+    const payload = {
+      email: cleanInput.toLowerCase(),
+      identifier: cleanInput,
+      phone: isNumericPhone ? digitsOnly.slice(-10) : undefined,
+      password,
+      role: activeRole,
+    }
+
+    const res = await login(payload)
     if (res.success) {
       if (res.user?.role === 'employer') {
         navigate('/employer/dashboard', { replace: true })
@@ -128,7 +139,7 @@ export default function Login() {
           message: res.message,
         })
       }
-      setErrorMessage(res.message || 'Invalid email or password.')
+      setErrorMessage(res.message || 'Invalid mobile number/email or password.')
     }
   }
 
@@ -462,22 +473,22 @@ export default function Login() {
 
                   {/* Modern Form Fields */}
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Email Field */}
+                    {/* Mobile Number or Email Field */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {isWorker ? (t.workerEmailLabel || 'Worker Email Address') : (t.employerEmailLabel || 'Employer Work Email')}
+                        {isWorker ? (t.workerMobileOrEmailLabel || 'Worker Mobile Number or Email') : (t.employerEmailLabel || 'Employer Work Email or Mobile')}
                       </label>
                       <div className="relative group/input">
                         <input
-                          type="email"
+                          type="text"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder={isWorker ? 'worker@example.com' : 'hr@company.com'}
-                          autoComplete="email"
+                          placeholder={isWorker ? 'e.g. 9876543210 or worker@example.com' : 'hr@company.com or 9876543210'}
+                          autoComplete="username"
                           required
                           className="w-full px-4 py-3.5 pl-11 rounded-2xl border border-slate-300 dark:border-white/15 bg-slate-50/70 dark:bg-[#151D30] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all placeholder:text-slate-400"
                         />
-                        <Mail className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
+                        <PhoneCall className="w-5 h-5 text-slate-400 group-focus-within/input:text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
                       </div>
                     </div>
 

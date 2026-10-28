@@ -136,6 +136,10 @@ applicationSchema.methods.toJSON = function () {
     else if (/help|hamali|labour|मजदूर|ಸಹಾಯಕ/i.test(titleToCheck)) resolvedCat = 'HELPER';
   }
   obj.category = resolvedCat || 'DRIVER';
+  const realWorkerPhone = obj.applicantId?.phone || obj.applicantId?.phoneNumber;
+  if (realWorkerPhone && (!obj.applicantPhone || obj.applicantPhone === '9876543210' || obj.applicantPhone === '1234567890')) {
+    obj.applicantPhone = realWorkerPhone;
+  }
   obj.dailyWage = obj.dailyWage || obj.expectedWage || obj.jobId?.dailyWage || 1200;
   obj.experience = obj.applicantExperience || '1+ Years';
   obj.voiceRecording = obj.voiceRecordingUrl || '';
