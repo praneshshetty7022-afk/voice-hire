@@ -14,7 +14,6 @@ import {
   Sparkles,
   ArrowRight,
   UserCheck,
-  LogOut,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios'
@@ -22,7 +21,7 @@ import { useAuth } from '../context/AuthContext'
 import { useVoice } from '../context/VoiceContext'
 
 export default function EmployerDashboard() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const { t } = useVoice()
   const [jobs, setJobs] = useState([])
   const [applicants, setApplicants] = useState([])
@@ -108,16 +107,6 @@ export default function EmployerDashboard() {
             <Users className="w-4 h-4 text-amber-400" />
             <span>{t.manageCandidates || 'Manage Candidates'}</span>
           </Link>
-
-          <button
-            type="button"
-            onClick={logout}
-            className="px-4 py-3 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 hover:text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
-            title="Sign Out of Employer Portal"
-          >
-            <LogOut className="w-4 h-4 text-rose-400" />
-            <span>{t.navLogout || 'Sign Out'}</span>
-          </button>
         </div>
       </div>
 
