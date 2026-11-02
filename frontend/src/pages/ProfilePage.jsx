@@ -16,13 +16,14 @@ import {
   ArrowRight,
   Clock,
   Sparkles,
+  LogOut,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { useVoice } from '../context/VoiceContext'
 
 export default function ProfilePage() {
-  const { user, isEmployer, isEmployee, updateProfile, refreshUser } = useAuth()
+  const { user, isEmployer, isEmployee, updateProfile, refreshUser, logout } = useAuth()
   const { selectedLang, setSelectedLang, t } = useVoice()
 
   const [fullName, setFullName] = useState('')
@@ -146,20 +147,30 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
-            <span className="text-xs font-black uppercase text-slate-400">Role</span>
-            <p className="text-sm font-black text-[#2563EB] dark:text-[#60A5FA] capitalize">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center min-w-[70px]">
+            <span className="text-[10px] sm:text-xs font-black uppercase text-slate-400">Role</span>
+            <p className="text-xs sm:text-sm font-black text-[#2563EB] dark:text-[#60A5FA] capitalize">
               {user?.role || (isEmployer ? 'Employer' : 'Employee')}
             </p>
           </div>
 
-          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
-            <span className="text-xs font-black uppercase text-slate-400">Trust Score</span>
-            <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center min-w-[70px]">
+            <span className="text-[10px] sm:text-xs font-black uppercase text-slate-400">Trust Score</span>
+            <p className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400">
               {user?.trustScore || 96}%
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="flex items-center gap-1.5 px-3.5 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-black text-xs border border-rose-500/25 active:scale-95 transition-all cursor-pointer"
+            title="Log Out of VoiceHire"
+          >
+            <LogOut className="w-4 h-4 stroke-[2.5]" />
+            <span>{t.navLogout || 'Sign Out'}</span>
+          </button>
         </div>
       </div>
 
@@ -376,8 +387,17 @@ export default function ProfilePage() {
           </>
         )}
 
-        {/* Submit */}
-        <div className="pt-4 flex justify-end">
+        {/* Submit & Quick Sign Out */}
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 dark:border-white/10">
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-black text-xs border border-rose-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 stroke-[2.5]" />
+            <span>{t.navLogout || 'Sign Out'}</span>
+          </button>
+
           <button
             type="submit"
             disabled={saving}

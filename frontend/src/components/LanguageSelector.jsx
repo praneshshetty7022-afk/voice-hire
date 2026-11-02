@@ -47,16 +47,19 @@ export default function LanguageSelector({ selectedLang = 'en-IN', onSelectLang,
           if (detectCurrentLanguage) detectCurrentLanguage()
           setIsOpen(!isOpen)
         }}
-        className={`flex items-center gap-1.5 sm:gap-2 bg-white dark:bg-[#151C2C] hover:bg-blue-50 dark:hover:bg-[#1E293B] text-slate-800 dark:text-[#F8FAFC] font-extrabold px-2.5 py-2 sm:px-4 sm:py-2 rounded-2xl text-xs sm:text-sm border shadow-sm transition-all active:scale-95 cursor-pointer ${
+        className={`flex items-center gap-1 sm:gap-2 bg-white dark:bg-[#151C2C] hover:bg-blue-50 dark:hover:bg-[#1E293B] text-slate-800 dark:text-[#F8FAFC] font-extrabold px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm border shadow-sm transition-all active:scale-95 cursor-pointer shrink-0 ${
           isLanguageMismatch
             ? 'border-amber-400/80 dark:border-amber-500/50 ring-2 ring-amber-400/20'
             : 'border-slate-200 dark:border-white/10'
         }`}
+        title={`Change Language (Current: ${currentLangObj.name})`}
+        aria-label="Select Language"
       >
-        <Globe className="w-4 h-4 text-[#2563EB] shrink-0" />
-        <span className="truncate">{currentLangObj.flag} {currentLangObj.native}</span>
+        <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#2563EB] shrink-0" />
+        <span className="hidden sm:inline truncate">{currentLangObj.flag} {currentLangObj.native}</span>
+        <span className="inline sm:hidden font-black text-[11px]">{currentLangObj.flag} {(currentLangObj.code || 'en').slice(0, 2).toUpperCase()}</span>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0 ${
+          className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

@@ -23,14 +23,15 @@ import {
   RotateCcw,
   Globe,
   HardHat,
-  ChevronRight
+  ChevronRight,
+  LogOut,
 } from 'lucide-react'
 import axios from '../api/axios'
 import toast from 'react-hot-toast'
 
 export default function WorkerDashboardPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const { selectedLang, voiceState, debugLog, startListening, stopListening } = useVoice()
   const { isDark } = useTheme()
   const t = getTranslation(selectedLang)
@@ -182,7 +183,7 @@ export default function WorkerDashboardPage() {
   // Page 3: Mobile Touch Quick Access Tiles (2x3 Grid)
   const MOBILE_QUICK_TILES = [
     { label: t.benefitVoiceSearch || 'Voice Search', icon: '🎙️', action: handleMicTap },
-    { label: t.selectLanguage || 'Select Language', icon: '🌐', action: () => navigate('/register') },
+    { label: t.navLogout || 'Log Out', icon: '🚪', action: logout },
     { label: t.tradeDriver || 'Driver Jobs', icon: '🚚', action: () => handleChipClick('DRIVER') },
     { label: t.tradeCarpenter || 'Carpenter Jobs', icon: '🔨', action: () => handleChipClick('CARPENTER') },
     { label: t.tradeHelper || 'Construction', icon: '🏗️', action: () => handleChipClick('HELPER') },

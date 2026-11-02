@@ -14,6 +14,7 @@ import {
   Sparkles,
   ArrowRight,
   UserCheck,
+  LogOut,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios'
@@ -21,7 +22,7 @@ import { useAuth } from '../context/AuthContext'
 import { useVoice } from '../context/VoiceContext'
 
 export default function EmployerDashboard() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const { t } = useVoice()
   const [jobs, setJobs] = useState([])
   const [applicants, setApplicants] = useState([])
@@ -84,14 +85,14 @@ export default function EmployerDashboard() {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            {t.greetingGeneric || 'Welcome'}, {user?.companyName || user?.fullName || 'Hiring Partner'}
+            {String(t.greetingGeneric || 'Welcome').replace(/,\s*$/, '')}, {user?.companyName || user?.fullName || 'Hiring Partner'}
           </h1>
           <p className="text-xs sm:text-sm font-semibold text-slate-400">
             {t.employerWelcomeText || 'Manage your worker hiring pipeline, post open job requisitions, and listen to spoken candidate applications.'}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <Link
             to="/employer/post-job"
             className="px-5 py-3 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-blue-500/30 flex items-center gap-2 active:scale-95 transition-all"
@@ -107,6 +108,16 @@ export default function EmployerDashboard() {
             <Users className="w-4 h-4 text-amber-400" />
             <span>{t.manageCandidates || 'Manage Candidates'}</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="px-4 py-3 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 hover:text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
+            title="Sign Out of Employer Portal"
+          >
+            <LogOut className="w-4 h-4 text-rose-400" />
+            <span>{t.navLogout || 'Sign Out'}</span>
+          </button>
         </div>
       </div>
 
