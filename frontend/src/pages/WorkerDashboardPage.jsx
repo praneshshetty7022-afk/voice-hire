@@ -180,72 +180,8 @@ export default function WorkerDashboardPage() {
     },
   ]
 
-  // Page 3: Mobile Touch Quick Access Tiles (2x3 Grid)
-  const MOBILE_QUICK_TILES = [
-    { label: t.benefitVoiceSearch || 'Voice Search', icon: '🎙️', action: handleMicTap },
-    { label: t.navLogout || 'Log Out', icon: '🚪', action: logout },
-    { label: t.tradeDriver || 'Driver Jobs', icon: '🚚', action: () => handleChipClick('DRIVER') },
-    { label: t.tradeCarpenter || 'Carpenter Jobs', icon: '🔨', action: () => handleChipClick('CARPENTER') },
-    { label: t.tradeHelper || 'Construction', icon: '🏗️', action: () => handleChipClick('HELPER') },
-    { label: t.watchStoryBtn || 'Watch Story 🎬', icon: '🎬', action: () => window.dispatchEvent(new CustomEvent('open-cinematic-intro')) },
-  ]
-
   return (
     <div className="space-y-10 sm:space-y-12 pb-24 sm:pb-16 relative z-10 transition-colors duration-300">
-      {/* =====================================================================
-          PAGE 3: MOBILE TOUCH QUICK ACCESS TILES (Shown on Mobile screens)
-          ===================================================================== */}
-      <section className="sm:hidden space-y-4">
-        {/* Mobile Prominent Voice Search Card with Pulsing Ring */}
-        <div className="p-6 rounded-3xl bg-white/90 dark:bg-[#151C2C]/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-lg text-center relative overflow-hidden">
-          <div className="flex flex-col items-center">
-            <div className="relative mb-4">
-              {/* Pulsating Wave Ring */}
-              <div className={`absolute -inset-2 rounded-full border-2 border-blue-500/40 pointer-events-none transition-all ${isListening ? 'animate-ping' : 'animate-pulse'}`} />
-              <button
-                type="button"
-                onClick={handleMicTap}
-                className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-90 ${
-                  isListening ? 'bg-rose-500 ring-4 ring-rose-400/40 animate-pulse' : 'bg-[#2563EB] shadow-blue-500/40'
-                }`}
-                aria-label="Tap to speak"
-              >
-                {isListening ? <MicOff className="w-9 h-9 stroke-[2.5]" /> : <Mic className="w-9 h-9 stroke-[2.5]" />}
-              </button>
-            </div>
-
-            <h2 className="text-lg font-black text-[#0F172A] dark:text-[#F8FAFC]">
-              {isListening ? (t.listeningToVoice || 'Listening to your voice...') : (t.tapToSpeakSearch || 'Tap to Speak Job Search')}
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1">
-              {t.trySaying || 'Try saying:'} "{t.tradeDriver || 'Driver'}", "{t.tradeCarpenter || 'Carpenter'}", "{t.tradeHelper || 'General Worker'}"
-            </p>
-          </div>
-        </div>
-
-        {/* 2x3 Mobile Touch Tile Grid */}
-        <div>
-          <p className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1 mb-2.5">
-            {t.quickTouchNav || 'Quick Touch Navigation'}
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            {MOBILE_QUICK_TILES.map((tile, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={tile.action}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-white/95 dark:bg-[#151C2C]/95 border border-slate-200 dark:border-white/10 shadow-sm text-left active:scale-95 transition-all cursor-pointer"
-              >
-                <span className="text-2xl">{tile.icon}</span>
-                <span className="text-xs font-extrabold text-[#0F172A] dark:text-[#F8FAFC] truncate">
-                  {tile.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* =====================================================================
           PAGE 2: SECTION B — HERO SECTION (Split Layout)
           Left: Value Proposition & Interactive Voice Bar with Waveform
